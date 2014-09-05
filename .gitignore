@@ -44,3 +44,20 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
+# Recommender plugin
+target/
+workspace/
+.recommenders/
+aggregators/
+screenshots/
+rebel.xml
+.project
+.classpath
+.checkstyle
+.DS_Store
+*~
+*#
+*.licensed
+*.aux
+*_trace
