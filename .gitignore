@@ -61,3 +61,4 @@ rebel.xml
 *.licensed
 *.aux
 *_trace
+*.zip
