@@ -4,9 +4,11 @@ import java.net.ServerSocket;
 public class Server extends Thread {
 	private int port;
 	private ServerSocket serverSocket;
+	private ProcessManager processManager;
 	
-	public Server(int p) {
+	public Server(int p, ProcessManager mgr) {
 		this.port = p;
+		this.processManager = mgr;
 		try {
 			serverSocket = new ServerSocket(port);
 		} catch (IOException e) {
@@ -18,7 +20,7 @@ public class Server extends Thread {
 	public void run() {
 		ClientWorker w;
 		try {
-			w = new ClientWorker(serverSocket.accept(), "abc");
+			w = new ClientWorker(serverSocket.accept(), processManager);
 			new Thread(w).start();
 		} catch (IOException e) {
 			System.out.println("Accept failed: port " + port);
