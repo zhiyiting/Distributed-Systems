@@ -18,10 +18,9 @@ public class Server extends Thread {
 	}
 
 	public void run() {
-		ClientWorker w;
 		try {
-			w = new ClientWorker(serverSocket.accept(), processManager);
-			new Thread(w).start();
+			//Socket socket = serverSocket.accept();
+			//new Thread(w).start();
 		} catch (IOException e) {
 			System.out.println("Accept failed: port " + port);
 		}
