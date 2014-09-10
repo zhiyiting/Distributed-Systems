@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Server extends Thread {
 	private int port;
@@ -19,8 +20,8 @@ public class Server extends Thread {
 
 	public void run() {
 		try {
-			//Socket socket = serverSocket.accept();
-			//new Thread(w).start();
+			Socket socket = serverSocket.accept();
+			new Work(socket, processManager).start();
 		} catch (IOException e) {
 			System.out.println("Accept failed: port " + port);
 		}
