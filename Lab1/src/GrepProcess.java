@@ -1,6 +1,5 @@
 import java.io.PrintStream;
 import java.io.EOFException;
-import java.io.DataInputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +15,10 @@ public class GrepProcess implements MigratableProcess {
 
 	private volatile boolean suspending;
 
+	public GrepProcess() {
+
+	}
+
 	public GrepProcess(String args[]) throws Exception {
 		if (args.length != 3) {
 			System.out
@@ -30,7 +33,7 @@ public class GrepProcess implements MigratableProcess {
 
 	public void run() {
 		PrintStream out = new PrintStream(outFile);
-		//DataInputStream in = new DataInputStream(inFile);
+		// DataInputStream in = new DataInputStream(inFile);
 		BufferedReader in = new BufferedReader(new InputStreamReader(inFile));
 
 		try {
@@ -69,11 +72,11 @@ public class GrepProcess implements MigratableProcess {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("GrepProcess: ");
+		sb.append("GrepProcess: '");
 		sb.append(query);
-		sb.append(", ");
+		sb.append("' ");
 		sb.append(inFile.toString());
-		sb.append(", ");
+		sb.append(" ");
 		sb.append(outFile.toString());
 		return sb.toString();
 	}

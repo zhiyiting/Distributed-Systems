@@ -38,6 +38,12 @@ public class Listener extends Thread {
 							out.writeObject("connected");
 							out.flush();
 						}
+						if (message.contains("die")) {
+							String [] str = message.split(" ");
+							processManager.dieProcess(Integer.parseInt(str[1]));
+							out.writeObject("ok");
+							out.flush();
+						}
 					}
 					in.close();
 					out.close();
@@ -47,8 +53,7 @@ public class Listener extends Thread {
 					System.out.println("Class Not Found");
 				}
 			}
-		}
-		else {
+		} else {
 			while (true) {
 				try {
 					Socket socket = serverSocket.accept();
@@ -57,13 +62,37 @@ public class Listener extends Thread {
 					ObjectOutputStream out = new ObjectOutputStream(
 							socket.getOutputStream());
 					Object o = in.readObject();
-					System.out.println(o);
 					if (o != null) {
 						String message = o.toString();
-						if (message.equals("Are you there?")) {
-							
-							out.writeObject("Yes");
+						String[] cmd = message.split(" ");
+						switch (cmd[0]) {
+						case "run":
+							if (cmd.length != 2) {
+								System.out.println("deserialize error");
+							} else {
+								if (processManager.doProcess(Integer.parseInt(cmd[1])) == 1) {
+									System.out.println("Working on process "
+											+ cmd[1]);
+									out.writeObject("ok");
+								} else {
+									System.out
+											.println("Fail to work on process "
+													+ cmd[1]);
+									out.writeObject("bad");
+								}
+								out.flush();
+							}
+							break;
+						case "suspend":
+							break;
+						case "remove":
+							break;
+						case "check":
+							out.writeObject("HI");
 							out.flush();
+							break;
+						default:
+							break;
 						}
 					}
 					in.close();
