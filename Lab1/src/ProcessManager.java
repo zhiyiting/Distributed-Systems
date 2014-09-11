@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -14,10 +15,11 @@ import java.util.Stack;
 
 public class ProcessManager {
 	public Boolean isMaster;
-	private String masterAddr;
-	private int port;
+	public String masterAddr;
+	public int port;
 
 	private List<SlaveWorker> slaveList;
+	private List<Thread> slaveThread;
 
 	private List<Integer> activeProcess;
 	private List<Integer> suspendedProcess;
@@ -32,6 +34,7 @@ public class ProcessManager {
 
 		idPool = new Stack<Integer>();
 		slaveList = new ArrayList<SlaveWorker>();
+		slaveThread = new ArrayList<Thread>();
 
 		activeProcess = new ArrayList<Integer>();
 		suspendedProcess = new ArrayList<Integer>();
@@ -43,26 +46,25 @@ public class ProcessManager {
 		// Start it as a master process manager
 		if (addr == null) {
 			this.isMaster = true;
-			startMaster();
+			this.port = port;
 		}
 		// Start it as a slave process manager
 		else {
 			this.isMaster = false;
 			this.masterAddr = addr;
 			this.port = port;
-			startSlave();
 		}
 	}
 
 	private void startMaster() {
 		// Open a port to listen to slave connections
-		Server t = new Server(port, this);
+		Listener t = new Listener(port, this);
 		t.start();
 		System.out.println("Start Process Manager (Master) : port " + port);
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		while (true) {
 			try {
-				System.out.print(">> ");
+				System.out.print(port + ">> ");
 				String in = br.readLine();
 				String[] args = in.split(" ");
 				if (args.length <= 0) {
@@ -72,12 +74,18 @@ public class ProcessManager {
 				case "jobs":
 					printJob();
 					break;
+				case "slave":
+					printSlaves();
+					break;
 				case "launch":
 					launch(args);
 					break;
 				case "migrate":
 					break;
 				case "suspend":
+					break;
+				case "ping":
+					pingSlave();
 					break;
 				case "exit":
 				case "quit":
@@ -163,11 +171,12 @@ public class ProcessManager {
 			System.out.println("Invocation Target Exception!");
 			return -1;
 		}
-		
+
 		String slave = pickSlave(addr);
 		String[] slaveAddr = slave.split(":");
 		// send it to slave
 		try {
+
 			Socket socket = new Socket(slaveAddr[0],
 					Integer.parseInt(slaveAddr[1]));
 			ObjectOutputStream out = new ObjectOutputStream(
@@ -193,15 +202,51 @@ public class ProcessManager {
 			Socket socket = new Socket(ip[0], Integer.parseInt(ip[1]));
 			ObjectOutputStream out = new ObjectOutputStream(
 					socket.getOutputStream());
-			out.writeObject("connect");
+			Listener t = new Listener(port, this);
+			t.start();
+			System.out.println("Connecting to server " + masterAddr + "...");
+			out.writeObject("connect:" + InetAddress.getLocalHost().getHostName() + ":"
+					+ t.serverSocket.getLocalPort());
+			ObjectInputStream in = new ObjectInputStream(
+					socket.getInputStream());
+			try {
+				System.out.println(in.readObject());
+			} catch (ClassNotFoundException e) {
+				System.out.println("Couldn't connect to server!");
+				System.exit(-1);
+			}
 			out.flush();
+			out.close();
+			in.close();
 			socket.close();
 		} catch (NumberFormatException e) {
 			System.out.println("NumberFormatException");
+			System.exit(-1);
 		} catch (UnknownHostException e) {
 			System.out.println("UnknownHostException");
+			System.exit(-1);
 		} catch (IOException e) {
 			System.out.println("IOException");
+			System.exit(-1);
+		}
+		while (true) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e1) {
+				System.out.println("Thread sleep interrupted");
+			}
+			for (int i = 0; i < slaveThread.size(); i++) {
+				Thread thread = slaveThread.get(i);
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					System.out.println("Thread join interrupted");
+				}
+				if (!thread.isAlive()) {
+					slaveThread.remove(i);
+					i--;
+				}
+			}
 		}
 	}
 
@@ -317,6 +362,13 @@ public class ProcessManager {
 		}
 	}
 
+	private void printSlaves() {
+		for (int i = 0; i < slaveList.size(); i++) {
+			System.out.println(slaveList.get(i).ip + ":"
+					+ slaveList.get(i).port);
+		}
+	}
+
 	private static void printUsage() {
 		System.out
 				.println("Usage: \n"
@@ -326,17 +378,49 @@ public class ProcessManager {
 		System.exit(-1);
 	}
 
+	private void pingSlave() {
+		for (int i = 0; i < slaveList.size(); i++) {
+			SlaveWorker w = slaveList.get(i);
+			try {
+				Socket s = new Socket(w.ip, w.port);
+				ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
+				ObjectInputStream in = new ObjectInputStream(s.getInputStream());
+				out.writeObject("Are you there?");
+				out.flush();
+				try {
+					System.out.println(in.readObject());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				in.close();
+				out.close();
+				s.close();
+				
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
 	public static void main(String[] args) {
+		ProcessManager pm;
 		if (args.length == 2 && args[0].equals("-p")) {
-			ProcessManager pm = new ProcessManager(null,
-					Integer.parseInt(args[1]));
+			pm = new ProcessManager(null, Integer.parseInt(args[1]));
+			pm.startMaster();
+			System.out.println(pm.port);
 		} else if (args.length == 4 && args[0].equals("-m")
 				&& args[2].equals("-p")) {
-			ProcessManager pm = new ProcessManager(args[1],
-					Integer.parseInt(args[3]));
+			pm = new ProcessManager(args[1], Integer.parseInt(args[3]));
+			pm.startSlave();
+			System.out.println(pm.port);
 		} else {
 			printUsage();
 		}
-
 	}
 }

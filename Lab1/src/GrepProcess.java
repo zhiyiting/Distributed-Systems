@@ -30,7 +30,7 @@ public class GrepProcess implements MigratableProcess {
 
 	public void run() {
 		PrintStream out = new PrintStream(outFile);
-		// DataInputStream in = new DataInputStream(inFile);
+		//DataInputStream in = new DataInputStream(inFile);
 		BufferedReader in = new BufferedReader(new InputStreamReader(inFile));
 
 		try {

@@ -9,8 +9,9 @@ public class SlaveWorker {
 	private List<Integer> suspendedProcessList;
 	
 	public SlaveWorker(String addr) {
-		ip = addr.split(":")[0];
-		port = Integer.parseInt(addr.split(":")[1]);
+		String [] a = addr.split(":");
+		ip = a[0];
+		port = Integer.parseInt(a[1]);
 		activeProcessList = new ArrayList<Integer>();
 		suspendedProcessList = new ArrayList<Integer>();
 	}
