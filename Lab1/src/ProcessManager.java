@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 //http://compression.ca/act/act-files.html
 
@@ -23,7 +24,7 @@ public class ProcessManager {
 	public int port;
 
 	private List<SlaveWorker> slaveList;
-	private HashMap<Thread, Integer> slaveThread;
+	private ConcurrentHashMap<Thread, Integer> slaveThread;
 
 	private List<Integer> activeProcess;
 	private List<Integer> suspendedProcess;
@@ -36,7 +37,7 @@ public class ProcessManager {
 		processCount = 0;
 
 		slaveList = new ArrayList<SlaveWorker>();
-		slaveThread = new HashMap<Thread, Integer>();
+		slaveThread = new ConcurrentHashMap<Thread, Integer>();
 
 		activeProcess = new ArrayList<Integer>();
 		suspendedProcess = new ArrayList<Integer>();
@@ -227,28 +228,8 @@ public class ProcessManager {
 			} catch (InterruptedException e1) {
 				System.out.println("Thread sleep interrupted");
 			}
-			/*
-			Iterator<Entry<Thread, Integer>> it = slaveThread.entrySet().iterator();
 			
-		    while (it.hasNext()) {
-		        Map.Entry<Thread, Integer> pairs = (Map.Entry<Thread, Integer>)it.next();
-		        Thread thread = pairs.getKey();
-		        try {
-		        	thread.join(10);
-		        } catch (InterruptedException e) {
-					System.out.println("Thread join interrupted");
-				}
-		        if (!thread.isAlive()) {
-					activeProcess.remove(slaveThread.get(thread));
-					finishedProcess.add(slaveThread.get(thread));
-					sendToMaster("die " + slaveThread.get(thread));
-					slaveThread.remove(thread);
-					System.out.println("I die");
-				}
-		        it.remove(); // avoids a ConcurrentModificationException
-		    }*/
-		    
-		    
+			// TODO: Concurrent issues not solved
 			for (Thread key : slaveThread.keySet()) {
 				Thread thread = key;
 				try {
