@@ -33,7 +33,7 @@ public class Listener extends Thread {
 					if (o != null) {
 						String message = o.toString();
 						if (message.contains("connect")) {
-							String[] ip = message.split(":");
+							String[] ip = message.split(" ");
 							processManager.addSlave(ip[1] + ":" + ip[2]);
 							out.writeObject("connected");
 							out.flush();
@@ -70,9 +70,7 @@ public class Listener extends Thread {
 							if (cmd.length != 2) {
 								System.out.println("deserialize error");
 							} else {
-								if (processManager.doProcess(Integer.parseInt(cmd[1])) == 1) {
-									System.out.println("Working on process "
-											+ cmd[1]);
+								if (processManager.doLaunch(Integer.parseInt(cmd[1])) == 1) {
 									out.writeObject("ok");
 								} else {
 									System.out
@@ -84,11 +82,22 @@ public class Listener extends Thread {
 							}
 							break;
 						case "suspend":
+							if (cmd.length != 2) {
+								System.out.println("cmd length error");
+								return;
+							}
+							if (processManager.doSuspend(Integer.parseInt(cmd[1])) == 1) {
+								System.out.println("suspend ok");
+								out.writeObject("ok");
+							}
+							else {
+								System.out.println("suspend fail");
+								out.writeObject("bad");
+							}
 							break;
-						case "remove":
-							break;
+						
 						case "check":
-							out.writeObject("HI");
+							out.writeObject("hi");
 							out.flush();
 							break;
 						default:

@@ -14,34 +14,12 @@ public class TransactionalFileOutputStream extends java.io.OutputStream
 	}
 
 	@Override
-	public void write(int b) throws IOException {
-		RandomAccessFile out = new RandomAccessFile(filename, "rws");
-		out.seek(position);
-		out.write(b);
-		out.close();
-		position++;
-	}
-
-	@Override
-	public void write(byte b[]) throws IOException {
-		write(b, 0, b.length);
-	}
-
-	@Override
-	public void write(byte b[], int off, int len) throws IOException {
-		if (b == null) {
-			throw new NullPointerException();
-		} else if ((off < 0) || (off > b.length) || (len < 0)
-				|| ((off + len) > b.length) || ((off + len) < 0)) {
-			throw new IndexOutOfBoundsException();
-		} else if (len == 0) {
-			return;
-		}
-		RandomAccessFile out = new RandomAccessFile(filename, "rws");
-		out.seek(position);
-		out.write(b, off, len);
-		out.close();
-		position += len;
+	public void write(int arg) throws IOException {
+		RandomAccessFile f = new RandomAccessFile(filename, "rw");
+		f.seek(position);
+		f.write(arg);
+		f.close();
+		position += 1;
 	}
 
 	@Override
