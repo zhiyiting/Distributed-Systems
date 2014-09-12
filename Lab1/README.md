@@ -7,11 +7,11 @@ To make this possible, the work-in-progress should be agnostic to what node it i
 
 To achieve this, it is necessary to be able to pause and package up a process, ship it to another node, and unpackage and resume it such that it is running again. The process should not lose it’s location in the program, variables, open files, network connections or any other state.
 
-1. Design and Usage
+Design and Usage
 
 The framework is designed with Master/Slave design pattern. The main function is in the ProcessManager.java class. Depending on user's input, it will instantiate either a master ProcessManager object or a slave ProcessManager object. The master is responsible for scheduling which slave (node) the process is going to run on. The master also will ping the slave every 5 seconds to see if the slave is still connected; if not, the slave will be removed and following processes won't be sent to the dead slave. The master also contains a terminal, where you can not only launch, suspend and migrate processes, but also view the processes being run, and the processes being suspend.
 
-2. Success and Bugs
+Success and Bugs
 
 Success:
 User can type in the processes that he wants to run. By default, the process will be run by the node 0. The user can also specify other nodes by writing additional arguments.
@@ -24,7 +24,7 @@ Bug:
 When writing to same file, there will be concurrency issues which haven't been fixed.
 Sometimes there will be Exceptions thrown, due to solo limited development time. If given more time, more testing will be done and they should be fixed.
 
-3. Build, Deploy and Run
+Build, Deploy and Run
 
 To build:
 - Go to the source code folder src
@@ -44,11 +44,11 @@ To launch process:
 Launch a process at master side (GrepProcess for example)
 launch ProcessName querystring <infile> <outfile>
 
-4. Dependency
+Dependency
 
 Developed on a Mac OS X machine with JSE-1.8. No additional libraries required.
 
-5. Testing
+Testing
 
 (Get process number and node from "jobs" and "slave")
 Test 1
