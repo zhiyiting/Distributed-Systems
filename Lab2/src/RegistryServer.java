@@ -10,14 +10,15 @@ import java.util.Hashtable;
 
 public class RegistryServer extends Listener {
 
-	private Hashtable<String, RemoteObjectRef> registry;
+	private Hashtable<String, RemoteObjectRef> rortbl;
+
 	private static String host;
 	private static int port;
 	private CommModule commModule;
 
 	public RegistryServer(int port) {
 		super(port);
-		registry = new Hashtable<String, RemoteObjectRef>();
+		rortbl = new Hashtable<String, RemoteObjectRef>();
 	}
 
 	public void register() {
@@ -36,24 +37,30 @@ public class RegistryServer extends Listener {
 					RMIMessage msg = (RMIMessage) o;
 					String method = msg.getMethod();
 					switch (method) {
-					case "register":
+					case "bind":
+					case "rebind": {
 						RemoteObjectRef ror = (RemoteObjectRef) msg
 								.getContent();
-						registry.put(ror.getServiceName(), ror);
-						System.out.println("Registered Success: "
-								+ ror.getServiceName());
+						rortbl.put(ror.getServiceName(), ror);
+						System.out.println("Service bound: "
+								+ ror.getInterfaceName());
+					}
 						break;
-					case "lookup":
+
+					case "lookup": {
 						String serviceName = (String) msg.getContent();
-						Object content = registry.get(serviceName);
+						Object content = rortbl.get(serviceName);
 						RMIMessage m = new RMIMessage("lookup", content,
 								msg.getFromHost(), msg.getFromPort(), host,
 								port);
 						commModule.send(m);
+					}
 						break;
-					case "rebind":
-						break;
-					case "bind":
+					case "unbind": {
+						String serviceName = (String) msg.getContent();
+						rortbl.remove(serviceName);
+						System.out.println("Service removed: " + serviceName);
+					}
 						break;
 					default:
 						break;

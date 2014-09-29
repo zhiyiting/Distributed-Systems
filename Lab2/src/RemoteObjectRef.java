@@ -7,16 +7,14 @@ public class RemoteObjectRef implements Serializable {
 	private static final long serialVersionUID = 1631581795692753053L;
 	String host;
 	int port;
-	int key;
-	String remoteInterfaceName;
 	String serviceName;
+	String remoteInterfaceName;
 
-	public RemoteObjectRef(String ip, int port, int obj_key, String riname, String sname) {
+	public RemoteObjectRef(String ip, int port, String key, String riname) {
 		this.host = ip;
 		this.port = port;
-		this.key = obj_key;
+		this.serviceName = key;
 		this.remoteInterfaceName = riname;
-		this.serviceName = sname;
 	}
 
 	// this method is important, since it is a stub creator.
@@ -45,15 +43,11 @@ public class RemoteObjectRef implements Serializable {
 		return null;
 	}
 	
-	public int getKey() {
-		return key;
+	public String getServiceName() {
+		return serviceName;
 	}
 	
 	public String getInterfaceName() {
 		return remoteInterfaceName;
-	}
-	
-	public String getServiceName() {
-		return serviceName;
 	}
 }
