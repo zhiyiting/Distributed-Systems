@@ -1,6 +1,10 @@
 
 public class TestImpl implements Test {
-	public void test() {
-		System.out.println("Hello!!");
+	public String speak() {
+		return "hello";
+	}
+	
+	public String echo(String s) {
+		return s;
 	}
 }

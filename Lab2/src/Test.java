@@ -1,4 +1,5 @@
 
 public interface Test extends MyRemote{
-	public void test();
+	public String speak();
+	public String echo(String arg);
 }
