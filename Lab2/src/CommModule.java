@@ -34,25 +34,4 @@ public class CommModule {
 		}
 		return null;
 	}
-
-	public static void sendACK(String toHost, int toPort) {
-
-		try {
-			Socket socket = new Socket(toHost, toPort);
-			ObjectOutputStream out = new ObjectOutputStream(
-					socket.getOutputStream());
-			out.writeObject("ACK");
-			out.flush();
-			out.close();
-			socket.close();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
 }

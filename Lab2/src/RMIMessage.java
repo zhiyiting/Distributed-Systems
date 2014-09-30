@@ -24,7 +24,7 @@ public class RMIMessage implements Serializable {
 		this.fromPort = fromPort;
 	}
 	
-	public RMIMessage(String content) {
+	public RMIMessage(Object content) {
 		this.content = content;
 	}
 

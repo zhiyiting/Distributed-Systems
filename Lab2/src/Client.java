@@ -7,7 +7,7 @@ public class Client {
 	
 	public static void main (String args[]) {
 		RMINaming naming = null;
-		// -p <port number> -r <server ip> <registry port number>
+		// -p <port number> -r <server ip> <dispatcher port> <registry port>
 		if (args.length != 5 || !args[0].equals("-p") || !args[2].equals("-r")) {
 			printUsage();
 			return;
@@ -27,7 +27,8 @@ public class Client {
 		}
 
 		Test test = null;
-		test = (Test) naming.lookup("Test");
+		// look up a service name
+		test = (Test) naming.lookup("test");
 		String result = test.speak();
 		System.out.println(result);
 		

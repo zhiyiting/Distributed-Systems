@@ -38,17 +38,11 @@ public class RegistryServer {
 		return false;
 	}
 
-	private void lookup(RMIMessage msg) {
+	private RMIMessage lookup(RMIMessage msg) {
 		String name = (String) msg.getContent();
 		Object content = rortbl.get(name);
-		RMIMessage m = new RMIMessage("lookup", content, msg.getFromHost(),
-				msg.getFromPort(), msg.getToHost(), msg.getToPort());
-		CommModule.send(m);
-		if (content != null) {
-			System.out.println("Found");
-		} else {
-			System.out.println("Not found");
-		}
+		RMIMessage m = new RMIMessage(content);
+		return m;
 	}
 
 	private boolean unbind(String name) {
@@ -103,8 +97,8 @@ public class RegistryServer {
 						out.writeObject(ret);
 						break;
 					case "lookup":
-						regServer.lookup(msg);
-						out.writeObject("ACK");
+						ret = regServer.lookup(msg);
+						out.writeObject(ret);
 						break;
 					case "unbind":
 						if (regServer.unbind((String) msg.getContent())) {
