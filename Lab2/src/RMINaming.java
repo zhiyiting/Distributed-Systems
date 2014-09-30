@@ -1,7 +1,7 @@
 import java.util.Hashtable;
 
 public class RMINaming {
-	
+
 	private Hashtable<String, MyRemote> stubtbl;
 	private String rHost;
 	private int rPort;
@@ -15,22 +15,25 @@ public class RMINaming {
 		this.rHost = rHost;
 		this.rPort = rPort;
 	}
-	
+
 	public MyRemote lookup(String serviceName) {
 		if (stubtbl.contains(serviceName)) {
 			return stubtbl.get(serviceName);
 		}
-		RMIMessage msg = new RMIMessage("lookup", serviceName, rHost, rPort, host, port);
-		RemoteObjectRef ror = (RemoteObjectRef) ((RMIMessage) CommModule.send(msg)).getContent();
+
 		MyRemote stub = null;
-		if (ror == null) {
-			System.out.println("lookup fail");
+		RMIMessage msg = new RMIMessage("lookup", serviceName, rHost, rPort,
+				host, port);
+		RMIMessage retMsg = (RMIMessage) CommModule.send(msg);
+		if (retMsg != null) {
+			RemoteObjectRef ror = (RemoteObjectRef) retMsg.getContent();
+			if (ror == null) {
+				System.out.println("lookup fail");
+			} else {
+				stub = (MyRemote) ror.localise();
+				stubtbl.put(serviceName, stub);
+			}
 		}
-		else {
-			stub = (MyRemote) ror.localise();
-			stubtbl.put(serviceName, stub);
-		}
-		
 		return stub;
 	}
 

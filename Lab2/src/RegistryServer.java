@@ -1,87 +1,64 @@
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Hashtable;
 
-public class RegistryServer extends Listener {
+public class RegistryServer {
 
 	private Hashtable<String, RemoteObjectRef> rortbl;
 
-	private static String host;
-	private static int port;
-	private CommModule commModule;
+	private ServerSocket serverSocket;
 
 	public RegistryServer(int port) {
-		super(port);
+		try {
+			serverSocket = new ServerSocket(port);
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			System.out.println("Fail to listen on port " + port);
+		}
 		rortbl = new Hashtable<String, RemoteObjectRef>();
 	}
 
-	public void register() {
-		commModule = new CommModule();
+	private boolean bind(RemoteObjectRef ror) {
+		if (rortbl.contains(ror.getServiceName())) {
+			return false;
+		}
+		rortbl.put(ror.getServiceName(), ror);
+		return true;
 	}
 
-	@Override
-	public void run() {
-		while (canRun) {
-			try {
-				Socket socket = serverSocket.accept();
-				ObjectInputStream in = new ObjectInputStream(
-						socket.getInputStream());
-				Object o = in.readObject();
-				if (o != null) {
-					RMIMessage msg = (RMIMessage) o;
-					String method = msg.getMethod();
-					switch (method) {
-					case "bind":
-					case "rebind": {
-						RemoteObjectRef ror = (RemoteObjectRef) msg
-								.getContent();
-						rortbl.put(ror.getServiceName(), ror);
-						System.out.println("Service bound: "
-								+ ror.getInterfaceName());
-					}
-						break;
-
-					case "lookup": {
-						String serviceName = (String) msg.getContent();
-						Object content = rortbl.get(serviceName);
-						RMIMessage m = new RMIMessage("lookup", content,
-								msg.getFromHost(), msg.getFromPort(), host,
-								port);
-						commModule.send(m);
-					}
-						break;
-					case "unbind": {
-						String serviceName = (String) msg.getContent();
-						rortbl.remove(serviceName);
-						System.out.println("Service removed: " + serviceName);
-					}
-						break;
-					default:
-						break;
-					}
-
-				}
-				in.close();
-				socket.close();
-
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			}
+	private boolean rebind(RemoteObjectRef ror) {
+		if (rortbl.contains(ror.getServiceName())) {
+			rortbl.put(ror.getServiceName(), ror);
+			return true;
 		}
+		return false;
+	}
 
+	private void lookup(RMIMessage msg) {
+		String name = (String) msg.getContent();
+		Object content = rortbl.get(name);
+		RMIMessage m = new RMIMessage("lookup", content, msg.getFromHost(),
+				msg.getFromPort(), msg.getToHost(), msg.getToPort());
+		CommModule.send(m);
+		if (content != null) {
+			System.out.println("Found");
+		} else {
+			System.out.println("Not found");
+		}
+	}
+
+	private boolean unbind(String name) {
+		if (rortbl.remove(name) != null) {
+			return true;
+		}
+		return false;
 	}
 
 	public static void main(String args[]) {
+		int port;
 		if (args.length != 1) {
 			printUsage();
 			return;
@@ -92,16 +69,66 @@ public class RegistryServer extends Listener {
 			printUsage();
 			return;
 		}
-		try {
-			host = InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException e) {
-			System.out.println(e.getMessage());
-			return;
-		}
 
-		RegistryServer registryServer = new RegistryServer(port);
-		Thread t = new Thread(registryServer);
-		t.start();
+		RegistryServer regServer = new RegistryServer(port);
+		while (true) {
+			try {
+				Socket socket = regServer.serverSocket.accept();
+				ObjectInputStream in = new ObjectInputStream(
+						socket.getInputStream());
+				ObjectOutputStream out = new ObjectOutputStream(
+						socket.getOutputStream());
+				Object o = in.readObject();
+				if (o != null) {
+					RMIMessage msg = (RMIMessage) o;
+					String method = msg.getMethod();
+					RMIMessage ret = null;
+					switch (method) {
+					case "bind":
+						if (regServer.bind((RemoteObjectRef) msg.getContent())) {
+							ret = new RMIMessage("Bind Success");
+						} else {
+							ret = new RMIMessage("Service name already exist");
+						}
+						out.writeObject(ret);
+					case "rebind":
+						if (regServer.rebind((RemoteObjectRef) msg.getContent())) {
+							ret = new RMIMessage("Rebind Success");
+						}
+						else {
+							ret = new RMIMessage("Service name doesn't exist");
+						}
+						out.writeObject(ret);
+						break;
+					case "lookup":
+						regServer.lookup(msg);
+						out.writeObject("ACK");
+						break;
+					case "unbind":
+						if (regServer.unbind((String) msg.getContent())) {
+							ret = new RMIMessage("Unbind Success");
+						} else {
+							ret = new RMIMessage("No such service name");
+						}
+						out.writeObject(ret);
+						break;
+					default:
+						break;
+					}
+
+				}
+				in.close();
+				out.close();
+				socket.close();
+
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private static void printUsage() {

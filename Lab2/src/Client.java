@@ -7,7 +7,7 @@ public class Client {
 	
 	public static void main (String args[]) {
 		RMINaming naming = null;
-		// -p <port number> -r <registry ip> <registry port number>
+		// -p <port number> -r <server ip> <registry port number>
 		if (args.length != 5 || !args[0].equals("-p") || !args[2].equals("-r")) {
 			printUsage();
 			return;

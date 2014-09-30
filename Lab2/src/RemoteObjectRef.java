@@ -1,14 +1,16 @@
 import java.io.Serializable;
 
+import javax.tools.JavaCompiler;
+
 public class RemoteObjectRef implements Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1631581795692753053L;
-	String host;
-	int port;
-	String serviceName;
-	String remoteInterfaceName;
+	private String host;
+	private int port;
+	private String serviceName;
+	private String remoteInterfaceName;
 
 	public RemoteObjectRef(String ip, int port, String key, String riname) {
 		this.host = ip;
@@ -25,12 +27,27 @@ public class RemoteObjectRef implements Serializable {
 		// Assume the stub class has the name e.g.
 		//
 		// Remote_Interface_Name + "_stub".
-		//
-		// Then you can create a new stub as follows:
-		//
-		// Class c = Class.forName(Remote_Interface_Name + "_stub");
-		// Object o = c.newinstance()
-		//
+		MyRemote stub = null;
+		String stubName = remoteInterfaceName + "_stub";
+		Class<?> c = null;
+		try {
+			c = Class.forName(stubName);
+		} catch (ClassNotFoundException e) {
+			System.out.println("Cannot find stub class");
+			// either download, or a local complier
+			
+		}
+
+		try {
+			stub = (MyRemote) c.newInstance();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		// For this to work, your stub should have a constructor without
 		// arguments.
 		// You know what it does when it is called: it gives communication
@@ -40,14 +57,22 @@ public class RemoteObjectRef implements Serializable {
 		// to
 		// another place.
 		// Here let it return null.
-		return null;
+		return stub;
 	}
-	
+
 	public String getServiceName() {
 		return serviceName;
 	}
-	
+
 	public String getInterfaceName() {
 		return remoteInterfaceName;
+	}
+	
+	public String getHost() {
+		return host;
+	}
+	
+	public int getPort() {
+		return port;
 	}
 }

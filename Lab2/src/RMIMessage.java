@@ -1,9 +1,3 @@
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class RMIMessage implements Serializable {
@@ -29,27 +23,9 @@ public class RMIMessage implements Serializable {
 		this.fromHost = fromHost;
 		this.fromPort = fromPort;
 	}
-
-	public RMIMessage read() {
-		try {
-			FileInputStream fileIn = new FileInputStream("communication/1.ser");
-			ObjectInputStream in = new ObjectInputStream(fileIn);
-			RMIMessage message = (RMIMessage) in.readObject();
-			in.close();
-			fileIn.close();
-			return message;
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-
+	
+	public RMIMessage(String content) {
+		this.content = content;
 	}
 
 	public String getMethod() {

@@ -5,20 +5,18 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Hashtable;
 
 public class RMIServer {
 	private static String host;
 	private static int port;
 	private static int rPort;
-	private static Hashtable<Integer, MyRemote> registry = new Hashtable<Integer, MyRemote>();
 	static int count;
 
 	public RMIServer() {
 	}
 
 	public static void main(String args[]) {
-		// port -r rHost rPort
+		// port -r rPort
 		if (args.length != 3 || !args[1].equals("-r")) {
 			printUsage();
 			return;
@@ -41,9 +39,6 @@ public class RMIServer {
 		Thread t = new Thread(dispatcher);
 		t.start();
 
-		CommModule commModule = new CommModule();
-		// test if the registry server is there
-
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		while (true) {
 			try {
@@ -53,12 +48,12 @@ public class RMIServer {
 				if (arg.length <= 0) {
 					continue;
 				}
+				RMIMessage ret = null;
 
 				switch (arg[0]) {
 				// register and bind a service name with the server and send it
 				// to the registry
 				// format: bind <class name> <service name>
-				case "rebind":
 				case "bind": {
 					if (arg.length != 3) {
 						printShellUsage();
@@ -76,7 +71,30 @@ public class RMIServer {
 							arg[2], riname);
 					RMIMessage msg = new RMIMessage("bind", ror, host, rPort,
 							host, port);
-					commModule.send(msg);
+					ret = (RMIMessage) CommModule.send(msg);
+					System.out.println(ret.getContent());
+				}
+					break;
+
+				case "rebind": {
+					if (arg.length != 3) {
+						printShellUsage();
+						continue;
+					}
+					MyRemote rm;
+
+					// get the remote object by name
+					Class<?> c = Class.forName(arg[1]);
+					Constructor<?> ctor = c.getConstructor();
+					rm = (MyRemote) ctor.newInstance();
+					String riname = rm.getClass().getInterfaces()[0].getName();
+					// get the remote object reference
+					RemoteObjectRef ror = new RemoteObjectRef(host, port,
+							arg[2], riname);
+					RMIMessage msg = new RMIMessage("rebind", ror, host, rPort,
+							host, port);
+					ret = (RMIMessage) CommModule.send(msg);
+					System.out.println(ret.getContent());
 				}
 					break;
 				// format: unbind <service name>
@@ -87,7 +105,8 @@ public class RMIServer {
 					}
 					RMIMessage msg = new RMIMessage("unbind", arg[1], host,
 							rPort, host, port);
-					commModule.send(msg);
+					ret = (RMIMessage) CommModule.send(msg);
+					System.out.println(ret.getContent());
 				}
 					break;
 				case "exit":
