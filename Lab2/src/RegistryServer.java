@@ -4,6 +4,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
+import java.util.Set;
 
 public class RegistryServer {
 
@@ -22,7 +23,7 @@ public class RegistryServer {
 	}
 
 	private boolean bind(RemoteObjectRef ror) {
-		if (rortbl.contains(ror.getServiceName())) {
+		if (rortbl.containsKey(ror.getServiceName())) {
 			return false;
 		}
 		rortbl.put(ror.getServiceName(), ror);
@@ -30,7 +31,7 @@ public class RegistryServer {
 	}
 
 	private boolean rebind(RemoteObjectRef ror) {
-		if (rortbl.contains(ror.getServiceName())) {
+		if (rortbl.containsKey(ror.getServiceName())) {
 			rortbl.put(ror.getServiceName(), ror);
 			return true;
 		}
@@ -88,15 +89,16 @@ public class RegistryServer {
 						if (regServer.bind((RemoteObjectRef) msg.getContent())) {
 							ret = new RMIMessage("Bind Success");
 						} else {
-							ret = new RMIMessage("Service name already exist");
+							ret = new RMIMessage("Bind Fail: Service name already exist");
 						}
 						out.writeObject(ret);
+						break;
 					case "rebind":
 						if (regServer.rebind((RemoteObjectRef) msg.getContent())) {
 							ret = new RMIMessage("Rebind Success");
 						}
 						else {
-							ret = new RMIMessage("Service name doesn't exist");
+							ret = new RMIMessage("Rebind Fail: Service name doesn't exist");
 						}
 						out.writeObject(ret);
 						break;
@@ -108,7 +110,7 @@ public class RegistryServer {
 						if (regServer.unbind((String) msg.getContent())) {
 							ret = new RMIMessage("Unbind Success");
 						} else {
-							ret = new RMIMessage("No such service name");
+							ret = new RMIMessage("Unbind Fail: No such service name");
 						}
 						out.writeObject(ret);
 						break;
@@ -120,6 +122,11 @@ public class RegistryServer {
 				in.close();
 				out.close();
 				socket.close();
+				System.out.println("------------");
+				Set<String> keys = regServer.rortbl.keySet();
+				for (String key: keys) {
+					System.out.println(key + "  " + regServer.rortbl.get(key).getServiceName());
+				}
 
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
