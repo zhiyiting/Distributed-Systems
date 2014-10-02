@@ -38,11 +38,9 @@ public class RegistryServer {
 		return false;
 	}
 
-	private RMIMessage lookup(RMIMessage msg) {
-		String name = (String) msg.getContent();
-		Object content = rortbl.get(name);
-		RMIMessage m = new RMIMessage(content);
-		return m;
+	private RemoteObjectRef lookup(String serviceName) {
+		RemoteObjectRef content = rortbl.get(serviceName);
+		return content;
 	}
 
 	private boolean unbind(String name) {
@@ -97,7 +95,8 @@ public class RegistryServer {
 						out.writeObject(ret);
 						break;
 					case "lookup":
-						ret = regServer.lookup(msg);
+						RemoteObjectRef ror = regServer.lookup((String) msg.getContent());
+						ret = new RMIMessage(ror);
 						out.writeObject(ret);
 						break;
 					case "unbind":

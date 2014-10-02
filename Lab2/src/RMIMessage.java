@@ -23,7 +23,14 @@ public class RMIMessage implements Serializable {
 		this.fromHost = fromHost;
 		this.fromPort = fromPort;
 	}
-	
+
+	public RMIMessage(String method, Object content, String toHost, int toPort) {
+		this.method = method;
+		this.content = content;
+		this.toHost = toHost;
+		this.toPort = toPort;
+	}
+
 	public RMIMessage(Object content) {
 		this.content = content;
 	}

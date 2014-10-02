@@ -1,4 +1,6 @@
 import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 
 import javax.tools.JavaCompiler;
 
@@ -21,12 +23,8 @@ public class RemoteObjectRef implements Serializable {
 
 	// this method is important, since it is a stub creator.
 	//
-	Object localise() {
-		// Implement this as you like: essentially you should
-		// create a new stub object and returns it.
-		// Assume the stub class has the name e.g.
-		//
-		// Remote_Interface_Name + "_stub".
+	public Object localise() {
+		/*
 		MyRemote stub = null;
 		String stubName = remoteInterfaceName + "_stub";
 		Class<?> c = null;
@@ -34,19 +32,32 @@ public class RemoteObjectRef implements Serializable {
 			c = Class.forName(stubName);
 		} catch (ClassNotFoundException e) {
 			System.out.println("Cannot find stub class");
-			// either download, or a local complier
+			// Invocation handler
 			
-		}
+		}*/
+		System.out.println("Start to localise");
+		InvocationHandler handler = new StubGenerator(this.host, this.port);
+		System.out.println("Handler created");
 
 		try {
-			stub = (MyRemote) c.newInstance();
+			Class<?> c = Class.forName(remoteInterfaceName);
+			Object proxy = Proxy.newProxyInstance(c.getClassLoader(), new Class[] {c}, handler);
+			System.out.println("Proxy created");
+			return proxy;
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/*
+		try {
+			//stub = (MyRemote) c.newInstance();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 
 		// For this to work, your stub should have a constructor without
 		// arguments.
@@ -57,7 +68,7 @@ public class RemoteObjectRef implements Serializable {
 		// to
 		// another place.
 		// Here let it return null.
-		return stub;
+		return null;
 	}
 
 	public String getServiceName() {
