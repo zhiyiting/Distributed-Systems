@@ -16,10 +16,11 @@ public class Dispatcher extends Listener {
 		servicetbl = new Hashtable<String, MyRemote>();
 	}
 	
-	private void dispatch(RMIMessage m) {
+	private Object dispatch(RMIMessage m) {
+		Object ret = null;
 		if (m == null) {
 			System.out.println("Message is empty");
-			return;
+			return ret;
 		}
 		String serviceName = m.getService();
 		MyRemote rm = servicetbl.get(serviceName);
@@ -37,8 +38,7 @@ public class Dispatcher extends Listener {
 
 			System.out.println("About to invoke...");
 			Method method = rm.getClass().getMethod(methodName, parameterTypes);
-			Object ret = method.invoke(rm, args);
-			System.out.println(ret);
+			ret = method.invoke(rm, args);
 		}catch (NoSuchMethodException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -55,6 +55,7 @@ public class Dispatcher extends Listener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return ret;
 		
 	}
 	
@@ -66,11 +67,16 @@ public class Dispatcher extends Listener {
 		while (canRun) {
 			try {
 				Socket socket = serverSocket.accept();
-				System.out.println("Got message!");
 				ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 				ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 				RMIMessage o = (RMIMessage) in.readObject();
-				dispatch(o);
+				Object returnVal = dispatch(o);
+				RMIMessage ret = new RMIMessage(returnVal);
+				out.writeObject(ret);
+				out.flush();
+				out.close();
+				in.close();
+				socket.close();
 				
 			} catch (IOException e) {
 				System.out.println(e.getMessage());

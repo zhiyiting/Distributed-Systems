@@ -19,7 +19,7 @@ public class Client {
 		Test test = null;
 		// look up a service name
 		test = (Test) naming.lookup("obj");
-		String result = test.speak("i am argument");
+		String result = (String) test.speak();
 		System.out.println(result);
 		
 		
