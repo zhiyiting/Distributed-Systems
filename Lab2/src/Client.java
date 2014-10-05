@@ -1,7 +1,3 @@
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-
 public class Client {
 		
 	public static void main (String args[]) {
@@ -23,12 +19,8 @@ public class Client {
 		Test test = null;
 		// look up a service name
 		test = (Test) naming.lookup("obj");
-		String result = "";
-		if (test != null) {
-			System.out.println("Run function");
-			result = test.speak();
-			System.out.println(result);
-		}		
+		String result = test.speak("i am argument");
+		System.out.println(result);
 		
 		
 	}

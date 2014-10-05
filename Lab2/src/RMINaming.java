@@ -27,7 +27,6 @@ public class RMINaming {
 			} else {
 				stub = (MyRemote) ror.localise();
 				stubtbl.put(serviceName, stub);
-				System.out.println("stub created");
 			}
 		}
 		return stub;

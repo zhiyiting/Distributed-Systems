@@ -7,25 +7,26 @@ public class RMIMessage implements Serializable {
 	 */
 	private static final long serialVersionUID = 4061427658346808609L;
 
-	private String method;
+	private String serviceName;
+	private Object method;
+	private Object parameterTypes;
 	private Object content;
 	private String fromHost;
 	private int fromPort;
 	private String toHost;
 	private int toPort;
 
-	public RMIMessage(String method, Object content, String toHost, int toPort,
-			String fromHost, int fromPort) {
+	public RMIMessage(Object method, Object content, String toHost, int toPort) {
 		this.method = method;
 		this.content = content;
 		this.toHost = toHost;
 		this.toPort = toPort;
-		this.fromHost = fromHost;
-		this.fromPort = fromPort;
 	}
-
-	public RMIMessage(String method, Object content, String toHost, int toPort) {
+	
+	public RMIMessage(String serviceName, String method, Object parameterTypes, Object content, String toHost, int toPort) {
+		this.serviceName = serviceName;
 		this.method = method;
+		this.parameterTypes = parameterTypes;
 		this.content = content;
 		this.toHost = toHost;
 		this.toPort = toPort;
@@ -34,9 +35,17 @@ public class RMIMessage implements Serializable {
 	public RMIMessage(Object content) {
 		this.content = content;
 	}
+	
+	public String getService() {
+		return serviceName;
+	}
 
-	public String getMethod() {
+	public Object getMethod() {
 		return method;
+	}
+	
+	public Object getParameterTypes() {
+		return parameterTypes;
 	}
 
 	public Object getContent() {

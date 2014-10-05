@@ -74,7 +74,7 @@ public class RegistryServer {
 				Object o = in.readObject();
 				if (o != null) {
 					RMIMessage msg = (RMIMessage) o;
-					String method = msg.getMethod();
+					String method = (String) msg.getMethod();
 					RMIMessage ret = null;
 					switch (method) {
 					case "bind":

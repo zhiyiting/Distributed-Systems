@@ -4,7 +4,7 @@ public class TestImpl implements Test {
 		return "hello";
 	}
 	
-	public String echo(String s) {
+	public String speak(String s) {
 		return s;
 	}
 }

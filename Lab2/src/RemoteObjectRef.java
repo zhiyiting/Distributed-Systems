@@ -2,8 +2,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 
-import javax.tools.JavaCompiler;
-
 public class RemoteObjectRef implements Serializable {
 	/**
 	 * 
@@ -36,7 +34,7 @@ public class RemoteObjectRef implements Serializable {
 			
 		}*/
 		System.out.println("Start to localise");
-		InvocationHandler handler = new StubGenerator(this.host, this.port);
+		InvocationHandler handler = new StubGenerator(this.host, this.port, this.serviceName);
 		System.out.println("Handler created");
 
 		try {

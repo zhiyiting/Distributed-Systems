@@ -66,11 +66,12 @@ public class RMIServer {
 					Constructor<?> ctor = c.getConstructor();
 					rm = (MyRemote) ctor.newInstance();
 					String riname = rm.getClass().getInterfaces()[0].getName();
+					String serviceName = arg[2];
+					dispatcher.add(serviceName, rm);
 					// get the remote object reference
 					RemoteObjectRef ror = new RemoteObjectRef(host, port,
-							arg[2], riname);
-					RMIMessage msg = new RMIMessage("bind", ror, host, rPort,
-							host, port);
+							serviceName, riname);
+					RMIMessage msg = new RMIMessage("bind", ror, host, rPort);
 					ret = (RMIMessage) CommModule.send(msg);
 					System.out.println(ret.getContent());
 				}
@@ -91,8 +92,7 @@ public class RMIServer {
 					// get the remote object reference
 					RemoteObjectRef ror = new RemoteObjectRef(host, port,
 							arg[2], riname);
-					RMIMessage msg = new RMIMessage("rebind", ror, host, rPort,
-							host, port);
+					RMIMessage msg = new RMIMessage("rebind", ror, host, rPort);
 					ret = (RMIMessage) CommModule.send(msg);
 					System.out.println(ret.getContent());
 				}
@@ -104,7 +104,7 @@ public class RMIServer {
 						continue;
 					}
 					RMIMessage msg = new RMIMessage("unbind", arg[1], host,
-							rPort, host, port);
+							rPort);
 					ret = (RMIMessage) CommModule.send(msg);
 					System.out.println(ret.getContent());
 				}
