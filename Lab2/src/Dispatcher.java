@@ -24,13 +24,10 @@ public class Dispatcher extends Listener {
 		}
 		String serviceName = m.getService();
 		MyRemote rm = servicetbl.get(serviceName);
-		System.out.println("Get obj done...");
 
 		String methodName = (String) m.getMethod();
-		System.out.println("Get method  done...");
 
 		Object[] args = (Object[])m.getContent();
-		System.out.println("Get args  done...");
 		
 		Class<?>[] parameterTypes = (Class<?>[]) m.getParameterTypes();
 		
