@@ -6,7 +6,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+/**
+ * RMIServer class that serves remote objects
+ * @author zhiyiting
+ *
+ */
 public class RMIServer {
+	private static CommModule commModule;
 	private static String host;
 	private static int port;
 	private static int rPort;
@@ -15,8 +21,13 @@ public class RMIServer {
 	public RMIServer() {
 	}
 
+	/**
+	 * main method to start a server
+	 * @param args
+	 */
 	public static void main(String args[]) {
-		// port -r rPort
+		// argument format:
+		// <server port number> -r <registry port number>
 		if (args.length != 3 || !args[1].equals("-r")) {
 			printUsage();
 			return;
@@ -28,17 +39,22 @@ public class RMIServer {
 			printUsage();
 			return;
 		}
+		// get local ip address for reference
 		try {
 			host = InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e) {
 			System.out.println(e.getMessage());
 			return;
 		}
+		
+		commModule = new CommModule();
 
+		// start a dispatcher thread that listens to client messages
 		Dispatcher dispatcher = new Dispatcher(port);
 		Thread t = new Thread(dispatcher);
 		t.start();
 
+		// create a shell that provides bind, unbind and rebind methods
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		while (true) {
 			try {
@@ -60,30 +76,33 @@ public class RMIServer {
 						continue;
 					}
 					MyRemote rm;
-
 					// get the remote object by name
 					Class<?> c = Class.forName(arg[1]);
 					Constructor<?> ctor = c.getConstructor();
 					rm = (MyRemote) ctor.newInstance();
 					String riname = rm.getClass().getInterfaces()[0].getName();
 					String serviceName = arg[2];
+					// put the object to dispatcher for reference
 					dispatcher.add(serviceName, rm);
 					// get the remote object reference
 					RemoteObjectRef ror = new RemoteObjectRef(host, port,
 							serviceName, riname);
+					// compose a bind request
+					// send it through communication module
 					RMIMessage msg = new RMIMessage("bind", ror, host, rPort);
-					ret = (RMIMessage) CommModule.send(msg);
+					ret = (RMIMessage) commModule.send(msg);
 					System.out.println(ret.getContent());
 				}
 					break;
-
+				// update a service name with the server and send it to 
+				// the registry
+				// format: rebind <class name> <service name>
 				case "rebind": {
 					if (arg.length != 3) {
 						printShellUsage();
 						continue;
 					}
 					MyRemote rm;
-
 					// get the remote object by name
 					Class<?> c = Class.forName(arg[1]);
 					Constructor<?> ctor = c.getConstructor();
@@ -93,10 +112,11 @@ public class RMIServer {
 					RemoteObjectRef ror = new RemoteObjectRef(host, port,
 							arg[2], riname);
 					RMIMessage msg = new RMIMessage("rebind", ror, host, rPort);
-					ret = (RMIMessage) CommModule.send(msg);
+					ret = (RMIMessage) commModule.send(msg);
 					System.out.println(ret.getContent());
 				}
 					break;
+				// Unbind a service from the registry
 				// format: unbind <service name>
 				case "unbind": {
 					if (arg.length != 2) {
@@ -105,10 +125,11 @@ public class RMIServer {
 					}
 					RMIMessage msg = new RMIMessage("unbind", arg[1], host,
 							rPort);
-					ret = (RMIMessage) CommModule.send(msg);
+					ret = (RMIMessage) commModule.send(msg);
 					System.out.println(ret.getContent());
 				}
 					break;
+				// stop the RMI Server
 				case "exit":
 					dispatcher.stop();
 					return;
@@ -118,7 +139,7 @@ public class RMIServer {
 
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				System.out.println("IO Exception");
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
 				System.out.println("Class Not Found Exception");
@@ -146,6 +167,9 @@ public class RMIServer {
 
 	}
 
+	/**
+	 * function to print the usage of server shell
+	 */
 	private static void printShellUsage() {
 		System.out.println("Usage:");
 		System.out.println("bind <class name> <service name>");
@@ -153,6 +177,9 @@ public class RMIServer {
 		System.out.println("unbind <service name>");
 	}
 
+	/**
+	 * function to print usage of rmi server
+	 */
 	private static void printUsage() {
 		System.out.println("Usage:\nRMIserver <dispatcher port number>");
 	}

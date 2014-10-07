@@ -4,7 +4,6 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
-import java.util.Set;
 
 /**
  * Registry Server that keeps reference of remote objects
@@ -122,6 +121,7 @@ public class RegistryServer {
 				Object o = in.readObject();
 				if (o != null) {
 					RMIMessage msg = (RMIMessage) o;
+					// get the method type from incoming message
 					String method = (String) msg.getMethod();
 					RMIMessage ret = null;
 					switch (method) {
@@ -167,14 +167,6 @@ public class RegistryServer {
 				in.close();
 				out.close();
 				socket.close();
-				/*
-				System.out.println("------------");
-				Set<String> keys = regServer.rortbl.keySet();
-				for (String key : keys) {
-					System.out.println(key + "  "
-							+ regServer.rortbl.get(key).getServiceName());
-				}*/
-
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();
@@ -184,7 +176,10 @@ public class RegistryServer {
 			}
 		}
 	}
-
+	
+	/**
+	 * Print the usage of registry server
+	 */
 	private static void printUsage() {
 		System.out.println("Usage:\n RegistryServer <registry port number>");
 	}
