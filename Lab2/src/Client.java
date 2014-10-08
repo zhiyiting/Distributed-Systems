@@ -1,25 +1,25 @@
 public class Client {
 		
 	public static void main (String args[]) {
-		RMINaming naming = null;
+		String rHost;
+		int rPort;
 		// <server ip> <registry port>
 		if (args.length != 2) {
 			printUsage();
 			return;
 		}
 		try {
-			String rHost = args[0];
-			int rPort = Integer.parseInt(args[1]);
-			naming = new RMINaming(rHost, rPort);
+			rHost = args[0];
+			rPort = Integer.parseInt(args[1]);
 		}
 		catch (NumberFormatException e) {
 			printUsage();
 			return;
 		}
-		Test test = null;
 		// look up a service name
-		test = (Test) naming.lookup("obj");
-		String result = (String) test.speak();
+		RMINaming naming = new RMINaming(rHost, rPort);
+		Test test = (Test) naming.lookup("obj");
+		String result = test.speak();
 		System.out.println(result);
 		
 		

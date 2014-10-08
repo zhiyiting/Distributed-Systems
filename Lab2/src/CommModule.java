@@ -33,13 +33,13 @@ public class CommModule {
 			return o;
 
 		} catch (UnknownHostException e) {
-			System.out.println("Unknown Host Exception");
+			System.out.println("Unknown Host Exception" + e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("IO Exception");
+			System.out.println("IO Exception" + e.getMessage());
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			System.out.println("Class Not Found Exception");
+			System.out.println("Class Not Found Exception" + e.getMessage());
 			e.printStackTrace();
 		}
 		return null;

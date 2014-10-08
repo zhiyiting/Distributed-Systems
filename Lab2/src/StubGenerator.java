@@ -31,13 +31,12 @@ public class StubGenerator implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {
-		System.out.println("invoke function ");
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		// compose a message to invoke method from remote object
 		RMIMessage msg = new RMIMessage(serviceName, method.getName(),
 				parameterTypes, args, serverHost, serverPort);
+		// send it over socket and get return value
 		RMIMessage ret = (RMIMessage) CommModule.sendStatic(msg);
 		return ret.getContent();
 	}
-
 }

@@ -58,7 +58,6 @@ public class RMIServer {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		while (true) {
 			try {
-				System.out.print(">> ");
 				String in = br.readLine();
 				String arg[] = in.split(" ");
 				if (arg.length <= 0) {
