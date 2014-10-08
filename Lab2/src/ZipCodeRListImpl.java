@@ -41,12 +41,4 @@ public class ZipCodeRListImpl implements ZipCodeRList {
 	public ZipCodeRList next() {
 		return next;
 	}
-	
-	public String getCity() {
-		return city;
-	}
-	
-	public String getCode() {
-		return zipcode;
-	}
 }
