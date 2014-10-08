@@ -11,8 +11,6 @@ CLASSES = \
 	ZipCodeClient.java \
 	ZipCodeRListImpl.java \
 	ZipCodeRListClient.java \
-	NameServerImpl.java \
-	NameClient.java \
 	TestImpl.java \
 	TestClient.java \
 

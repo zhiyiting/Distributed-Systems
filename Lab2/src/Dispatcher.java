@@ -5,12 +5,23 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 
+/**
+ * Dispatcher class instantiates threads for dispatching functions
+ * 
+ * @author zhiyiting
+ *
+ */
 public class Dispatcher implements Runnable {
 
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	private ServerListener serverListener;
 
+	/**
+	 * Constructor that keeps track of input/output stream 
+	 * @param socket
+	 * @param server listener
+	 */
 	public Dispatcher(Socket socket, ServerListener sl) {
 		try {
 			this.in = new ObjectInputStream(socket.getInputStream());
@@ -69,6 +80,9 @@ public class Dispatcher implements Runnable {
 
 	}
 
+	/**
+	 * Start a thread and reuse current input/output stream
+	 */
 	@Override
 	public void run() {
 		while (true) {

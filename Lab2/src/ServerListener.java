@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.util.Hashtable;
 
 /**
- * Dispatcher to unmarshall the method invocation
+ * Server Listener to listen to requests and start new threads
  * 
  * @author zhiyiting
  *

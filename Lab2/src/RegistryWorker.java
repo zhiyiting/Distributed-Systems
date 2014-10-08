@@ -3,12 +3,24 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+/**
+ * Registry Worker create work thread for incoming message
+ * 
+ * @author zhiyiting
+ *
+ */
 public class RegistryWorker implements Runnable {
 
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	private RegistryServer regServer;
 
+	/**
+	 * Constructor to have reference to registry server
+	 * 
+	 * @param socket
+	 * @param registry server
+	 */
 	public RegistryWorker(Socket socket, RegistryServer regServer) {
 		try {
 			this.in = new ObjectInputStream(socket.getInputStream());
@@ -19,18 +31,21 @@ public class RegistryWorker implements Runnable {
 		}
 	}
 
+	/**
+	 * Create thread to process incoming message and use cached socket
+	 */
 	@Override
 	public void run() {
+		// always try to use cached input/output stream
 		while (true) {
-			System.out.println("thread running");
 			try {
 				Object o = in.readObject();
 				if (o != null) {
 					RMIMessage msg = (RMIMessage) o;
 					// get the method type from incoming message
 					String method = (String) msg.getMethod();
-					System.out.println(method);
 					RMIMessage ret = null;
+					// process the incoming function by method
 					switch (method) {
 					case "bind":
 						if (regServer.bind((RemoteObjectRef) msg.getContent())) {
@@ -71,7 +86,8 @@ public class RegistryWorker implements Runnable {
 					}
 				}
 			} catch (ClassNotFoundException e) {
-				System.out.println("RegistryWorker: Class Not Found Exception" + e.getMessage());
+				System.out.println("RegistryWorker: Class Not Found Exception"
+						+ e.getMessage());
 			} catch (IOException e) {
 				break;
 			}
