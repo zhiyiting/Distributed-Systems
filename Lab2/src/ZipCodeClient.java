@@ -42,6 +42,8 @@ public class ZipCodeClient {
 			else
 				l = new ZipCodeList(city.trim(), code.trim(), l);
 		}
+		in.close();
+
 		// the final value of l should be the initial head of
 		// the list.
 

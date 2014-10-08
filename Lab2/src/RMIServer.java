@@ -139,8 +139,7 @@ public class RMIServer {
 				System.out.println("IO Exception");
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
-				System.out.println("Class Not Found Exception");
-				e.printStackTrace();
+				System.out.println("Failure: Class Not Found");
 			} catch (NoSuchMethodException e) {
 				System.out.println("No Such Method Exception");
 				e.printStackTrace();

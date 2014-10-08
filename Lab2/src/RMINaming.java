@@ -36,8 +36,9 @@ public class RMINaming {
 	 * and instantiate a local stub to handle the function call
 	 * @param serviceName
 	 * @return local stub
+	 * @throws RemoteException 
 	 */
-	public MyRemote lookup(String serviceName) {
+	public MyRemote lookup(String serviceName) throws RemoteException {
 		// if the stub exists locally, return the local stub
 		if (stubtbl.containsKey(serviceName)) {
 			return stubtbl.get(serviceName);
@@ -51,7 +52,7 @@ public class RMINaming {
 			// get the ror back from registry server
 			RemoteObjectRef ror = (RemoteObjectRef) ret.getContent();
 			if (ror == null) {
-				System.out.println("lookup fail");
+				throw new RemoteException("Lookup Fail");
 			} else {
 				// instantiate a local stub
 				stub = (MyRemote) ror.localise(commModule);
