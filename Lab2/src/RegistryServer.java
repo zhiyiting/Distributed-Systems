@@ -1,6 +1,4 @@
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
@@ -39,7 +37,7 @@ public class RegistryServer {
 	 * @param ror
 	 * @return success (true), fail (false)
 	 */
-	private boolean bind(RemoteObjectRef ror) {
+	public boolean bind(RemoteObjectRef ror) {
 		// if the ror already exists, don't bind
 		if (rortbl.containsKey(ror.getServiceName())) {
 			return false;
@@ -53,7 +51,7 @@ public class RegistryServer {
 	 * @param ror
 	 * @return sucess (true), fail (false)
 	 */
-	private boolean rebind(RemoteObjectRef ror) {
+	public boolean rebind(RemoteObjectRef ror) {
 		// if the table doesn't contain the service name
 		// do not bind a new one
 		if (rortbl.containsKey(ror.getServiceName())) {
@@ -68,7 +66,7 @@ public class RegistryServer {
 	 * @param serviceName
 	 * @return remote object reference of service name
 	 */
-	private RemoteObjectRef lookup(String serviceName) {
+	public RemoteObjectRef lookup(String serviceName) {
 		RemoteObjectRef content = rortbl.get(serviceName);
 		return content;
 	}
@@ -78,7 +76,7 @@ public class RegistryServer {
 	 * @param name
 	 * @return success (true), fail (false)
 	 */
-	private boolean unbind(String name) {
+	public boolean unbind(String name) {
 		// if the table doesn't contain the service name
 		// return false and let user know
 		if (rortbl.remove(name) != null) {
@@ -114,63 +112,8 @@ public class RegistryServer {
 		while (true) {
 			try {
 				Socket socket = regServer.serverSocket.accept();
-				ObjectInputStream in = new ObjectInputStream(
-						socket.getInputStream());
-				ObjectOutputStream out = new ObjectOutputStream(
-						socket.getOutputStream());
-				Object o = in.readObject();
-				if (o != null) {
-					RMIMessage msg = (RMIMessage) o;
-					// get the method type from incoming message
-					String method = (String) msg.getMethod();
-					RMIMessage ret = null;
-					switch (method) {
-					case "bind":
-						if (regServer.bind((RemoteObjectRef) msg.getContent())) {
-							ret = new RMIMessage("Bind Success");
-						} else {
-							ret = new RMIMessage(
-									"Bind Fail: Service name already exist");
-						}
-						out.writeObject(ret);
-						break;
-					case "rebind":
-						if (regServer
-								.rebind((RemoteObjectRef) msg.getContent())) {
-							ret = new RMIMessage("Rebind Success");
-						} else {
-							ret = new RMIMessage(
-									"Rebind Fail: Service name doesn't exist");
-						}
-						out.writeObject(ret);
-						break;
-					case "lookup":
-						RemoteObjectRef ror = regServer.lookup((String) msg
-								.getContent());
-						ret = new RMIMessage(ror);
-						out.writeObject(ret);
-						break;
-					case "unbind":
-						if (regServer.unbind((String) msg.getContent())) {
-							ret = new RMIMessage("Unbind Success");
-						} else {
-							ret = new RMIMessage(
-									"Unbind Fail: No such service name");
-						}
-						out.writeObject(ret);
-						break;
-					default:
-						break;
-					}
-
-				}
-				in.close();
-				out.close();
-				socket.close();
+				new Thread(new RegistryWorker(socket, regServer)).start();
 			} catch (IOException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}

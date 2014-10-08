@@ -12,17 +12,19 @@ public class StubGenerator implements InvocationHandler {
 	private String serverHost;
 	private int serverPort;
 	private String serviceName;
-
+	private CommModule commModule;
+	
 	/**
 	 * Constructor to create a stub
 	 * @param server host
 	 * @param server port
 	 * @param service name
 	 */
-	public StubGenerator(String serverHost, int serverPort, String sn) {
+	public StubGenerator(String serverHost, int serverPort, String sn, CommModule commModule) {
 		this.serverHost = serverHost;
 		this.serverPort = serverPort;
 		this.serviceName = sn;
+		this.commModule = commModule;
 	}
 
 	/**
@@ -36,7 +38,7 @@ public class StubGenerator implements InvocationHandler {
 		RMIMessage msg = new RMIMessage(serviceName, method.getName(),
 				parameterTypes, args, serverHost, serverPort);
 		// send it over socket and get return value
-		RMIMessage ret = (RMIMessage) CommModule.sendStatic(msg);
+		RMIMessage ret = (RMIMessage) commModule.send(msg);
 		return ret.getContent();
 	}
 }

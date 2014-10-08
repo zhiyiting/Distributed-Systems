@@ -7,8 +7,14 @@ JC = javac
 CLASSES = \
 	RegistryServer.java \
 	RMIServer.java \
+	ZipCodeServerImpl.java \
+	ZipCodeClient.java \
 	ZipCodeRListImpl.java \
 	ZipCodeRListClient.java \
+	NameServerImpl.java \
+	NameClient.java \
+	TestImpl.java \
+	TestClient.java \
 
 default: classes
 

@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 
 /**
  * RMIServer class that serves remote objects
+ * 
  * @author zhiyiting
  *
  */
@@ -23,6 +24,7 @@ public class RMIServer {
 
 	/**
 	 * main method to start a server
+	 * 
 	 * @param args
 	 */
 	public static void main(String args[]) {
@@ -46,12 +48,12 @@ public class RMIServer {
 			System.out.println(e.getMessage());
 			return;
 		}
-		
+
 		commModule = new CommModule();
 
 		// start a dispatcher thread that listens to client messages
-		Dispatcher dispatcher = new Dispatcher(port);
-		Thread t = new Thread(dispatcher);
+		ServerListener sl = new ServerListener(port);
+		Thread t = new Thread(sl);
 		t.start();
 
 		// create a shell that provides bind, unbind and rebind methods
@@ -82,7 +84,7 @@ public class RMIServer {
 					String riname = rm.getClass().getInterfaces()[0].getName();
 					String serviceName = arg[2];
 					// put the object to dispatcher for reference
-					dispatcher.add(serviceName, rm);
+					sl.add(serviceName, rm);
 					// get the remote object reference
 					RemoteObjectRef ror = new RemoteObjectRef(host, port,
 							serviceName, riname);
@@ -93,7 +95,7 @@ public class RMIServer {
 					System.out.println(ret.getContent());
 				}
 					break;
-				// update a service name with the server and send it to 
+				// update a service name with the server and send it to
 				// the registry
 				// format: rebind <class name> <service name>
 				case "rebind": {
@@ -128,10 +130,6 @@ public class RMIServer {
 					System.out.println(ret.getContent());
 				}
 					break;
-				// stop the RMI Server
-				case "exit":
-					dispatcher.stop();
-					return;
 				default:
 					printShellUsage();
 					break;

@@ -73,6 +73,7 @@ public class SocketCache {
 			SocketInfo si = sockettbl.remove(lastUsedKey);
 			// close the socket and IOs
 			try {
+				System.out.println("About to close socket in socketCache...");
 				si.in.close();
 				si.out.close();
 				si.socket.close();

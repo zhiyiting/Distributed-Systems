@@ -34,11 +34,11 @@ public class RemoteObjectRef implements Serializable {
 	 * Stub creator that makes a local stub to deal with method invocation
 	 * @return proxy stub
 	 */
-	public Object localise() {
+	public Object localise(CommModule commModule) {
 
 	// use an invocation handler to invoke method
 		InvocationHandler handler = new StubGenerator(this.host, this.port,
-				this.serviceName);
+				this.serviceName, commModule);
 		try {
 			Class<?> c = Class.forName(remoteInterfaceName);
 			// create a proxy for communication to server side

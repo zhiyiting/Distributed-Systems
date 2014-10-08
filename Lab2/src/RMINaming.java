@@ -14,6 +14,8 @@ public class RMINaming {
 	private String rHost;
 	// registry server port
 	private int rPort;
+	// create a socket cache
+	private CommModule commModule;
 
 	/**
 	 * Constructor to get server information to connect to
@@ -26,6 +28,7 @@ public class RMINaming {
 		stubtbl = new Hashtable<String, MyRemote>();
 		this.rHost = rHost;
 		this.rPort = rPort;
+		this.commModule = new CommModule();
 	}
 
 	/**
@@ -42,7 +45,7 @@ public class RMINaming {
 		MyRemote stub = null;
 		// send a lookup message to the registry server
 		RMIMessage msg = new RMIMessage("lookup", serviceName, rHost, rPort);
-		RMIMessage ret = (RMIMessage) CommModule.sendStatic(msg);
+		RMIMessage ret = (RMIMessage) commModule.send(msg);
 
 		if (ret != null) {
 			// get the ror back from registry server
@@ -51,7 +54,7 @@ public class RMINaming {
 				System.out.println("lookup fail");
 			} else {
 				// instantiate a local stub
-				stub = (MyRemote) ror.localise();
+				stub = (MyRemote) ror.localise(commModule);
 				stubtbl.put(serviceName, stub);
 			}
 		}

@@ -17,33 +17,6 @@ public class CommModule {
 	public CommModule() {
 		socketCache = new SocketCache();
 	}
-	
-	public static Object sendStatic(RMIMessage msg) {
-		try {
-			Socket socket = new Socket(msg.getToHost(), msg.getToPort());
-			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-			out.writeObject(msg);
-			out.flush();
-			// get the return message from the socket
-			Object o = in.readObject();
-			out.close();
-			in.close();
-			socket.close();
-			return o;
-
-		} catch (UnknownHostException e) {
-			System.out.println("Unknown Host Exception" + e.getMessage());
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("IO Exception" + e.getMessage());
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			System.out.println("Class Not Found Exception" + e.getMessage());
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	/**
 	 * function to send and receive message
@@ -56,10 +29,13 @@ public class CommModule {
 			ObjectOutputStream out;
 			ObjectInputStream in;
 			if (socketCache.contains(msg.getToHost(), msg.getToPort())) {
+				System.out.println("socket contains!!");
 				SocketInfo socketObj = socketCache.get(msg.getToHost(), msg.getToPort());
 				out = socketObj.out;
 				in = socketObj.in;
 			} else {
+				System.out.println("socket not contains!!");
+
 				// establish a new socket
 				Socket socket = new Socket(msg.getToHost(), msg.getToPort());
 				out = new ObjectOutputStream(socket.getOutputStream());

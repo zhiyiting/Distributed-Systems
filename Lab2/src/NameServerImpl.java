@@ -1,4 +1,8 @@
 public class NameServerImpl implements NameServer {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8823424676918609292L;
 	String serviceName;
 	RemoteObjectRef ro;
 	NameServer next;
