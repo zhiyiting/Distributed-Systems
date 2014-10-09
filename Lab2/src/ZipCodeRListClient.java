@@ -27,7 +27,14 @@ public class ZipCodeRListClient {
 
 		// get (create) the stub out of ror.
 		RMINaming naming = new RMINaming(host, port);
-		ZipCodeRList rl = (ZipCodeRList) naming.lookup(serviceName);
+		ZipCodeRList rl;
+		try {
+			rl = (ZipCodeRList) naming.lookup(serviceName);
+		} catch (RemoteException e) {
+			System.out.println(e.getMessage());
+			in.close();
+			return;
+		}
 
 		// reads the data and make a "local" zip code list.
 		// later this is sent to the server.

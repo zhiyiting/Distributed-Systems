@@ -15,6 +15,7 @@ public class ServerListener implements Runnable {
 	private boolean canRun;
 	// service lookup table
 	public Hashtable<String, MyRemote> servicetbl;
+	
 
 	/**
 	 * Constructor to create a server socket
@@ -29,6 +30,7 @@ public class ServerListener implements Runnable {
 			System.out.println(e.getMessage());
 			System.out.println("Fail to listen on port " + port);
 		}
+		System.out.println("Server started, listening on port " + port);
 		servicetbl = new Hashtable<String, MyRemote>();
 	}
 
@@ -48,7 +50,9 @@ public class ServerListener implements Runnable {
 		while (canRun) {
 			try {
 				Socket socket = serverSocket.accept();
-				new Thread(new Dispatcher(socket, this)).start();
+				Thread t = new Thread(new Dispatcher(socket, this));
+				t.setDaemon(true);
+				t.start();
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();

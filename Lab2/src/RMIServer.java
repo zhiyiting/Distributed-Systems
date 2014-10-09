@@ -54,10 +54,12 @@ public class RMIServer {
 		// start a dispatcher thread that listens to client messages
 		ServerListener sl = new ServerListener(port);
 		Thread t = new Thread(sl);
+		t.setDaemon(true);
 		t.start();
 
 		// create a shell that provides bind, unbind and rebind methods
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		printShellUsage();
 		while (true) {
 			try {
 				String in = br.readLine();
@@ -136,28 +138,27 @@ public class RMIServer {
 
 				}
 			} catch (IOException e) {
-				System.out.println("IO Exception");
-				e.printStackTrace();
+				System.out.println("IO Exception: " + e.getMessage());
+				sl.stop();
+				return;
 			} catch (ClassNotFoundException e) {
-				System.out.println("Failure: Class Not Found");
+				System.out.println("Failure: Class Not Found: " + e.getMessage());
 			} catch (NoSuchMethodException e) {
-				System.out.println("No Such Method Exception");
-				e.printStackTrace();
+				System.out.println("Failure: No Such Method: " + e.getMessage());
 			} catch (SecurityException e) {
-				System.out.println("Security Exception");
-				e.printStackTrace();
+				System.out.println("Security Exception: " + e.getMessage());
 			} catch (InstantiationException e) {
-				System.out.println("Instantiation Exception");
-				e.printStackTrace();
+				System.out.println("Instantiation Exception: " + e.getMessage());
 			} catch (IllegalAccessException e) {
-				System.out.println("Illegal Access Exception");
-				e.printStackTrace();
+				System.out.println("Illegal Access Exception: " + e.getMessage());
 			} catch (IllegalArgumentException e) {
-				System.out.println("Illegal Argument Exception");
-				e.printStackTrace();
+				System.out.println("Illegal Argument Exception: " + e.getMessage());
 			} catch (InvocationTargetException e) {
-				System.out.println("Invocation Target Exception");
-				e.printStackTrace();
+				System.out.println("Invocation Target Exception: " + e.getMessage());
+			} catch (RemoteException e) {
+				System.out.println("Remote Exception: " + e.getMessage());
+				sl.stop();
+				return;
 			}
 		}
 
@@ -167,10 +168,12 @@ public class RMIServer {
 	 * function to print the usage of server shell
 	 */
 	private static void printShellUsage() {
-		System.out.println("Usage:");
-		System.out.println("bind <class name> <service name>");
-		System.out.println("rebind <class name> <service name>");
-		System.out.println("unbind <service name>");
+		System.out.println("##############################################");
+		System.out.println("#  Usage:                                    #");
+		System.out.println("#  bind <class name> <service name>          #");
+		System.out.println("#  rebind <class name> <service name>        #");
+		System.out.println("#  unbind <service name>                     #");
+		System.out.println("##############################################");
 	}
 
 	/**

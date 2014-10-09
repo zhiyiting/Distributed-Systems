@@ -27,7 +27,14 @@ public class ZipCodeClient {
 
 		// locate the registry and get ror.
 		RMINaming naming = new RMINaming(host, port);
-		ZipCodeServer zcs = (ZipCodeServer) naming.lookup(serviceName);
+		ZipCodeServer zcs;
+		try {
+			zcs = (ZipCodeServer) naming.lookup(serviceName);
+		} catch (RemoteException e) {
+			System.out.println(e.getMessage());
+			in.close();
+			return;
+		}
 
 		// reads the data and make a "local" zip code list.
 		// later this is sent to the server.

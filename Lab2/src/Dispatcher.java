@@ -16,6 +16,7 @@ public class Dispatcher implements Runnable {
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	private ServerListener serverListener;
+	private boolean canRun;
 
 	/**
 	 * Constructor that keeps track of input/output stream 
@@ -31,6 +32,7 @@ public class Dispatcher implements Runnable {
 			System.out.println("Dispatcher Worker: fail to create socket");
 
 		}
+		canRun = true;
 	}
 
 	/**
@@ -85,7 +87,7 @@ public class Dispatcher implements Runnable {
 	 */
 	@Override
 	public void run() {
-		while (true) {
+		while (canRun) {
 			try {
 				// read the incoming message
 				RMIMessage o = (RMIMessage) in.readObject();
@@ -103,6 +105,10 @@ public class Dispatcher implements Runnable {
 
 			}
 		}
+	}
+	
+	public void stop() {
+		canRun = false;
 	}
 
 }

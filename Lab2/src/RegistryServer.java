@@ -29,6 +29,7 @@ public class RegistryServer {
 			System.out.println(e.getMessage());
 			System.out.println("Fail to listen on port " + port);
 		}
+		System.out.println("Registry server started, listening on port " + port);
 		rortbl = new Hashtable<String, RemoteObjectRef>();
 	}
 
@@ -115,7 +116,6 @@ public class RegistryServer {
 				new Thread(new RegistryWorker(socket, regServer)).start();
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
-				e.printStackTrace();
 			}
 		}
 	}
