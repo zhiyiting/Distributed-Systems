@@ -86,37 +86,45 @@ java <client program> <registry port> <registry host> <service name> <args>
 4.3. Example Server and Client for Testing
 
 1) Start Registry Server
-- Open a terminal window
-- ssh andrewId@unix2.andrew.cmu.edu
-- cd to the src folder
-- make clean, make
-- java RegistryServer 15410
-- See the message: Registry server started, listening on port 15410
+>Open a terminal window;
+>ssh andrewId@unix2.andrew.cmu.edu;
+>cd to the src folder;
+>make clean, make;
+>java RegistryServer 15410;
+>See the message: Registry server started, listening on port 15410;
+
 2) Start RMI Server
-- Open a new terminal window
-- ssh andrewId@unix2.andrew.cmu.edu
-- cd to the src folder
-- java RMIServer 15440 –r 15410
-- See the message: Server started, listening on port 15440.
+>Open a new terminal window;
+>ssh andrewId@unix2.andrew.cmu.edu;
+>cd to the src folder;
+>java RMIServer 15440 –r 15410;
+>See the message: Server started, listening on port 15440.;
+
 3) Run Client Program
-- Open a new terminal window
-- If the project file exists locally, you can cd to the src folder locally, make clean, make
-- If the project file is on AFS, ssh andrewId@unix.andrew.cmu.edu, cd to the src folder
+>Open a new terminal window;
+>If the project file exists locally, you can cd to the src folder locally, make clean, make;
+>If the project file is on AFS, ssh andrewId@unix.andrew.cmu.edu, cd to the src folder;
+
 a. Example 1: TestClient (without argument)
-- Go to RMIServer’s terminal
-- bind TestImpl test1
-- See the message: Bind Success
-- Go back to Client terminal
-- java TestClient 128.2.13.134 15410 test1
+
+>Go to RMIServer’s terminal;
+>bind TestImpl test1;
+>See the message: Bind Success;
+>Go back to Client terminal;
+>java TestClient 128.2.13.134 15410 test1;
+
 b. Example2: TestClient (with argument)
-- Go to RMIServer’s terminal
-- unbind test1
-- bind TestImpl test1
-- Go back to Client terminal
-- java TestClient 128.2.13.134 15410 test1 echo
+
+>Go to RMIServer’s terminal
+>unbind test1;
+>bind TestImpl test1;
+>Go back to Client terminal;
+>java TestClient 128.2.13.134 15410 test1 echo;
+
 c. Example 3: ZipCodeClient
-- RMIServer’s terminal: bind ZipCodeServer Impl zip
-- Client’s terminal: java ZipCodeClient 128.2.13.134 15410 zip ExampleData
+>RMIServer’s terminal: bind ZipCodeServer Impl zip;
+>Client’s terminal: java ZipCodeClient 128.2.13.134 15410 zip ExampleData;
+
 d. Example 4: ZipCodeRListClient
-- RMIServer’s terminal: rebind ZipCodeRListImpl zip
-- Client’s terminal: java ZipCodeRListClient 128.2.13.134 15410 zip ExampleData
+>RMIServer’s terminal: rebind ZipCodeRListImpl zip;
+>Client’s terminal: java ZipCodeRListClient 128.2.13.134 15410 zip ExampleData;
