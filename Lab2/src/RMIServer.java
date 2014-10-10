@@ -52,11 +52,6 @@ public class RMIServer {
 
 		commModule = new CommModule();
 
-		HeartBeat hb = new HeartBeat(commModule, host, rPort);
-		Thread hbt = new Thread(hb);
-		hbt.setDaemon(true);
-		hbt.start();
-
 		// start a dispatcher thread that listens to client messages
 		ServerListener sl = new ServerListener(port);
 		Thread slt = new Thread(sl);
@@ -65,14 +60,10 @@ public class RMIServer {
 		
 		// create a shell that provides bind, unbind and rebind methods
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		
 		printShellUsage();
 		
 		while (true) {
 			try {
-				if (!hbt.isAlive()) {
-					throw new RemoteException("Registry server is down");
-				}
 				String in = br.readLine();
 				String arg[] = in.split(" ");
 				if (arg.length <= 0) {
@@ -159,7 +150,6 @@ public class RMIServer {
 			} catch (NoSuchMethodException e) {
 				System.out
 						.println("Failure: No Such Method: " + e.getMessage());
-				throw new RemoteException("No such method");
 			} catch (SecurityException e) {
 				System.out.println("Security Exception: " + e.getMessage());
 			} catch (InstantiationException e) {

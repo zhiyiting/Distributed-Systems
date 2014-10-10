@@ -21,6 +21,10 @@ public class ZipCodeClient {
 	// (2) a service name.
 	// (3) a file name as above.
 	public static void main(String[] args) throws IOException {
+		if (args.length != 4) {
+			System.out.println("Usage: <host> <port> <service name> <file>");
+			return;
+		}
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
 		String serviceName = args[2];
