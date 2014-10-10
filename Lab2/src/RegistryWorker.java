@@ -81,6 +81,10 @@ public class RegistryWorker implements Runnable {
 						}
 						out.writeObject(ret);
 						break;
+					case "ping":
+						ret = new RMIMessage("hi");
+						out.writeObject(ret);
+						break;
 					default:
 						break;
 					}

@@ -60,11 +60,12 @@ public class Dispatcher implements Runnable {
 		Class<?>[] parameterTypes = (Class<?>[]) m.getParameterTypes();
 
 		try {
+			// invoke the method
 			Method method = rm.getClass().getMethod(methodName, parameterTypes);
 			ret = method.invoke(rm, args);
 		} catch (NoSuchMethodException e) {
 			System.out.println("No Such Method Exception");
-			e.printStackTrace();
+			ret = new RemoteException("Remote Exception: No Such Method");
 		} catch (SecurityException e) {
 			System.out.println("Security Exception");
 			e.printStackTrace();

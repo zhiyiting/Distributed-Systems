@@ -11,6 +11,7 @@
 //   end.
 
 import java.io.*;
+import java.lang.reflect.UndeclaredThrowableException;
 
 public class ZipCodeRListClient {
 
@@ -63,22 +64,28 @@ public class ZipCodeRListClient {
 					+ temp.ZipCode);
 			temp = temp.next;
 		}
+
 		// test "add".
 		System.out.println("testing add.");
-		
+
 		temp = l;
 		ZipCodeList l2 = null;
-		while (temp !=null)            
-		{	String city = temp.city;
-			String code = temp.ZipCode;		
-			l2 = new ZipCodeList(city, code, l2);		      
-			temp = temp.next;                        
-		}    
-		
-		temp = l2;
 		while (temp != null) {
-			rl = rl.add(temp.city, temp.ZipCode);
+			String city = temp.city;
+			String code = temp.ZipCode;
+			l2 = new ZipCodeList(city, code, l2);
 			temp = temp.next;
+		}
+
+		try {
+			temp = l2;
+			while (temp != null) {
+				rl = rl.add(temp.city, temp.ZipCode);
+				temp = temp.next;
+			}
+		} catch (UndeclaredThrowableException e) {
+			System.out.println(e.getCause().getMessage());
+			return;
 		}
 		System.out.println("add tested.");
 		// rl should contain the initial head of the list.
@@ -86,14 +93,20 @@ public class ZipCodeRListClient {
 		// This is also the test that "add" performed all right.
 		System.out
 				.println("\n This is the remote list, printed using find/next.");
-		temp = l;
-		rtemp = rl;
-		while (temp != null) {
-			// here is a test.
-			String res = rtemp.find(temp.city);
-			System.out.println("city: " + temp.city + ", " + "code: " + res);
-			temp = temp.next;
-			rtemp = rtemp.next();
+		try {
+			temp = l;
+			rtemp = rl;
+			while (temp != null) {
+				// here is a test.
+				String res = rtemp.find(temp.city);
+				System.out
+						.println("city: " + temp.city + ", " + "code: " + res);
+				temp = temp.next;
+				rtemp = rtemp.next();
+			}
+		} catch (UndeclaredThrowableException e) {
+			System.out.println(e.getCause().getMessage());
+			return;
 		}
 	}
 }

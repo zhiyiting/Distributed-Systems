@@ -26,8 +26,9 @@ public class RMIServer {
 	 * main method to start a server
 	 * 
 	 * @param args
+	 * @throws RemoteException 
 	 */
-	public static void main(String args[]) {
+	public static void main(String args[]) throws RemoteException {
 		// argument format:
 		// <server port number> -r <registry port number>
 		if (args.length != 3 || !args[1].equals("-r")) {
@@ -51,17 +52,27 @@ public class RMIServer {
 
 		commModule = new CommModule();
 
+		HeartBeat hb = new HeartBeat(commModule, host, rPort);
+		Thread hbt = new Thread(hb);
+		hbt.setDaemon(true);
+		hbt.start();
+
 		// start a dispatcher thread that listens to client messages
 		ServerListener sl = new ServerListener(port);
-		Thread t = new Thread(sl);
-		t.setDaemon(true);
-		t.start();
-
+		Thread slt = new Thread(sl);
+		slt.setDaemon(true);
+		slt.start();
+		
 		// create a shell that provides bind, unbind and rebind methods
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		
 		printShellUsage();
+		
 		while (true) {
 			try {
+				if (!hbt.isAlive()) {
+					throw new RemoteException("Registry server is down");
+				}
 				String in = br.readLine();
 				String arg[] = in.split(" ");
 				if (arg.length <= 0) {
@@ -111,7 +122,9 @@ public class RMIServer {
 					Constructor<?> ctor = c.getConstructor();
 					rm = (MyRemote) ctor.newInstance();
 					String riname = rm.getClass().getInterfaces()[0].getName();
+					String serviceName = arg[2];
 					// get the remote object reference
+					sl.add(serviceName, rm);
 					RemoteObjectRef ror = new RemoteObjectRef(host, port,
 							arg[2], riname);
 					RMIMessage msg = new RMIMessage("rebind", ror, host, rPort);
@@ -139,26 +152,33 @@ public class RMIServer {
 				}
 			} catch (IOException e) {
 				System.out.println("IO Exception: " + e.getMessage());
-				sl.stop();
 				return;
 			} catch (ClassNotFoundException e) {
-				System.out.println("Failure: Class Not Found: " + e.getMessage());
+				System.out.println("Failure: Class Not Found: "
+						+ e.getMessage());
 			} catch (NoSuchMethodException e) {
-				System.out.println("Failure: No Such Method: " + e.getMessage());
+				System.out
+						.println("Failure: No Such Method: " + e.getMessage());
+				throw new RemoteException("No such method");
 			} catch (SecurityException e) {
 				System.out.println("Security Exception: " + e.getMessage());
 			} catch (InstantiationException e) {
-				System.out.println("Instantiation Exception: " + e.getMessage());
+				System.out
+						.println("Instantiation Exception: " + e.getMessage());
 			} catch (IllegalAccessException e) {
-				System.out.println("Illegal Access Exception: " + e.getMessage());
+				System.out.println("Illegal Access Exception: "
+						+ e.getMessage());
 			} catch (IllegalArgumentException e) {
-				System.out.println("Illegal Argument Exception: " + e.getMessage());
+				System.out.println("Illegal Argument Exception: "
+						+ e.getMessage());
 			} catch (InvocationTargetException e) {
-				System.out.println("Invocation Target Exception: " + e.getMessage());
+				System.out.println("Invocation Target Exception: "
+						+ e.getMessage());
 			} catch (RemoteException e) {
 				System.out.println("Remote Exception: " + e.getMessage());
-				sl.stop();
 				return;
+			} catch (ClassCastException e) {
+				System.out.println("Bind fail: " + e.getMessage());
 			}
 		}
 

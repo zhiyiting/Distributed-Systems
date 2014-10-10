@@ -11,6 +11,7 @@
 //   end.
 
 import java.io.*;
+import java.lang.reflect.UndeclaredThrowableException;
 
 public class ZipCodeClient {
 
@@ -64,32 +65,38 @@ public class ZipCodeClient {
 		}
 
 		// test the initialise.
-		zcs.initialise(l);
-		System.out.println("\n Server initalised.");
+		try {
+			zcs.initialise(l);
+			System.out.println("\n Server initalised.");
 
-		// test the find.
-		System.out.println("\n This is the remote list given by find.");
-		temp = l;
-		while (temp != null) {
+			// test the find.
+			System.out.println("\n This is the remote list given by find.");
+			temp = l;
+			while (temp != null) {
+				// here is a test.
+				String res = zcs.find(temp.city);
+				System.out
+						.println("city: " + temp.city + ", " + "code: " + res);
+				temp = temp.next;
+			}
+
+			// test the findall.
+			System.out.println("\n This is the remote list given by findall.");
 			// here is a test.
-			String res = zcs.find(temp.city);
-			System.out.println("city: " + temp.city + ", " + "code: " + res);
-			temp = temp.next;
-		}
+			temp = zcs.findAll();
+			while (temp != null) {
+				System.out.println("city: " + temp.city + ", " + "code: "
+						+ temp.ZipCode);
+				temp = temp.next;
+			}
 
-		// test the findall.
-		System.out.println("\n This is the remote list given by findall.");
-		// here is a test.
-		temp = zcs.findAll();
-		while (temp != null) {
-			System.out.println("city: " + temp.city + ", " + "code: "
-					+ temp.ZipCode);
-			temp = temp.next;
+			// test the printall.
+			System.out.println("\n We test the remote site printing.");
+			// here is a test.
+			zcs.printAll();
+		} catch (UndeclaredThrowableException e) {
+			System.out.println(e.getCause().getMessage());
+			return;
 		}
-
-		// test the printall.
-		System.out.println("\n We test the remote site printing.");
-		// here is a test.
-		zcs.printAll();
 	}
 }

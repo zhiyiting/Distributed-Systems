@@ -33,8 +33,9 @@ public class StubGenerator implements InvocationHandler {
 
 	/**
 	 * Function to invoke method
-	 * @throws IOException 
-	 * @throws RemoteException 
+	 * 
+	 * @throws IOException
+	 * @throws RemoteException
 	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws RemoteException {
@@ -45,9 +46,12 @@ public class StubGenerator implements InvocationHandler {
 					parameterTypes, args, serverHost, serverPort);
 			// send it over socket and get return value
 			RMIMessage ret = (RMIMessage) commModule.send(msg);
+			if (ret.getContent() instanceof Exception) {
+				throw new RemoteException(((RemoteException)ret.getContent()).getMessage());
+			}
 			return ret.getContent();
 		} catch (RemoteException e) {
-			throw new RemoteException("Can't invoke method");
+			throw new RemoteException(e.getMessage());
 		}
 	}
 }

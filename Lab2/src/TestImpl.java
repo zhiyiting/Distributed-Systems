@@ -1,10 +1,10 @@
 
 public class TestImpl implements Test {
 	public String speak() {
-		return "hello";
+		return "I speak without argument!";
 	}
 	
 	public String speak(String s) {
-		return s;
+		return "I'll repeat what you said   " + s;
 	}
 }
