@@ -1,6 +1,8 @@
 package example;
 
 import java.util.StringTokenizer;
+
+import client.ClientMonitor;
 import util.*;
 import conf.Configuration;
 
@@ -50,8 +52,8 @@ public class WordCount {
 		job.setInputFormatClass(FileInputFormat.class);
 		job.setOutputFormatClass(FileOutputFormat.class);
 
-		//job.waitForCompletion(true);
-		job.start();
+		ClientMonitor cm = new ClientMonitor(job);
+		cm.run();
 	}
 
 }

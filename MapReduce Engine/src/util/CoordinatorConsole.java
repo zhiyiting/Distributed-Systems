@@ -6,15 +6,17 @@ import java.io.InputStreamReader;
 
 import conf.Configuration;
 
-public class Worker implements Runnable{
-
+public class CoordinatorConsole implements Runnable {
 	private boolean canRun;
 	private BufferedReader br;
-
 	
-	public Worker() {
+	public CoordinatorConsole() {
 		this.canRun = true;
 		this.br = new BufferedReader(new InputStreamReader(System.in));
+		Coordinator coord = new Coordinator(Configuration.SERVERPORT);
+		Thread t = new Thread(coord);
+		t.setDaemon(true);
+		t.start();
 	}
 
 	@Override
@@ -23,7 +25,7 @@ public class Worker implements Runnable{
 			try {
 				String in = br.readLine();
 				switch (in) {
-				// print all the jobs
+				// print all the jobs and associated mappers
 				case "list":
 					break;
 				// stop the node
@@ -39,5 +41,5 @@ public class Worker implements Runnable{
 			
 		}
 	}
-
+	
 }

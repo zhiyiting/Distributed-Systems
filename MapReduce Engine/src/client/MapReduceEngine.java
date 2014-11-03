@@ -2,14 +2,13 @@ package client;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
 import conf.Configuration;
-import util.Coordinator;
+import util.CoordinatorConsole;
 import util.Worker;
 
 public class MapReduceEngine {
 	public static void main(String[] args) {
-		Configuration conf = new Configuration();
-		String masterAdd = (String) conf.get("master address");
 		String host = null;
 		try {
 			host = InetAddress.getLocalHost().getHostName();
@@ -19,9 +18,9 @@ public class MapReduceEngine {
 			return;
 		}
 		// determine if the node is master/slave
-		if (host == masterAdd) {
-			System.out.println("this is master");
-			Coordinator coord = new Coordinator();
+		if (host.equals(Configuration.MASTERADDRESS)) {
+			System.out.println("Running coordinator on " + host);
+			CoordinatorConsole coord = new CoordinatorConsole();
 			coord.run();		
 		}
 		else {

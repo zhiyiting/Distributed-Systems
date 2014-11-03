@@ -1,11 +1,27 @@
 package util;
 
-public class Coordinator implements Runnable {
+import java.io.IOException;
+import java.net.Socket;
 
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
+public class Coordinator extends Listener {
+
+	public Coordinator(int port) {
+		super(port);
 	}
 	
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				Socket socket = serverSocket.accept();
+				Thread t = new Thread(new Dispatcher(socket, this));
+				t.setDaemon(true);
+				t.start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
 }

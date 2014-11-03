@@ -1,19 +1,18 @@
 package util;
 
+import java.io.Serializable;
+
 import conf.Configuration;
 
-public class Job {
-	
+public class Job implements Serializable{
+
+	private static final long serialVersionUID = -8502305018282114686L;
 	private Configuration conf;
 	private String jobName;
-	private String inputPath;
-	private String outputPath;
 
 	public Job(Configuration conf, String jobName) {
 		this.conf = conf;
 		this.jobName = jobName;
-		this.inputPath = (String) conf.get("input-path");
-		this.outputPath = (String) conf.get("output-path");
 	}
 	
 	public void setMapperClass(Class<? extends Mapper> cls) {
@@ -34,10 +33,5 @@ public class Job {
 	
 	public void setOutputFormatClass(Class <?> cls) {
 		
-	}
-	
-	public void start() {
-		//ClientMonitor cm = new ClientMonitor();
-		//cm.run();
 	}
 }
