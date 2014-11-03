@@ -1,3 +1,6 @@
+package util;
+
+import conf.Configuration;
 
 public class Job {
 	
@@ -34,7 +37,7 @@ public class Job {
 	}
 	
 	public void start() {
-		ClientMonitor cm = new ClientMonitor();
-		cm.run();
+		//ClientMonitor cm = new ClientMonitor();
+		//cm.run();
 	}
 }

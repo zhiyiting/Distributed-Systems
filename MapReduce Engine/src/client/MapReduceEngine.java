@@ -1,6 +1,10 @@
+package client;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
+import conf.Configuration;
+import util.Coordinator;
+import util.Worker;
 
 public class MapReduceEngine {
 	public static void main(String[] args) {

@@ -1,4 +1,8 @@
+package example;
+
 import java.util.StringTokenizer;
+import util.*;
+import conf.Configuration;
 
 public class WordCount {
 
