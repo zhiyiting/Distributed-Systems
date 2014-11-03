@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="master address">"unix1.andrew.cmu.edu"</entry>
+<entry key="slave address">"unix2.andrew.cmu.edu" "unix3.andrew.cmu.edu"</entry>
+<entry key="record size">200</entry>
+</properties>
