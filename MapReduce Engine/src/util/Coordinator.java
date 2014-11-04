@@ -14,7 +14,7 @@ public class Coordinator extends Listener {
 		while (true) {
 			try {
 				Socket socket = serverSocket.accept();
-				Thread t = new Thread(new Dispatcher(socket, this));
+				Thread t = new Thread(new CoordDispatcher(socket));
 				t.setDaemon(true);
 				t.start();
 			} catch (IOException e) {

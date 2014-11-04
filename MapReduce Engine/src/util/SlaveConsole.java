@@ -4,21 +4,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import conf.Configuration;
+public class SlaveConsole implements Runnable{
 
-public class CoordinatorConsole implements Runnable {
 	private boolean canRun;
 	private BufferedReader br;
-	private JobTracker tracker;
+	private TaskTracker tracker;
+	private SlaveMessenger messenger;
 	
-	public CoordinatorConsole() {
+	public SlaveConsole() {
 		this.canRun = true;
 		this.br = new BufferedReader(new InputStreamReader(System.in));
-		this.tracker = new JobTracker();
-		Coordinator coord = new Coordinator(Configuration.SERVER_PORT);
-		Thread t = new Thread(coord);
-		t.setDaemon(true);
-		t.start();
+		this.tracker = new TaskTracker();
+		this.messenger = new SlaveMessenger(tracker);
+		Thread t = new Thread(messenger);
+		t.setDaemon(false);
+		t.start();	
 	}
 
 	@Override
@@ -27,14 +27,14 @@ public class CoordinatorConsole implements Runnable {
 			try {
 				String in = br.readLine();
 				switch (in) {
-				// print all the jobs and associated mappers
+				// print all the jobs
 				case "list":
+					tracker.list();
 					break;
 				// stop the node
 				case "quit":
 					canRun = false;
-					break;
-				
+					break;			
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -43,5 +43,5 @@ public class CoordinatorConsole implements Runnable {
 			
 		}
 	}
-	
+
 }

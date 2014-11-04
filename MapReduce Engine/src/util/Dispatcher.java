@@ -15,7 +15,6 @@ public class Dispatcher implements Runnable {
 
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
-	private Listener listener;
 	private boolean canRun;
 
 	/**
@@ -23,11 +22,10 @@ public class Dispatcher implements Runnable {
 	 * @param socket
 	 * @param server listener
 	 */
-	public Dispatcher(Socket socket, Listener l) {
+	public Dispatcher(Socket socket) {
 		try {
 			this.in = new ObjectInputStream(socket.getInputStream());
 			this.out = new ObjectOutputStream(socket.getOutputStream());
-			this.listener = l;
 		} catch (IOException e) {
 			System.out.println("Dispatcher: fail to create socket");
 
@@ -36,27 +34,13 @@ public class Dispatcher implements Runnable {
 	}
 
 	/**
-	 * unmarshall method name and arguments from message, and start the method
-	 * invocation
+	 * unmarshall incoming message
 	 * 
-	 * @param invocation
-	 *            message
+	 * @param message
 	 * @return return value
 	 */
-	private Object dispatch(Message m) {
-		Object ret = null;
-		if (m == null) {
-			System.out.println("Message is empty");
-			return ret;
-		}
-		// get service name from message and get corresponding remote object
-		String method = m.getMethod();
-		switch (method) {
-		case "start":
-			break;
-		}
-		return ret;
-
+	protected Object dispatch(Message m) {
+		return null;
 	}
 
 	/**
@@ -68,10 +52,10 @@ public class Dispatcher implements Runnable {
 			try {
 				// read the incoming message
 				Message m = (Message) in.readObject();
-				// invoke the message locally and get return value
+				// dispatch the message
 				Object returnVal = dispatch(m);
 				// compose the return message
-				Message ret = new Message(returnVal);
+				Message ret = new Message((String)returnVal);
 				out.writeObject(ret);
 				out.flush();
 			} catch (IOException e) {

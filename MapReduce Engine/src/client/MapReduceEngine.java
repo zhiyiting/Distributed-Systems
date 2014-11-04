@@ -5,7 +5,7 @@ import java.net.UnknownHostException;
 
 import conf.Configuration;
 import util.CoordinatorConsole;
-import util.Worker;
+import util.SlaveConsole;
 
 public class MapReduceEngine {
 	public static void main(String[] args) {
@@ -18,15 +18,15 @@ public class MapReduceEngine {
 			return;
 		}
 		// determine if the node is master/slave
-		if (host.equals(Configuration.MASTERADDRESS)) {
+		if (host.equals(Configuration.MASTER_ADDRESS)) {
 			System.out.println("Running coordinator on " + host);
 			CoordinatorConsole coord = new CoordinatorConsole();
 			coord.run();		
 		}
 		else {
 			System.out.println("this is worker");
-			Worker worker = new Worker();
-			worker.run();
+			SlaveConsole slave = new SlaveConsole();
+			slave.run();
 		}
 	}
 }
