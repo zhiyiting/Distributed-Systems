@@ -2,7 +2,7 @@ package example;
 
 import java.util.StringTokenizer;
 
-import client.ClientMonitor;
+import client.ClientConsole;
 import util.*;
 import conf.Configuration;
 
@@ -52,7 +52,7 @@ public class WordCount {
 		job.setInputFormatClass(FileInputFormat.class);
 		job.setOutputFormatClass(FileOutputFormat.class);
 
-		ClientMonitor cm = new ClientMonitor(job);
+		ClientConsole cm = new ClientConsole(job);
 		cm.run();
 	}
 

@@ -27,7 +27,7 @@ public class CommModule {
 	 * @return return message
 	 * @throws RemoteException 
 	 */
-	public Object send(Message msg) throws RemoteException {
+	public Message send(Message msg) throws RemoteException {
 		try {
 			ObjectOutputStream out;
 			ObjectInputStream in;
@@ -47,7 +47,7 @@ public class CommModule {
 			out.writeObject(msg);
 			out.flush();
 			// get the return message from the socket
-			Object o = in.readObject();
+			Message o = (Message)in.readObject();
 			if(o == null) {
 				throw new RemoteException("can't connect to server");
 			}

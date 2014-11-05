@@ -15,10 +15,6 @@ public class CoordinatorConsole implements Runnable {
 		this.canRun = true;
 		this.br = new BufferedReader(new InputStreamReader(System.in));
 		this.tracker = new JobTracker();
-		Coordinator coord = new Coordinator(Configuration.SERVER_PORT);
-		Thread t = new Thread(coord);
-		t.setDaemon(true);
-		t.start();
 	}
 
 	@Override
@@ -29,6 +25,7 @@ public class CoordinatorConsole implements Runnable {
 				switch (in) {
 				// print all the jobs and associated mappers
 				case "list":
+					tracker.list();
 					break;
 				// stop the node
 				case "quit":

@@ -39,7 +39,7 @@ public class Dispatcher implements Runnable {
 	 * @param message
 	 * @return return value
 	 */
-	protected Object dispatch(Message m) {
+	Message dispatch(Message m) {
 		return null;
 	}
 
@@ -53,9 +53,8 @@ public class Dispatcher implements Runnable {
 				// read the incoming message
 				Message m = (Message) in.readObject();
 				// dispatch the message
-				Object returnVal = dispatch(m);
+				Message ret = dispatch(m);
 				// compose the return message
-				Message ret = new Message((String)returnVal);
 				out.writeObject(ret);
 				out.flush();
 			} catch (IOException e) {

@@ -25,11 +25,13 @@ public class SlaveConsole implements Runnable{
 	public void run() {
 		while (canRun) {
 			try {
-				String in = br.readLine();
-				switch (in) {
+				String[] in = br.readLine().split(" ");
+				switch (in[0]) {
 				// print all the jobs
 				case "list":
 					tracker.list();
+					break;
+				case "kill":
 					break;
 				// stop the node
 				case "quit":
