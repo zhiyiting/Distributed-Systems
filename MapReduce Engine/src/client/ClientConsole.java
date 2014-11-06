@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import conf.Configuration;
 import util.CommModule;
 import util.Job;
+import util.JobMessage;
 import util.Message;
 import util.RemoteException;
 
@@ -24,7 +25,18 @@ public class ClientConsole implements Runnable{
 		this.commModule = new CommModule();
 		this.toHost = Configuration.MASTER_ADDRESS;
 		this.toPort = Configuration.SERVER_PORT;
-		// start the job...
+		startJob();
+	}
+	
+	private void startJob() {
+		JobMessage msg = new JobMessage("start", job, toHost, toPort);
+		try {
+			Message ret = commModule.send(msg);
+			System.out.println(ret.getContent());
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override

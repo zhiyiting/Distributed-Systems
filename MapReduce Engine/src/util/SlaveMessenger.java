@@ -1,5 +1,6 @@
 package util;
 
+
 import conf.Configuration;
 
 public class SlaveMessenger implements Runnable {
@@ -16,6 +17,23 @@ public class SlaveMessenger implements Runnable {
 		this.toHost = Configuration.MASTER_ADDRESS;
 		this.toPort = Configuration.SERVER_PORT;
 		this.sleepInterval = Configuration.HEART_BEAT_INTERVAL;
+		registerSlave();
+	}
+	
+	private void registerSlave() {
+		Message msg = new Message("hi", toHost, toPort);
+		try {
+			Message ret = commModule.send(msg);
+			if (ret.getContent().equals("ACK")) {
+				System.out.println("Connected to master at " + toHost);
+			}
+			else {
+				System.out.println("Master isn't there");
+			}
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void dispatch(Message msg) {

@@ -5,9 +5,11 @@ import java.net.Socket;
 public class CoordDispatcher extends Dispatcher {
 
 	private JobTracker tracker;
+	private Socket socket;
 	
 	public CoordDispatcher(Socket socket, JobTracker tracker) {
 		super(socket);
+		this.socket = socket;
 		this.tracker = tracker;
 	}
 	
@@ -16,6 +18,10 @@ public class CoordDispatcher extends Dispatcher {
 		String method = m.getContent();
 		switch (method) {
 		// from client
+		case "start":
+			Job job = ((JobMessage) m).getJob();
+			tracker.start(job);
+			break;
 		case "list":
 			ret = new Message(tracker.toString());
 			break;
@@ -24,6 +30,10 @@ public class CoordDispatcher extends Dispatcher {
 			ret = new Message("Job stopped");
 			break;
 		// from slaves
+		case "hi":
+			tracker.addSlave(socket.getInetAddress().getHostName());
+			ret = new Message("ACK");
+			break;
 		case "idle": {
 			WorkMessage msg = (WorkMessage)m;
 			ret = new TaskMessage("todo");

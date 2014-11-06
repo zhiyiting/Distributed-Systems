@@ -7,12 +7,16 @@ import conf.Configuration;
 public class Job implements Serializable{
 
 	private static final long serialVersionUID = -8502305018282114686L;
-	private Configuration conf;
-	private String jobName;
+	private int id;
+	private String name;
 
-	public Job(Configuration conf, String jobName) {
-		this.conf = conf;
-		this.jobName = jobName;
+	public Job(String jobName) {
+		this.name = jobName;
+		this.id = -1;
+	}
+	
+	public void setID(int n) {
+		this.id = n;
 	}
 	
 	public void setMapperClass(Class<? extends Mapper> cls) {
