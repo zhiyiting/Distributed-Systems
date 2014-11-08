@@ -6,20 +6,16 @@ import conf.Configuration;
 
 public class TaskTracker {
 
-	private ArrayDeque<Task> mapTasks;
-	private ArrayDeque<Task> reduceTasks;
+	private ArrayDeque<MapTask> mapTasks;
+	private ArrayDeque<ReduceTask> reduceTasks;
 	private ArrayDeque<Task> finishedTasks;
 	
 	public TaskTracker() {
-		this.mapTasks = new ArrayDeque<Task>(Configuration.MAP_PER_NODE);
-		this.reduceTasks = new ArrayDeque<Task>(Configuration.REDUCE_PER_NODE);
+		this.mapTasks = new ArrayDeque<MapTask>(Configuration.MAP_PER_NODE);
+		this.reduceTasks = new ArrayDeque<ReduceTask>(Configuration.REDUCE_PER_NODE);
 		this.finishedTasks = new ArrayDeque<Task>();
 	}
-	
-	public boolean hasFinishedTasks() {
-		return finishedTasks.size() > 0;
-	}
-	
+
 	public int getIdleMapSlot() {
 		return Configuration.MAP_PER_NODE - mapTasks.size();
 	}
@@ -28,12 +24,8 @@ public class TaskTracker {
 		return Configuration.REDUCE_PER_NODE - reduceTasks.size();
 	}
 	
-	public ArrayDeque<Integer> getFinishedTaskID() {
-		ArrayDeque<Integer> result = new ArrayDeque<Integer>();
-		for (Task task: finishedTasks) {
-			result.add(task.getID());
-		}
-		return result;
+	public ArrayDeque<Task> getFinishedTasks() {
+		return finishedTasks;
 	}
 	
 	public void list() {

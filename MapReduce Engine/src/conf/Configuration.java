@@ -17,6 +17,7 @@ public class Configuration {
 	public static int MAP_PER_NODE;
 	public static int REDUCE_PER_NODE;
 	public static int HEART_BEAT_INTERVAL;
+	public static int RECORD_SIZE;
 	
 	static {
 		config = new Properties();
@@ -31,6 +32,7 @@ public class Configuration {
 			MAP_PER_NODE = Integer.parseInt(config.getProperty("map per node"));
 			REDUCE_PER_NODE = Integer.parseInt(config.getProperty("reduce per node"));
 			HEART_BEAT_INTERVAL = Integer.parseInt(config.getProperty("heart beat interval"));
+			RECORD_SIZE = Integer.parseInt(config.getProperty("record size"));
 		} catch (InvalidPropertiesFormatException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {

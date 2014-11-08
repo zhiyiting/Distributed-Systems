@@ -31,14 +31,14 @@ public class CoordDispatcher extends Dispatcher {
 			break;
 		// from slaves
 		case "hi":
-			tracker.addSlave(socket.getInetAddress().getHostName());
-			ret = new Message("ACK");
+			int slaveID = tracker.addSlave(socket.getInetAddress().getHostName());
+			ret = new Message(String.valueOf(slaveID));
 			break;
 		case "idle": {
 			WorkMessage msg = (WorkMessage)m;
 			ret = new TaskMessage("todo");
-			//tracker.assignMapTask(msg.getMapSlot());
-			//tracker.assignReduceTask(msg.getReduceSlot());
+			((TaskMessage) ret).setMapTask(tracker.assignMapTask(msg.getSlaveID(), msg.getMapSlot()));
+			((TaskMessage) ret).setReduceTask(tracker.assignReduceTask(msg.getSlaveID(), msg.getReduceSlot()));
 			break;
 		}
 		case "busy":
@@ -46,9 +46,9 @@ public class CoordDispatcher extends Dispatcher {
 			break;
 		case "done": {
 			WorkMessage msg = (WorkMessage)m;
-			//tracker.markDone(msg.getFinishedTask());
-			//tracker.assignMapTask(msg.getMapSlot());
-			//tracker.assignReduceTask(msg.getReduceSlot());
+			tracker.markDone(msg.getSlaveID(), msg.getFinishedTask());
+			((TaskMessage) ret).setMapTask(tracker.assignMapTask(msg.getSlaveID(), msg.getMapSlot()));
+			((TaskMessage) ret).setReduceTask(tracker.assignReduceTask(msg.getSlaveID(), msg.getReduceSlot()));
 			break;
 		}
 		default:

@@ -9,7 +9,7 @@ public class FileInputFormat {
 	public List<FileSplit> getSplit() {
 		return null;
 	}
-	public FileReader generateFileReader() {
+	public RecordReader generateFileReader() {
 		return null;
 	}
 

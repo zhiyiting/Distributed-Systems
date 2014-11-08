@@ -48,9 +48,6 @@ public class WordCount {
 		job.setCombinerClass(MyCombine.class);
 		job.setReducerClass(MyReduce.class);
 
-		job.setInputFormatClass(FileInputFormat.class);
-		job.setOutputFormatClass(FileOutputFormat.class);
-
 		ClientConsole cm = new ClientConsole(job);
 		cm.run();
 	}

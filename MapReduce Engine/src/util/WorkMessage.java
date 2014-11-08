@@ -8,7 +8,8 @@ public class WorkMessage extends Message {
 
 	private int mapSlot;
 	private int reduceSlot;
-	private ArrayDeque<Integer> finishedTaskID;
+	private int slaveID;
+	private ArrayDeque<Task> finishedTask;
 	
 	public WorkMessage(String content, String toHost, int toPort) {
 		super(content, toHost, toPort);
@@ -34,12 +35,20 @@ public class WorkMessage extends Message {
 		this.reduceSlot = n;
 	}
 	
-	public ArrayDeque<Integer> getFinishedTask() {
-		return finishedTaskID;
+	public ArrayDeque<Task> getFinishedTask() {
+		return finishedTask;
 	}
 	
-	public void setFinishedTask(ArrayDeque<Integer> list) {
-		finishedTaskID = list;
+	public void setFinishedTask(ArrayDeque<Task> list) {
+		finishedTask = list;
+	}
+
+	public int getSlaveID() {
+		return slaveID;
+	}
+
+	public void setSlaveID(int slaveID) {
+		this.slaveID = slaveID;
 	}
 
 }
