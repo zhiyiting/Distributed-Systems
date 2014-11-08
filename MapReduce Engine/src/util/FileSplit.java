@@ -25,7 +25,7 @@ public class FileSplit implements Serializable {
 
 	}
 
-	public void read(ObjectInput in) {
+	public void read(FileSplit in) {
 		// TODO Auto-generated method stub
 
 	}

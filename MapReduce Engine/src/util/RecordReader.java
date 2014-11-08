@@ -34,6 +34,10 @@ public class RecordReader {
 
 	}
 	
+	public RecordReader(FileSplit file) {
+		
+	}
+	
 	public String[][] getKVPair(int partitionIdx, int partitionSize) {
 		String[][] kvPair = new String[partitionSize][2];
 		try {

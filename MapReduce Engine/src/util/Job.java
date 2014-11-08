@@ -26,12 +26,24 @@ public class Job implements Serializable{
 		this.mapper = cls;
 	}
 	
+	public Class<? extends Mapper> getMapper() {
+		return this.mapper;
+	}
+	
 	public void setCombinerClass(Class<? extends Combiner> cls) {
 		this.combiner = cls;
 	}
 	
+	public Class<? extends Combiner> getCombiner() {
+		return this.combiner;
+	}
+	
 	public void setReducerClass(Class<? extends Reducer> cls) {
 		this.reducer = cls;
+	}
+	
+	public Class<? extends Reducer> getReducer() {
+		return this.reducer;
 	}
 	
 	public void setInputFormatClass(Class <?> cls) {
