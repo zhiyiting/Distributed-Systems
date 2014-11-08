@@ -24,6 +24,38 @@ public class TaskTracker {
 		return Configuration.REDUCE_PER_NODE - reduceTasks.size();
 	}
 	
+	public void addMapTask(ArrayDeque<MapTask> task) {
+		for (MapTask t: task) {
+			startMap(t);
+			mapTasks.addLast(t);
+		}
+	}
+	
+	private void startMap(Task t) {
+		
+	}
+	
+	public void addReduceTask(ArrayDeque<ReduceTask> task) {
+		for (ReduceTask t: task) {
+			startReduce(t);
+			reduceTasks.addLast(t);
+		}
+	}
+	
+	private void startReduce(Task t) {
+		
+	}
+	
+	public void finishMapTask(MapTask task) {
+		mapTasks.remove(task);
+		finishedTasks.addLast(task);
+	}
+	
+	public void finishReduceTask(ReduceTask task) {
+		reduceTasks.remove(task);
+		finishedTasks.addLast(task);
+	}
+	
 	public ArrayDeque<Task> getFinishedTasks() {
 		return finishedTasks;
 	}

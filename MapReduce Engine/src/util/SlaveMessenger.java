@@ -42,6 +42,9 @@ public class SlaveMessenger implements Runnable {
 		String method = msg.getContent();
 		switch (method) {
 		case "todo":
+			TaskMessage m = (TaskMessage) msg;
+			tracker.addMapTask(m.getMapTask());
+			tracker.addReduceTask(m.getReduceTask());			
 			break;
 		default:
 			break;

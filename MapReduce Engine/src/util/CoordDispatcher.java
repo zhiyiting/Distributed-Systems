@@ -47,6 +47,7 @@ public class CoordDispatcher extends Dispatcher {
 		case "done": {
 			WorkMessage msg = (WorkMessage)m;
 			tracker.markDone(msg.getSlaveID(), msg.getFinishedTask());
+			ret = new TaskMessage("todo");
 			((TaskMessage) ret).setMapTask(tracker.assignMapTask(msg.getSlaveID(), msg.getMapSlot()));
 			((TaskMessage) ret).setReduceTask(tracker.assignReduceTask(msg.getSlaveID(), msg.getReduceSlot()));
 			break;
