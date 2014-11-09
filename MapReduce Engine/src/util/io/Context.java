@@ -36,7 +36,6 @@ public class Context {
 				sb.append(entry[0]);
 				sb.append(" ");
 				sb.append(entry[1]);
-				System.out.println("newline " + sb.toString());
 				bw.write(sb.toString());
 				bw.newLine();
 			}

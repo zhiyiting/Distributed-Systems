@@ -55,7 +55,9 @@ public class TaskTracker {
 	}
 
 	public synchronized ArrayDeque<Task> getFinishedTasks() {
-		return finishedTasks;
+		ArrayDeque<Task> tmp = finishedTasks;
+		finishedTasks = new ArrayDeque<Task>();
+		return tmp;
 	}
 
 	public synchronized void list() {

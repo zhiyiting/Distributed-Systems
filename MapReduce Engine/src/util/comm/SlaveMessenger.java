@@ -71,7 +71,7 @@ public class SlaveMessenger implements Runnable {
 				}
 				if (ret == null) {
 					System.out.println("Coordinator died... retry in "
-							+ sleepInterval + " seconds...");
+							+ sleepInterval/1000 + " seconds...");
 				} else {
 					dispatch(ret);
 				}

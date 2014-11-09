@@ -3,6 +3,7 @@ package util.io;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayDeque;
 
 import conf.Configuration;
@@ -83,7 +84,11 @@ public class RecordReader {
 	public ArrayDeque<String[]> getKVPair() {
 		String [] pair = new String[2];
 		pair[0] = "";
-		pair[1] = data.toString();
+		try {
+			pair[1] = new String(data, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		ArrayDeque<String[]> result = new ArrayDeque<String[]>();
 		result.add(pair);
 		return result;

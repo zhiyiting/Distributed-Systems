@@ -59,7 +59,6 @@ public class JobTracker {
 			String path = Configuration.INPUT_DIR + "/" + filename;
 			RecordReader reader = new RecordReader(path);
 			int recordNum = reader.getRecordNum();
-			System.out.println("record Num: " + recordNum);
 			for (int i = 0; i < recordNum; i++) {
 				MapTask t = new MapTask();
 				t.setJob(job);
@@ -82,7 +81,7 @@ public class JobTracker {
 	}
 	
 	private void startReduce(Job job) {
-		
+		System.out.println("reduce started...");
 	}
 
 	public synchronized ArrayDeque<MapTask> assignMapTask(int slaveID, int taskNum) {
@@ -112,14 +111,21 @@ public class JobTracker {
 	}
 	
 	public synchronized void markDone(int slaveID, ArrayDeque<Task> finishedTask) {
-		HashSet<Task> slaveTaskList = slaveTask.get(slaveID);
 		for (Task task: finishedTask) {
+			System.out.println("mark done");
+			HashSet<Task> slaveTaskList = slaveTask.get(slaveID);
 			slaveTaskList.remove(task);
+			System.out.println("after mark done size " + slaveTaskList.size());
 			int jobID = task.getJob().getId();
 			// if the job is in mapping process
 			if (mapTask.containsKey(jobID)) {
 				HashSet<MapTask> hs = mapTask.get(jobID);
+				System.out.println("hash set object: ");
+				Task ttt = hs.iterator().next();
+				System.out.println(ttt.getJob().getId() +  "  " + ttt.getTaskID() + ttt.hashCode());
+				System.out.println(task.getJob().getId() + "  " + task.getTaskID() + task.hashCode());
 				hs.remove(task);
+				System.out.println("job to task after remove size " + hs.size());
 				if (hs.isEmpty()) {
 					// start reduce for this job
 					mapTask.remove(jobID);

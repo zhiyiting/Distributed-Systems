@@ -73,4 +73,17 @@ public class Task implements Serializable {
 	public void setJob(Job job) {
 		this.job = job;
 	}
+	
+	@Override
+	public int hashCode() {
+		return ((taskID + 1) * 31) ^ job.getId();
+	}
+	
+	public boolean equals(Object obj) {
+		if (obj instanceof Task) {
+			Task o = (Task)obj;
+			return taskID == o.getTaskID() && job.getId() == o.getJob().getId();
+		}
+		return false;
+	}
 }

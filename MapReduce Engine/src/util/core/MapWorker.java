@@ -26,7 +26,6 @@ public class MapWorker extends Worker {
 			ArrayDeque<String[]> KVPair = reader.getKVPair();
 			Context context = new Context(task.getOutputPath());
 			for (String[] pair : KVPair) {
-				System.out.println("key: " + pair[0] + ", value: " + pair[1]);
 				mapper.map(pair[0], pair[1], context);
 			}
 			context.generateOutput();

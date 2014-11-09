@@ -37,7 +37,8 @@ public class CoordDispatcher implements Runnable {
 		case "start":
 			Job job = ((JobMessage) m).getJob();
 			tracker.startMap(job);
-			ret = new Message("ACK");
+			ret = new Message("Job #" + job.getId() + " " + job.getName()
+					+ " started");
 			break;
 		case "list":
 			ret = new Message(tracker.toString());
@@ -54,28 +55,18 @@ public class CoordDispatcher implements Runnable {
 			System.out.println("Slave #" + slaveID + "("
 					+ socket.getInetAddress().getHostName() + ") connected");
 			break;
-		case "idle": {
+		case "idle":
 			WorkMessage msg = (WorkMessage) m;
 			ret = new TaskMessage("todo");
+			tracker.markDone(msg.getSlaveID(), msg.getFinishedTask());
 			((TaskMessage) ret).setMapTask(tracker.assignMapTask(
 					msg.getSlaveID(), msg.getMapSlot()));
 			((TaskMessage) ret).setReduceTask(tracker.assignReduceTask(
 					msg.getSlaveID(), msg.getReduceSlot()));
 			break;
-		}
 		case "busy":
 			ret = new Message("ACK");
 			break;
-		case "done": {
-			WorkMessage msg = (WorkMessage) m;
-			tracker.markDone(msg.getSlaveID(), msg.getFinishedTask());
-			ret = new TaskMessage("todo");
-			((TaskMessage) ret).setMapTask(tracker.assignMapTask(
-					msg.getSlaveID(), msg.getMapSlot()));
-			((TaskMessage) ret).setReduceTask(tracker.assignReduceTask(
-					msg.getSlaveID(), msg.getReduceSlot()));
-			break;
-		}
 		default:
 			break;
 		}
