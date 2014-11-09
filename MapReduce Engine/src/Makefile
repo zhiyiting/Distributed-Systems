@@ -6,7 +6,8 @@ JC = javac
 
 CLASSES = \
 	conf/Configuration.java \
-	util/Coordinator.java \
+	util/CoordinatorConsole.java \
+	util/SlaveConsole.java \
 	util/Worker.java \
 	client/MapReduceEngine.java \
 

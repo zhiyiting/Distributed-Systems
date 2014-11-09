@@ -4,8 +4,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import conf.Configuration;
-import util.CoordinatorConsole;
-import util.SlaveConsole;
+import util.console.CoordinatorConsole;
+import util.console.SlaveConsole;
 
 public class MapReduceEngine {
 	public static void main(String[] args) {

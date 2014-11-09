@@ -2,9 +2,12 @@ package example;
 
 import java.util.StringTokenizer;
 
-import client.ClientConsole;
-import util.*;
-import conf.Configuration;
+import util.console.ClientConsole;
+import util.core.Combiner;
+import util.core.Job;
+import util.core.Mapper;
+import util.core.Reducer;
+import util.io.Context;
 
 public class WordCount {
 
