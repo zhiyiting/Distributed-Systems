@@ -29,7 +29,7 @@ public class CoordListener implements Runnable {
 			try {
 				Socket socket = serverSocket.accept();
 				Thread t = new Thread(new CoordDispatcher(socket, tracker));
-				t.setDaemon(true);
+				t.setDaemon(false);
 				t.start();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

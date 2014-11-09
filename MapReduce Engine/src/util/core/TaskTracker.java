@@ -30,6 +30,7 @@ public class TaskTracker {
 
 	public synchronized void addMapTask(ArrayDeque<MapTask> task) {
 		for (MapTask t : task) {
+			System.out.println("New map task added: Job #" + t.getJob().getId() + ", Task#" + t.getTaskID());
 			MapWorker worker = new MapWorker(t, this);
 			Thread thread = new Thread(worker);
 			thread.start();

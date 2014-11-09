@@ -55,7 +55,7 @@ public class CommModule {
 		} catch (UnknownHostException e) {
 			throw new RemoteException("Unknown Host");
 		} catch (IOException e) {
-			throw new RemoteException("IO Exception, can't connect to server");
+			throw new RemoteException("IO Exception");
 		} catch (ClassNotFoundException e) {
 			System.out.println("Class Not Found Exception: " + e.getMessage());
 		}

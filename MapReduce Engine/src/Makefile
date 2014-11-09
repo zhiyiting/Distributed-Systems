@@ -2,20 +2,18 @@ JFLAGS =
 JC = javac
 .SUFFIXES: .java .class
 .java.class:
-	$(JC) $(JFLAGS) $.*/*.java
+	$(JC) $(JFLAGS) */*.java */*/*.java
 
 CLASSES = \
 	conf/Configuration.java \
-	util/CoordinatorConsole.java \
-	util/SlaveConsole.java \
-	util/Worker.java \
 	client/MapReduceEngine.java \
+	example/WordCount.java \
 
 default: classes
 
 classes: $(CLASSES:.java=.class)
 
 clean:
-	$(RM) ./*/*.class
+	$(RM) */*.class */*/*.class
 
 

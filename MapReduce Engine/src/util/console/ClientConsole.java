@@ -25,7 +25,6 @@ public class ClientConsole implements Runnable{
 		this.commModule = new CommModule();
 		this.toHost = Configuration.MASTER_ADDRESS;
 		this.toPort = Configuration.SERVER_PORT;
-		System.out.println(toHost + " " + toPort);
 		startJob();
 	}
 	

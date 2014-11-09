@@ -27,8 +27,8 @@ public class Configuration {
 			SLAVE_ADDRESS = config.getProperty("slave address").split(" ");
 			SERVER_PORT = Integer.parseInt(config.getProperty("server port"));
 			CLIENT_PORT = Integer.parseInt(config.getProperty("client port"));
-			INPUT_DIR = config.getProperty("input dir");
-			OUTPUT_DIR = config.getProperty("output dir");
+			INPUT_DIR = config.getProperty("input dir") + "/";
+			OUTPUT_DIR = config.getProperty("output dir") + "/";
 			MAP_PER_NODE = Integer.parseInt(config.getProperty("map per node"));
 			REDUCE_PER_NODE = Integer.parseInt(config.getProperty("reduce per node"));
 			HEART_BEAT_INTERVAL = Integer.parseInt(config.getProperty("heart beat interval"));

@@ -24,7 +24,6 @@ public class MapReduceEngine {
 			coord.run();		
 		}
 		else {
-			System.out.println("this is worker");
 			SlaveConsole slave = new SlaveConsole();
 			slave.run();
 		}

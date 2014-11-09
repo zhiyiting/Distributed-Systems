@@ -2,6 +2,10 @@ package util.core;
 
 import java.io.Serializable;
 
+import util.api.Combiner;
+import util.api.Mapper;
+import util.api.Reducer;
+
 public class Job implements Serializable{
 
 	private static final long serialVersionUID = -8502305018282114686L;
@@ -14,6 +18,10 @@ public class Job implements Serializable{
 	public Job(String jobName) {
 		this.name = jobName;
 		this.setId(-1);
+	}
+	
+	public String getName() {
+		return this.name;
 	}
 	
 	public void setID(int n) {

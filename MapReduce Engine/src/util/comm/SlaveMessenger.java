@@ -34,7 +34,6 @@ public class SlaveMessenger implements Runnable {
 				System.out.println("Master isn't there");
 			}
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

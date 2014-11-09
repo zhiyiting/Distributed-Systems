@@ -2,11 +2,9 @@ package example;
 
 import java.util.StringTokenizer;
 
+import util.api.*;
 import util.console.ClientConsole;
-import util.core.Combiner;
 import util.core.Job;
-import util.core.Mapper;
-import util.core.Reducer;
 import util.io.Context;
 
 public class WordCount {
@@ -51,8 +49,8 @@ public class WordCount {
 		job.setCombinerClass(MyCombine.class);
 		job.setReducerClass(MyReduce.class);
 
-		ClientConsole cm = new ClientConsole(job);
-		cm.run();
+		ClientConsole client = new ClientConsole(job);
+		client.run();
 	}
 
 }

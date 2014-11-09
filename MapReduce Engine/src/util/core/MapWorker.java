@@ -2,6 +2,7 @@ package util.core;
 
 import java.util.ArrayDeque;
 
+import util.api.Mapper;
 import util.core.Task.Status;
 import util.io.Context;
 import util.io.FileSplit;
@@ -25,10 +26,12 @@ public class MapWorker extends Worker {
 			ArrayDeque<String[]> KVPair = reader.getKVPair();
 			Context context = new Context(task.getOutputPath());
 			for (String[] pair : KVPair) {
+				System.out.println("key: " + pair[0] + ", value: " + pair[1]);
 				mapper.map(pair[0], pair[1], context);
 			}
 			context.generateOutput();
 			tracker.finishMapTask((MapTask)task);
+			System.out.println("Job #" + task.getJob().getId() + " Task #" + task.getTaskID() + " finished");
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

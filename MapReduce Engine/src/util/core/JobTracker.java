@@ -43,7 +43,7 @@ public class JobTracker {
 		queuedReduceTask = new ArrayDeque<ReduceTask>();
 	}
 
-	public void start(Job job) {
+	public void startMap(Job job) {
 		job.setID(getJobID());
 		synchronized (jobList) {
 			jobList.put(jobID, job);
@@ -51,10 +51,15 @@ public class JobTracker {
 		int taskID = 0;
 		ArrayDeque<MapTask> curMapTasks = new ArrayDeque<MapTask>();
 		File inputDir = new File(Configuration.INPUT_DIR);
+		if (!inputDir.exists()) {
+			System.out.println("Input Directory doesn't exist");
+			return;
+		}
 		for (String filename : inputDir.list()) {
 			String path = Configuration.INPUT_DIR + "/" + filename;
 			RecordReader reader = new RecordReader(path);
 			int recordNum = reader.getRecordNum();
+			System.out.println("record Num: " + recordNum);
 			for (int i = 0; i < recordNum; i++) {
 				MapTask t = new MapTask();
 				t.setJob(job);
@@ -137,6 +142,8 @@ public class JobTracker {
 
 	public int addSlave(String s) {
 		slaveList.put(getSlaveID(), s);
+		HashSet<Task> hs = new HashSet<Task>();
+		slaveTask.put(slaveID, hs);
 		return slaveID;
 	}
 
@@ -158,7 +165,7 @@ public class JobTracker {
 		return jobID;
 	}
 
-	private int getSlaveID() {
+	private synchronized int getSlaveID() {
 		slaveID++;
 		return slaveID;
 	}
