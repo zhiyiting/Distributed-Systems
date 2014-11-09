@@ -57,7 +57,7 @@ public class JobTracker {
 				t.setJob(job);
 				t.setStatus(Status.PENDING);
 				t.setInput(new FileSplit(path, i, Configuration.RECORD_SIZE));
-				t.setOutputPath("Map_" + job.getId() + "/" + taskID);
+				t.setOutputPath("Map_" + job.getId() + "/" + taskID + ".mapout");
 				t.setTaskID(taskID);
 				curMapTasks.add(t);
 				taskID++;

@@ -1,7 +1,5 @@
 package util;
 
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.Serializable;
 
 public class FileSplit implements Serializable {
@@ -18,16 +16,6 @@ public class FileSplit implements Serializable {
 		this.path = path;
 		this.start = idx * length;
 		this.length = length;
-	}
-
-	public void write(ObjectOutput out) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void read(FileSplit in) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public String getPath() {

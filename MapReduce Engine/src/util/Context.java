@@ -1,13 +1,20 @@
 package util;
 
-import java.util.LinkedList;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayDeque;
 
 public class Context {
 	
-	private LinkedList<String[]> buffer;
+	private ArrayDeque<String[]> buffer;
+	private String path;
 	
-	public Context() {
-		buffer = new LinkedList<String[]>();
+	public Context(String path) {
+		this.path = path;
+		buffer = new ArrayDeque<String[]>();
 	}
 	
 	public void write(String key, String val) {
@@ -15,5 +22,29 @@ public class Context {
 		record[0] = key;
 		record[1] = val;
 		buffer.add(record);
+	}
+	
+	public void generateOutput() {
+		File out = new File(path);
+		if (!out.getParentFile().exists()) {
+			out.getParentFile().mkdirs();
+		}
+		try {
+			out.createNewFile();
+			BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+			for (String[] entry: buffer) {
+				StringBuilder sb = new StringBuilder();
+				sb.append(entry[0]);
+				sb.append(" ");
+				sb.append(entry[1]);
+				bw.write(sb.toString());
+				bw.newLine();
+			}
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 }
