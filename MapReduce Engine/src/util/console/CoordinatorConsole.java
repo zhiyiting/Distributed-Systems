@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import util.core.JobTracker;
+import util.dfs.DFSMaster;
 
 public class CoordinatorConsole implements Runnable {
 	private boolean canRun;

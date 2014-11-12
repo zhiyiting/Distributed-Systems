@@ -18,8 +18,8 @@ public class MapWorker extends Worker {
 	public void run() {
 		Job job = task.getJob();
 		task.setStatus(Status.RUNNING);
-		Class<? extends Mapper> cls = job.getMapper();
 		try {
+			Class<? extends Mapper> cls = job.getMapper();
 			Mapper mapper = cls.newInstance();
 			FileSplit file = task.getInput();
 			RecordReader reader = new RecordReader(file);
@@ -29,8 +29,9 @@ public class MapWorker extends Worker {
 				mapper.map(pair[0], pair[1], context);
 			}
 			context.generateOutput();
-			tracker.finishMapTask((MapTask)task);
-			System.out.println("Job #" + task.getJob().getId() + " Task #" + task.getTaskID() + " finished");
+			tracker.finishMapTask((MapTask) task);
+			System.out.println("Job #" + task.getJob().getId() + " Task #"
+					+ task.getTaskID() + " finished");
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

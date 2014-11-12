@@ -1,5 +1,8 @@
 package util.core;
 
-public interface Partitioner {
-
+public class Partitioner {
+	
+	public int getPartitionID(String key, int partitionNum) {
+		return key.hashCode() % partitionNum;
+	}
 }

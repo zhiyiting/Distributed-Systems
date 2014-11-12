@@ -9,7 +9,6 @@ import java.util.Properties;
 public class Configuration {
 	private static Properties config;
 	public static String MASTER_ADDRESS;
-	public static String[] SLAVE_ADDRESS;
 	public static int SERVER_PORT;
 	public static int CLIENT_PORT;
 	public static String INPUT_DIR;
@@ -18,13 +17,13 @@ public class Configuration {
 	public static int REDUCE_PER_NODE;
 	public static int HEART_BEAT_INTERVAL;
 	public static int RECORD_SIZE;
+	public static int REPLICA;
 	
 	static {
 		config = new Properties();
 		try {
 			config.loadFromXML(new FileInputStream("Config.xml"));
 			MASTER_ADDRESS = config.getProperty("master address");
-			SLAVE_ADDRESS = config.getProperty("slave address").split(" ");
 			SERVER_PORT = Integer.parseInt(config.getProperty("server port"));
 			CLIENT_PORT = Integer.parseInt(config.getProperty("client port"));
 			INPUT_DIR = config.getProperty("input dir") + "/";
@@ -33,6 +32,7 @@ public class Configuration {
 			REDUCE_PER_NODE = Integer.parseInt(config.getProperty("reduce per node"));
 			HEART_BEAT_INTERVAL = Integer.parseInt(config.getProperty("heart beat interval"));
 			RECORD_SIZE = Integer.parseInt(config.getProperty("record size"));
+			REPLICA = Integer.parseInt(config.getProperty("replica"));
 		} catch (InvalidPropertiesFormatException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {

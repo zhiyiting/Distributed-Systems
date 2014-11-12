@@ -2,6 +2,7 @@ package util.core;
 
 import java.util.ArrayDeque;
 
+import util.dfs.DFSClient;
 import conf.Configuration;
 
 public class TaskTracker {
@@ -11,8 +12,10 @@ public class TaskTracker {
 	private ArrayDeque<Task> finishedTasks;
 	private int maxMapSlot;
 	private int maxReduceSlot;
+	private DFSClient dfs;
 
 	public TaskTracker() {
+		this.dfs = new DFSClient();
 		this.maxMapSlot = Configuration.MAP_PER_NODE;
 		this.maxReduceSlot = Configuration.REDUCE_PER_NODE;
 		this.mapTasks = new ArrayDeque<MapTask>(maxMapSlot);

@@ -2,7 +2,6 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 <entry key="master address">unix1.andrew.cmu.edu</entry>
-<entry key="slave address">unix2.andrew.cmu.edu unix3.andrew.cmu.edu</entry>
 <entry key="server port">15213</entry>
 <entry key="client port">15410</entry>
 <entry key="input dir">Input</entry>
@@ -11,4 +10,5 @@
 <entry key="map per node">3</entry>
 <entry key="reduce per node">1</entry>
 <entry key="heart beat interval">1000</entry>
+<entry key="replica">3</entry>
 </properties>

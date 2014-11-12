@@ -1,6 +1,11 @@
 package util.comm;
 
+import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import util.core.TaskTracker;
+import util.dfs.DFSClient;
 import conf.Configuration;
 
 public class SlaveMessenger implements Runnable {
@@ -11,6 +16,7 @@ public class SlaveMessenger implements Runnable {
 	private String toHost;
 	private int toPort;
 	private int slaveID;
+	private DFSClient dfsClient;
 
 	public SlaveMessenger(TaskTracker tracker) {
 		this.tracker = tracker;
@@ -19,6 +25,7 @@ public class SlaveMessenger implements Runnable {
 		this.toPort = Configuration.SERVER_PORT;
 		this.sleepInterval = Configuration.HEART_BEAT_INTERVAL;
 		this.slaveID = -1;
+		this.dfsClient = new DFSClient();
 		registerSlave();
 	}
 
@@ -44,7 +51,7 @@ public class SlaveMessenger implements Runnable {
 		case "todo":
 			TaskMessage m = (TaskMessage) msg;
 			tracker.addMapTask(m.getMapTask());
-			tracker.addReduceTask(m.getReduceTask());			
+			tracker.addReduceTask(m.getReduceTask());
 			break;
 		default:
 			break;
@@ -71,7 +78,7 @@ public class SlaveMessenger implements Runnable {
 				}
 				if (ret == null) {
 					System.out.println("Coordinator died... retry in "
-							+ sleepInterval/1000 + " seconds...");
+							+ sleepInterval / 1000 + " seconds...");
 				} else {
 					dispatch(ret);
 				}

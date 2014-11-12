@@ -35,6 +35,7 @@ public class RecordReader {
 
 	}
 
+	
 	public RecordReader(FileSplit file) {
 		this.path = file.getPath();
 		this.start = file.getStart();
@@ -82,7 +83,7 @@ public class RecordReader {
 	}
 
 	public ArrayDeque<String[]> getKVPair() {
-		String [] pair = new String[2];
+		String[] pair = new String[2];
 		pair[0] = "";
 		try {
 			pair[1] = new String(data, "UTF-8");
@@ -96,6 +97,23 @@ public class RecordReader {
 
 	public int getRecordNum() {
 		return this.recordNum;
+	}
+
+	public int getLineNum() {
+		recordNum = 0;
+		try {
+			RandomAccessFile f = new RandomAccessFile(path, "r");
+			while (f.readLine() != null) {
+				recordNum++;
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return recordNum;
 	}
 
 	private boolean isChar(byte b) {

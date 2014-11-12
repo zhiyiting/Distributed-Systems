@@ -20,16 +20,6 @@ public class WordCount {
 			}
 		}
 	}
-	
-	public static class MyCombine extends Combiner {
-		public void combine(String key, Iterable<Integer> values, Context context) {
-			int sum = 0;
-			for (Integer val : values) {
-				sum += val;
-			}
-			context.write(key, Integer.toString(sum));
-		}
-	}
 
 	public static class MyReduce extends Reducer {
 		public void reduce(String key, Iterable<Integer> values, Context context) {
@@ -46,7 +36,6 @@ public class WordCount {
 		Job job = new Job("wordcount");
 
 		job.setMapperClass(MyMap.class);
-		job.setCombinerClass(MyCombine.class);
 		job.setReducerClass(MyReduce.class);
 
 		ClientConsole client = new ClientConsole(job);

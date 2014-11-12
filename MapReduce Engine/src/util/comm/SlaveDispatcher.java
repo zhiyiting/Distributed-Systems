@@ -6,17 +6,17 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import util.core.Job;
-import util.core.JobTracker;
+import util.dfs.DFSClient;
 
-public class CoordDispatcher implements Runnable {
-
+public class SlaveDispatcher implements Runnable {
+	
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	private boolean canRun;
-	private JobTracker tracker;
 	private Socket socket;
-
-	public CoordDispatcher(Socket socket, JobTracker tracker) {
+	private DFSClient dfs;
+	
+	public SlaveDispatcher(Socket socket, DFSClient dfs) {
 		try {
 			this.in = new ObjectInputStream(socket.getInputStream());
 			this.out = new ObjectOutputStream(socket.getOutputStream());
@@ -26,7 +26,7 @@ public class CoordDispatcher implements Runnable {
 		}
 		canRun = true;
 		this.socket = socket;
-		this.tracker = tracker;
+		this.dfs = dfs;
 	}
 
 	private Message dispatch(Message m) {
@@ -34,37 +34,9 @@ public class CoordDispatcher implements Runnable {
 		String method = m.getContent();
 		switch (method) {
 		// from client
-		case "start":
-			Job job = ((JobMessage) m).getJob();
-			tracker.startMap(job);
-			ret = new Message("Job #" + job.getId() + " " + job.getName()
-					+ " started");
-			break;
-		case "list":
-			ret = new Message(tracker.toString());
-			break;
-		case "stop":
-			tracker.stop();
-			ret = new Message("Job stopped");
-			break;
-		// from slaves
-		case "hi":
-			int slaveID = tracker.addSlave(socket.getInetAddress()
-					.getHostName());
-			ret = new Message(String.valueOf(slaveID));
-			System.out.println("Slave #" + slaveID + "("
-					+ socket.getInetAddress().getHostName() + ") connected");
-			break;
-		case "idle":
-			WorkMessage msg = (WorkMessage) m;
-			ret = new TaskMessage("todo");
-			tracker.markDone(msg.getSlaveID(), msg.getFinishedTask());
-			((TaskMessage) ret).setMapTask(tracker.assignMapTask(
-					msg.getSlaveID(), msg.getMapSlot()));
-			((TaskMessage) ret).setReduceTask(tracker.assignReduceTask(
-					msg.getSlaveID(), msg.getReduceSlot()));
-			break;
-		case "busy":
+		case "distribute":
+			DFSMessage msg = (DFSMessage) m;
+			dfs.createFile(msg.getBuffer(), msg.getFilename());
 			ret = new Message("ACK");
 			break;
 		default:
@@ -100,5 +72,4 @@ public class CoordDispatcher implements Runnable {
 	public void stop() {
 		canRun = false;
 	}
-
 }

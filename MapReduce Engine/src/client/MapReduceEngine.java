@@ -1,5 +1,6 @@
 package client;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -25,6 +26,13 @@ public class MapReduceEngine {
 		}
 		else {
 			SlaveConsole slave = new SlaveConsole();
+			try {
+				System.out.println("Created local file system at "
+						+ InetAddress.getLocalHost().getHostName() + "/");
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			slave.run();
 		}
 	}
