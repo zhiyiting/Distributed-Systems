@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import util.core.Job;
 import util.dfs.DFSClient;
 
 public class SlaveDispatcher implements Runnable {
@@ -36,7 +35,7 @@ public class SlaveDispatcher implements Runnable {
 		// from client
 		case "distribute":
 			DFSMessage msg = (DFSMessage) m;
-			dfs.createFile(msg.getBuffer(), msg.getFilename());
+			dfs.createFile(msg.getContent(), msg.getFilename());
 			ret = new Message("ACK");
 			break;
 		default:

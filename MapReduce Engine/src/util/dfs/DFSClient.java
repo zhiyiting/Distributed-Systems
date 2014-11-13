@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashSet;
 
 import util.comm.SlaveListener;
 
@@ -12,7 +11,6 @@ public class DFSClient {
 
 	private String host;
 	private String folderPath;
-	private HashSet<Integer> fileDirectory;
 	private int fileNum;
 	private SlaveListener listener;
 
@@ -33,7 +31,9 @@ public class DFSClient {
 			e.printStackTrace();
 		}
 		listener = new SlaveListener(this);
-		fileDirectory = new HashSet<Integer>();
+		Thread t = new Thread(listener);
+		t.setDaemon(false);
+		t.start();
 	}
 
 	public int getFileNum() {
@@ -52,9 +52,6 @@ public class DFSClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		int fileIndex = Integer.parseInt(filename.split("_")[1]);
-		fileDirectory.add(fileIndex);
-
 	}
 
 	public String getHost() {

@@ -1,23 +1,25 @@
 package util.comm;
 
+import util.io.FileSplit;
+
 public class DFSMessage extends Message {
 
 	private static final long serialVersionUID = 2017772749305634518L;
-	private String buffer;
+	private String content;
 	private String filename;
-	
-	public DFSMessage(String content, String filename, String file, String toHost, int toPort) {
+
+	public DFSMessage(String content, FileSplit file, String toHost, int toPort) {
 		super(content, toHost, toPort);
-		this.setBuffer(file);
-		this.setFilename(filename);
+		this.setContent(file.getContent());
+		this.setFilename(file.getFilename());
 	}
 
-	public String getBuffer() {
-		return buffer;
+	public String getContent() {
+		return content;
 	}
 
-	public void setBuffer(String buffer) {
-		this.buffer = buffer;
+	public void setContent(String buffer) {
+		this.content = buffer;
 	}
 
 	public String getFilename() {

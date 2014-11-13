@@ -2,8 +2,10 @@ package util.core;
 
 import java.io.File;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -66,6 +68,7 @@ public class JobTracker {
 		 * Configuration.RECORD_SIZE)); t.setOutputPath(job.getOutputPath() +
 		 * taskID); t.setTaskID(taskID); curMapTasks.add(t); taskID++; } }
 		 */
+		/*
 		synchronized (queuedMapTask) {
 			queuedMapTask.addAll(curMapTasks);
 		}
@@ -73,7 +76,7 @@ public class JobTracker {
 			HashSet<MapTask> hs = new HashSet<MapTask>();
 			hs.addAll(curMapTasks);
 			mapTask.put(jobID, hs);
-		}
+		}*/
 	}
 
 	private void startReduce(Job job) {

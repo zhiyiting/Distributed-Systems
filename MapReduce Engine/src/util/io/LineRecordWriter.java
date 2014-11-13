@@ -4,18 +4,19 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import conf.Configuration;
 
 public class LineRecordWriter {
 
 	private StringBuilder sb;
-	private BufferedReader f;
+	private RandomAccessFile f;
 	private int chunkSize;
 
 	public LineRecordWriter(String path) {
 		try {
-			f = new BufferedReader(new FileReader(path));;
+			f = new RandomAccessFile(path, "r");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -24,7 +25,15 @@ public class LineRecordWriter {
 		chunkSize = Configuration.RECORD_SIZE;
 	}
 
-	public String write(int idx) {
+	public FileSplit write(int index, String filename) {
+		FileSplit file = null;
+		try {
+			file = new FileSplit(filename, f.getFilePointer(), chunkSize);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		sb = new StringBuilder();
 		for (int i = 0; i < chunkSize; i++) {
 			try {
@@ -34,6 +43,9 @@ public class LineRecordWriter {
 				break;
 			}
 		}
-		return sb.toString();
+		if (file != null) {
+			file.setContent(sb.toString());
+		}
+		return file;
 	}
 }

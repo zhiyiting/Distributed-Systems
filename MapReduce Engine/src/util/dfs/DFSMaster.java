@@ -10,6 +10,7 @@ import conf.Configuration;
 import util.comm.CommModule;
 import util.comm.DFSMessage;
 import util.comm.RemoteException;
+import util.io.FileSplit;
 import util.io.LineRecordReader;
 import util.io.LineRecordWriter;
 
@@ -47,9 +48,8 @@ public class DFSMaster {
 				for (int j = 0; j < replica; j++) {
 					DFSClient node = dfsNode.poll();
 					LineRecordWriter writer = new LineRecordWriter(path);
-					String buffer = writer.write(i);
-					DFSMessage msg = new DFSMessage("distribute", filename
-							+ "_" + i, buffer, node.getHost(),
+					FileSplit buffer = writer.write(i, filename);
+					DFSMessage msg = new DFSMessage("distribute", buffer, node.getHost(),
 							Configuration.SERVER_PORT);
 					try {
 						commModule.send(msg);
