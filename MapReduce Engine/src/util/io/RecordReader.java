@@ -35,9 +35,9 @@ public class RecordReader {
 
 	}
 
-	
+	/*
 	public RecordReader(FileSplit file) {
-		this.path = file.getPath();
+		this.path = file.getFilename();
 		this.start = file.getStart();
 		this.length = file.getLength();
 		try {
@@ -80,7 +80,7 @@ public class RecordReader {
 			e.printStackTrace();
 		}
 
-	}
+	}*/
 
 	public ArrayDeque<String[]> getKVPair() {
 		String[] pair = new String[2];

@@ -1,11 +1,15 @@
 package util.dfs;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import util.comm.SlaveListener;
+import util.io.FileSplit;
 
 public class DFSClient {
 
@@ -40,20 +44,20 @@ public class DFSClient {
 		return fileNum;
 	}
 
-	public void incFileNum() {
-		fileNum++;
-	}
-
-	public void createFile(String buffer, String filename) {
-		File file = new File(folderPath + filename);
+	public void createFile(FileSplit in) {
+		String filename = folderPath + in.getFilename() + "_" + in.getIndex();
 		try {
-			file.createNewFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			PrintWriter writer = new PrintWriter(filename, "UTF-8");
+			writer.println(in.getContent());
+			writer.close();
+			System.out.println("DFS: file chunk saved at " + filename);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+		
 	}
-
 	public String getHost() {
 		return host;
 	}

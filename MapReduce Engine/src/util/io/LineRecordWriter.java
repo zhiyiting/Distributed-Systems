@@ -1,8 +1,6 @@
 package util.io;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -28,7 +26,7 @@ public class LineRecordWriter {
 	public FileSplit write(int index, String filename) {
 		FileSplit file = null;
 		try {
-			file = new FileSplit(filename, f.getFilePointer(), chunkSize);
+			file = new FileSplit(filename, index, f.getFilePointer(), chunkSize);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -38,6 +36,7 @@ public class LineRecordWriter {
 		for (int i = 0; i < chunkSize; i++) {
 			try {
 				sb.append(f.readLine());
+				sb.append('\n');
 			} catch (IOException e) {
 				e.printStackTrace();
 				break;

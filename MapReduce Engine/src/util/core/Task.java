@@ -8,7 +8,7 @@ public class Task implements Serializable {
 
 	private static final long serialVersionUID = -128303213552988241L;
 
-	enum Status {
+	public enum Status {
 		PENDING, RUNNING, FINISHED, STOPPED, FAILED
 	}
 
@@ -17,7 +17,6 @@ public class Task implements Serializable {
 	private Status status;
 	private int slaveID;
 	private FileSplit input;
-	private String outputPath;
 
 	public int getTaskID() {
 		return taskID;
@@ -49,14 +48,6 @@ public class Task implements Serializable {
 
 	public void setInput(FileSplit input) {
 		this.input = input;
-	}
-
-	public String getOutputPath() {
-		return outputPath;
-	}
-
-	public void setOutputPath(String outputPath) {
-		this.outputPath = outputPath;
 	}
 
 	@Override

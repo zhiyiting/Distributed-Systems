@@ -35,7 +35,7 @@ public class SlaveDispatcher implements Runnable {
 		// from client
 		case "distribute":
 			DFSMessage msg = (DFSMessage) m;
-			dfs.createFile(msg.getContent(), msg.getFilename());
+			dfs.createFile(msg.getFile());
 			ret = new Message("ACK");
 			break;
 		default:

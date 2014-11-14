@@ -16,6 +16,7 @@ public class SlaveListener implements Runnable{
 		int port = Configuration.SERVER_PORT;
 		try {
 			this.serverSocket = new ServerSocket(port);
+			System.out.println("DFS listening on port " + port);
 
 		} catch (IOException e) {
 			System.out.println("Cannot listen on port " + port);

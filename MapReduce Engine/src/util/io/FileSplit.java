@@ -6,12 +6,14 @@ public class FileSplit implements Serializable {
 
 	private static final long serialVersionUID = -4955423900859261947L;
 	private String filename;
+	private int index;
 	private long start;
 	private int length;
 	private String content;
 
-	public FileSplit(String filename, long start, int length) {
+	public FileSplit(String filename, int index, long start, int length) {
 		this.filename = filename;
+		this.index = index;
 		this.start = start;
 		this.length = length;
 	}
@@ -34,6 +36,14 @@ public class FileSplit implements Serializable {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 }

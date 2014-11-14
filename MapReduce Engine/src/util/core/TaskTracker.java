@@ -12,10 +12,8 @@ public class TaskTracker {
 	private ArrayDeque<Task> finishedTasks;
 	private int maxMapSlot;
 	private int maxReduceSlot;
-	private DFSClient dfs;
 
 	public TaskTracker() {
-		this.dfs = new DFSClient();
 		this.maxMapSlot = Configuration.MAP_PER_NODE;
 		this.maxReduceSlot = Configuration.REDUCE_PER_NODE;
 		this.mapTasks = new ArrayDeque<MapTask>(maxMapSlot);

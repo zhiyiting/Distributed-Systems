@@ -1,9 +1,5 @@
 package util.comm;
 
-import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import util.core.TaskTracker;
 import util.dfs.DFSClient;
 import conf.Configuration;

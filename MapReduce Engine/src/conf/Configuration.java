@@ -11,6 +11,7 @@ public class Configuration {
 	public static String MASTER_ADDRESS;
 	public static int SERVER_PORT;
 	public static int CLIENT_PORT;
+	public static int DFS_PORT;
 	public static String INPUT_DIR;
 	public static String OUTPUT_DIR;
 	public static int MAP_PER_NODE;
@@ -26,6 +27,7 @@ public class Configuration {
 			MASTER_ADDRESS = config.getProperty("master address");
 			SERVER_PORT = Integer.parseInt(config.getProperty("server port"));
 			CLIENT_PORT = Integer.parseInt(config.getProperty("client port"));
+			DFS_PORT = Integer.parseInt(config.getProperty("dfs port"));
 			INPUT_DIR = config.getProperty("input dir") + "/";
 			OUTPUT_DIR = config.getProperty("output dir") + "/";
 			MAP_PER_NODE = Integer.parseInt(config.getProperty("map per node"));

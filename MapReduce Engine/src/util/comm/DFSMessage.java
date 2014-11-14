@@ -5,29 +5,19 @@ import util.io.FileSplit;
 public class DFSMessage extends Message {
 
 	private static final long serialVersionUID = 2017772749305634518L;
-	private String content;
-	private String filename;
+	private FileSplit file;
 
 	public DFSMessage(String content, FileSplit file, String toHost, int toPort) {
 		super(content, toHost, toPort);
-		this.setContent(file.getContent());
-		this.setFilename(file.getFilename());
+		this.setFile(file);
 	}
 
-	public String getContent() {
-		return content;
+	public FileSplit getFile() {
+		return file;
 	}
 
-	public void setContent(String buffer) {
-		this.content = buffer;
-	}
-
-	public String getFilename() {
-		return filename;
-	}
-
-	public void setFilename(String filename) {
-		this.filename = filename;
+	public void setFile(FileSplit file) {
+		this.file = file;
 	}
 
 }

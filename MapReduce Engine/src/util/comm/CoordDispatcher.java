@@ -36,7 +36,7 @@ public class CoordDispatcher implements Runnable {
 		// from client
 		case "start":
 			Job job = ((JobMessage) m).getJob();
-			tracker.startMap(job);
+			tracker.submitMapJob(job);
 			ret = new Message("Job #" + job.getId() + " " + job.getName()
 					+ " started");
 			break;

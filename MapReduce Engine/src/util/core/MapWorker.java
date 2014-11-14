@@ -22,9 +22,9 @@ public class MapWorker extends Worker {
 			Class<? extends Mapper> cls = job.getMapper();
 			Mapper mapper = cls.newInstance();
 			FileSplit file = task.getInput();
-			RecordReader reader = new RecordReader(file);
+			RecordReader reader = new RecordReader(file.getFilename());
 			ArrayDeque<String[]> KVPair = reader.getKVPair();
-			Context context = new Context(task.getOutputPath());
+			Context context = new Context("");
 			for (String[] pair : KVPair) {
 				mapper.map(pair[0], pair[1], context);
 			}
