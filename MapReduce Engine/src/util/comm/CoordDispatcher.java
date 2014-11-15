@@ -73,11 +73,11 @@ public class CoordDispatcher implements Runnable {
 					ret = new Message("ACK");
 				} else {
 					ret = new TaskMessage("todo");
-					tracker.markDone(i, msg.getFinishedTask());
 					((TaskMessage) ret).setMapTask(maps);
 					((TaskMessage) ret).setReduceTask(reduces);
 				}
 			}
+			tracker.markDone(msg.getFinishedTask());
 			break;
 		case "busy":
 			ret = new Message("ACK");

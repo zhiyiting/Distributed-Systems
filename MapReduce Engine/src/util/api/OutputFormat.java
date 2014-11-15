@@ -1,5 +1,10 @@
 package util.api;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayDeque;
 
 public class OutputFormat {
@@ -8,30 +13,23 @@ public class OutputFormat {
 
 	}
 
-	public ArrayDeque<String[]> getKVPair(String s) {
+	public ArrayDeque<String[]> getKVPair(String path) {
 		ArrayDeque<String[]> result = new ArrayDeque<String[]>();
-		int len = s.length();
-		if (len <= 0) {
-			return result;
-		}
-		String[] pair = new String[2];
-		pair[0] = "";
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < len; i++) {
-			char cur = s.charAt(i);
-			if (cur == '\n') {
-				pair[1] = sb.toString();
+		File file = new File(path);
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String line;
+			while ((line = br.readLine()) != null) {
+				String[] pair = { "", line };
 				result.add(pair);
-				sb = new StringBuilder();
-				pair = new String[2];
-				pair[0] = "";
-			} else {
-				sb.append(cur);
 			}
-		}
-		if (sb.length() > 0) {
-			pair[1] = sb.toString();
-			result.add(pair);
+			br.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return result;
 	}

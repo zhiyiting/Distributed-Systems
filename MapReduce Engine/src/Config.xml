@@ -7,7 +7,7 @@
 <entry key="dfs port">18113</entry>
 <entry key="input dir">Input</entry>
 <entry key="output dir">Output</entry>
-<entry key="record size">4</entry>
+<entry key="record size">1</entry>
 <entry key="map per node">3</entry>
 <entry key="reduce per node">1</entry>
 <entry key="heart beat interval">1000</entry>

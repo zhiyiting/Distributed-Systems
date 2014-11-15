@@ -50,6 +50,7 @@ public class JobTracker {
 	}
 
 	private synchronized void submitReduceJob(Job job) {
+		System.out.println("start reduce");
 	}
 
 	public synchronized ArrayDeque<MapTask> assignMapTask(int slaveID,
@@ -94,7 +95,7 @@ public class JobTracker {
 		return tasks;
 	}
 
-	public synchronized void markDone(int slaveID, ArrayDeque<Task> finishedTask) {
+	public synchronized void markDone(ArrayDeque<Task> finishedTask) {
 		for (Task task : finishedTask) {
 			int jobID = task.getJob().getId();
 			// if the job is in mapping process
@@ -106,6 +107,7 @@ public class JobTracker {
 					jobToMapTask.remove(jobID);
 					submitReduceJob(task.getJob());
 				}
+				jobToMapTask.put(jobID, hs);
 			}
 			// if the job is in reducing process
 			else if (jobToReduceTask.containsKey(jobID)) {

@@ -1,7 +1,6 @@
 package util.comm;
 
 import util.core.TaskTracker;
-import util.dfs.DFSClient;
 import conf.Configuration;
 
 public class SlaveMessenger implements Runnable {
@@ -48,7 +47,6 @@ public class SlaveMessenger implements Runnable {
 			tracker.addReduceTask(m.getReduceTask());
 			break;
 		default:
-			System.out.println(method);
 			break;
 		}
 	}
