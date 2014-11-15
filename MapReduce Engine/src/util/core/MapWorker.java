@@ -3,28 +3,40 @@ package util.core;
 import java.util.ArrayDeque;
 
 import util.api.Mapper;
+import util.api.OutputFormat;
 import util.core.Task.Status;
+import util.dfs.DFSClient;
 import util.io.Context;
 import util.io.FileSplit;
-import util.io.RecordReader;
 
 public class MapWorker extends Worker {
 
-	public MapWorker(Task t, TaskTracker trk) {
+	private DFSClient dfs;
+
+	public MapWorker(Task t, TaskTracker trk, DFSClient dfs) {
 		super(t, trk);
+		this.dfs = dfs;
 	}
 
 	@Override
 	public void run() {
 		Job job = task.getJob();
+		System.out.println("running task #" + task.getTaskID());
 		task.setStatus(Status.RUNNING);
 		try {
-			Class<? extends Mapper> cls = job.getMapper();
-			Mapper mapper = cls.newInstance();
+			Class<? extends Mapper> mapcls = job.getMapper();
+			Mapper mapper = mapcls.newInstance();
 			FileSplit file = task.getInput();
-			RecordReader reader = new RecordReader(file.getFilename());
-			ArrayDeque<String[]> KVPair = reader.getKVPair();
-			Context context = new Context("");
+			Class<? extends OutputFormat> outcls = job.getOutputFormat();
+			OutputFormat outfm;
+			if (outcls == null) {
+				outfm = new OutputFormat();
+			} else {
+				outfm = outcls.newInstance();
+			}
+			String path = dfs.getFolderPath() + file.getFilename();
+			ArrayDeque<String[]> KVPair = outfm.getKVPair(path);
+			Context context = new Context(path + "_out");
 			for (String[] pair : KVPair) {
 				mapper.map(pair[0], pair[1], context);
 			}

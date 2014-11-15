@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayDeque;
 
 import util.core.Job;
 import util.core.JobTracker;
+import util.core.MapTask;
+import util.core.ReduceTask;
 
 public class CoordDispatcher implements Runnable {
 
@@ -57,12 +60,24 @@ public class CoordDispatcher implements Runnable {
 			break;
 		case "idle":
 			WorkMessage msg = (WorkMessage) m;
-			ret = new TaskMessage("todo");
-			tracker.markDone(msg.getSlaveID(), msg.getFinishedTask());
-			((TaskMessage) ret).setMapTask(tracker.assignMapTask(
-					msg.getSlaveID(), msg.getMapSlot()));
-			((TaskMessage) ret).setReduceTask(tracker.assignReduceTask(
-					msg.getSlaveID(), msg.getReduceSlot()));
+			int mapSlot = msg.getMapSlot();
+			int reduceSlot = msg.getReduceSlot();
+			if (mapSlot == 0 && reduceSlot == 0) {
+				ret = new Message("ACK");
+			} else {
+				int i = msg.getSlaveID();
+				ArrayDeque<MapTask> maps = tracker.assignMapTask(i, mapSlot);
+				ArrayDeque<ReduceTask> reduces = tracker.assignReduceTask(i,
+						reduceSlot);
+				if (maps.size() == 0 && reduces.size() == 0) {
+					ret = new Message("ACK");
+				} else {
+					ret = new TaskMessage("todo");
+					tracker.markDone(i, msg.getFinishedTask());
+					((TaskMessage) ret).setMapTask(maps);
+					((TaskMessage) ret).setReduceTask(reduces);
+				}
+			}
 			break;
 		case "busy":
 			ret = new Message("ACK");

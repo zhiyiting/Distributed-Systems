@@ -16,12 +16,12 @@ public class JobTracker {
 	private Map<Integer, ArrayDeque<ReduceTask>> slaveToReduceTaskList;
 	private Map<Integer, HashSet<MapTask>> jobToMapTask;
 	private Map<Integer, HashSet<ReduceTask>> jobToReduceTask;
+	private HashSet<Task> assignedTask;
 
 	private DFSMaster dfs;
 
 	private int slaveID = 0;
 	private int jobID = 0;
-	private int taskID = 0;
 
 	public JobTracker() {
 		CoordListener listener = new CoordListener(Configuration.SERVER_PORT,
@@ -34,6 +34,7 @@ public class JobTracker {
 		slaveToReduceTaskList = new ConcurrentHashMap<Integer, ArrayDeque<ReduceTask>>();
 		jobToMapTask = new ConcurrentHashMap<Integer, HashSet<MapTask>>();
 		jobToReduceTask = new ConcurrentHashMap<Integer, HashSet<ReduceTask>>();
+		assignedTask = new HashSet<Task>();
 
 		dfs = new DFSMaster(this);
 	}
@@ -47,7 +48,7 @@ public class JobTracker {
 		// create and distribute splits
 		dfs.distributeFile(Configuration.INPUT_DIR, Configuration.REPLICA, job);
 	}
-	
+
 	private synchronized void submitReduceJob(Job job) {
 	}
 
@@ -55,11 +56,19 @@ public class JobTracker {
 			int taskNum) {
 		ArrayDeque<MapTask> tasks = new ArrayDeque<MapTask>();
 		ArrayDeque<MapTask> potential = slaveToMapTaskList.get(slaveID);
-		for (int i = 0; i < taskNum; i++) {
-			MapTask task = potential.pollFirst();
-			if (task == null)
-				break;
-			tasks.add(task);
+		if (potential != null && potential.size() > 0) {
+			for (int i = 0; i < taskNum; i++) {
+				MapTask task;
+				do {
+					task = potential.pollFirst();
+					if (task == null) break;
+				} while (assignedTask.contains(task));
+				if (task == null) {
+					break;
+				}
+				tasks.add(task);
+				assignedTask.add(task);
+			}
 		}
 		return tasks;
 	}
@@ -68,11 +77,19 @@ public class JobTracker {
 			int taskNum) {
 		ArrayDeque<ReduceTask> tasks = new ArrayDeque<ReduceTask>();
 		ArrayDeque<ReduceTask> potential = slaveToReduceTaskList.get(slaveID);
-		for (int i = 0; i < taskNum; i++) {
-			ReduceTask task = potential.pollFirst();
-			if (task == null)
-				break;
-			tasks.add(task);
+		if (potential != null && potential.size() > 0) {
+			for (int i = 0; i < taskNum; i++) {
+				ReduceTask task = null;
+				do {
+					task = potential.pollFirst();
+					if (task == null) break;
+				} while (assignedTask.contains(task));
+				if (task == null) {
+					break;
+				}
+				tasks.add(task);
+				assignedTask.add(task);
+			}
 		}
 		return tasks;
 	}
@@ -104,23 +121,24 @@ public class JobTracker {
 
 	}
 
-	public int addSlave(String host) {
+	public synchronized int addSlave(String host) {
 		dfs.addSlave(getSlaveID(), host);
 		ArrayDeque<MapTask> hs = new ArrayDeque<MapTask>();
 		slaveToMapTaskList.put(slaveID, hs);
 		return slaveID;
 	}
 
-	public void addQueuedMapTask(int n, MapTask task) {
-		task.setTaskID(getTaskID());
+	public synchronized void addQueuedMapTask(int n, MapTask task) {
 		ArrayDeque<MapTask> taskList = slaveToMapTaskList.get(n);
 		taskList.push(task);
+		slaveToMapTaskList.put(n, taskList);
 		int jobID = task.getJob().getId();
 		HashSet<MapTask> tasks = jobToMapTask.get(jobID);
 		if (tasks == null) {
 			tasks = new HashSet<MapTask>();
 		}
 		tasks.add(task);
+		jobToMapTask.put(jobID, tasks);
 	}
 
 	public void list() {
@@ -144,10 +162,5 @@ public class JobTracker {
 	private synchronized int getSlaveID() {
 		slaveID++;
 		return slaveID;
-	}
-
-	private synchronized int getTaskID() {
-		taskID++;
-		return taskID;
 	}
 }

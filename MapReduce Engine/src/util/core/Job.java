@@ -3,6 +3,7 @@ package util.core;
 import java.io.Serializable;
 
 import util.api.Mapper;
+import util.api.OutputFormat;
 import util.api.Reducer;
 
 public class Job implements Serializable{
@@ -13,6 +14,7 @@ public class Job implements Serializable{
 	private String outputPath;
 	private Class<? extends Mapper> mapper;
 	private Class<? extends Reducer> reducer;
+	private Class<? extends OutputFormat> outputformat;
 
 	public Job(String jobName) {
 		this.name = jobName;
@@ -20,6 +22,7 @@ public class Job implements Serializable{
 		this.outputPath = "";
 		this.mapper = null;
 		this.reducer = null;
+		this.outputformat = null;
 	}
 	
 	public String getName() {
@@ -68,5 +71,13 @@ public class Job implements Serializable{
 
 	public void setOutputPath(String outputPath) {
 		this.outputPath = outputPath;
+	}
+
+	public Class<? extends OutputFormat> getOutputFormat() {
+		return outputformat;
+	}
+
+	public void setOutputFormat(Class<? extends OutputFormat> outputformat) {
+		this.outputformat = outputformat;
 	}
 }

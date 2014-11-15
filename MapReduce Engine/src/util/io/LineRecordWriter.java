@@ -23,7 +23,7 @@ public class LineRecordWriter {
 		chunkSize = Configuration.RECORD_SIZE;
 	}
 
-	public FileSplit write(int index, String filename) {
+	public FileSplit createSplit(int index, String filename) {
 		FileSplit file = null;
 		try {
 			file = new FileSplit(filename, index, f.getFilePointer(), chunkSize);
@@ -31,7 +31,10 @@ public class LineRecordWriter {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
+		return file;
+	}
+	
+	public FileChunk write(String filename) {
 		sb = new StringBuilder();
 		for (int i = 0; i < chunkSize; i++) {
 			try {
@@ -42,9 +45,7 @@ public class LineRecordWriter {
 				break;
 			}
 		}
-		if (file != null) {
-			file.setContent(sb.toString());
-		}
-		return file;
+		FileChunk chunk = new FileChunk(filename, sb.toString());
+		return chunk;
 	}
 }

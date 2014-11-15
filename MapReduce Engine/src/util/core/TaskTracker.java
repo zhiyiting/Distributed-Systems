@@ -12,6 +12,7 @@ public class TaskTracker {
 	private ArrayDeque<Task> finishedTasks;
 	private int maxMapSlot;
 	private int maxReduceSlot;
+	private DFSClient dfs;
 
 	public TaskTracker() {
 		this.maxMapSlot = Configuration.MAP_PER_NODE;
@@ -19,6 +20,7 @@ public class TaskTracker {
 		this.mapTasks = new ArrayDeque<MapTask>(maxMapSlot);
 		this.reduceTasks = new ArrayDeque<ReduceTask>(maxReduceSlot);
 		this.finishedTasks = new ArrayDeque<Task>();
+		this.dfs = new DFSClient();
 	}
 
 	public synchronized int getIdleMapSlot() {
@@ -31,8 +33,7 @@ public class TaskTracker {
 
 	public synchronized void addMapTask(ArrayDeque<MapTask> task) {
 		for (MapTask t : task) {
-			System.out.println("New map task added: Job #" + t.getJob().getId() + ", Task#" + t.getTaskID());
-			MapWorker worker = new MapWorker(t, this);
+			MapWorker worker = new MapWorker(t, this, dfs);
 			Thread thread = new Thread(worker);
 			thread.start();
 			mapTasks.addLast(t);

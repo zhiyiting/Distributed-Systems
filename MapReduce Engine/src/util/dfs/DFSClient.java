@@ -2,13 +2,13 @@ package util.dfs;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import util.comm.SlaveListener;
+import util.io.FileChunk;
 import util.io.FileSplit;
 
 public class DFSClient {
@@ -44,11 +44,11 @@ public class DFSClient {
 		return fileNum;
 	}
 
-	public void createFile(FileSplit in) {
-		String filename = folderPath + in.getFilename() + "_" + in.getIndex();
+	public void createFile(FileChunk in) {
+		String filename = folderPath + in.getFileName();
 		try {
 			PrintWriter writer = new PrintWriter(filename, "UTF-8");
-			writer.println(in.getContent());
+			writer.println(in.getChunk());
 			writer.close();
 			System.out.println("DFS: file chunk saved at " + filename);
 		} catch (FileNotFoundException e) {
@@ -64,5 +64,9 @@ public class DFSClient {
 
 	public void setHost(String host) {
 		this.host = host;
+	}
+	
+	public String getFolderPath() {
+		return folderPath;
 	}
 }

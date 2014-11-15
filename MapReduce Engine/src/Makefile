@@ -15,5 +15,6 @@ classes: $(CLASSES:.java=.class)
 
 clean:
 	$(RM) */*.class */*/*.class
+	rm -rf unix*
 
 

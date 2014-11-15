@@ -9,7 +9,6 @@ public class FileSplit implements Serializable {
 	private int index;
 	private long start;
 	private int length;
-	private String content;
 
 	public FileSplit(String filename, int index, long start, int length) {
 		this.filename = filename;
@@ -19,7 +18,7 @@ public class FileSplit implements Serializable {
 	}
 
 	public String getFilename() {
-		return this.filename;
+		return this.filename + "_" + index;
 	}
 
 	public long getStart() {
@@ -28,14 +27,6 @@ public class FileSplit implements Serializable {
 
 	public int getLength() {
 		return this.length;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
 	}
 
 	public int getIndex() {

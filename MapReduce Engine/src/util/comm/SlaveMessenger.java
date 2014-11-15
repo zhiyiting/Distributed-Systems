@@ -12,7 +12,6 @@ public class SlaveMessenger implements Runnable {
 	private String toHost;
 	private int toPort;
 	private int slaveID;
-	private DFSClient dfsClient;
 
 	public SlaveMessenger(TaskTracker tracker) {
 		this.tracker = tracker;
@@ -21,7 +20,6 @@ public class SlaveMessenger implements Runnable {
 		this.toPort = Configuration.SERVER_PORT;
 		this.sleepInterval = Configuration.HEART_BEAT_INTERVAL;
 		this.slaveID = -1;
-		this.dfsClient = new DFSClient();
 		registerSlave();
 	}
 
@@ -50,6 +48,7 @@ public class SlaveMessenger implements Runnable {
 			tracker.addReduceTask(m.getReduceTask());
 			break;
 		default:
+			System.out.println(method);
 			break;
 		}
 	}

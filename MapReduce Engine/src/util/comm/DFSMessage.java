@@ -1,23 +1,19 @@
 package util.comm;
 
-import util.io.FileSplit;
+import util.io.FileChunk;
 
 public class DFSMessage extends Message {
 
 	private static final long serialVersionUID = 2017772749305634518L;
-	private FileSplit file;
+	private FileChunk file;
 
-	public DFSMessage(String content, FileSplit file, String toHost, int toPort) {
+	public DFSMessage(String content, FileChunk file, String toHost, int toPort) {
 		super(content, toHost, toPort);
-		this.setFile(file);
-	}
-
-	public FileSplit getFile() {
-		return file;
-	}
-
-	public void setFile(FileSplit file) {
 		this.file = file;
+	}
+
+	public FileChunk getFile() {
+		return file;
 	}
 
 }
