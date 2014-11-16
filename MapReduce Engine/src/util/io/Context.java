@@ -30,13 +30,13 @@ public class Context {
 	}
 	
 	public HashMap<Integer, ArrayDeque<String[]>> getPartition() {
-		int reduceNum = Configuration.REDUCE_NUM;
+		int reduceNum = Configuration.REDUCER_NUM;
 		for (int i = 1; i <= reduceNum; i++) {
 			ArrayDeque<String[]> temp = new ArrayDeque<String[]>();
 			partition.put(i, temp);
 		}
 		for (String[] item: buffer) {
-			int id = item[0].hashCode() % reduceNum + 1; // slaveID
+			int id = (item[0].hashCode() & 0x7FFFFFFF) % reduceNum + 1; // slaveID
 			ArrayDeque<String[]> temp = partition.get(id);
 			temp.push(item); // KVPair
 			partition.put(id, temp);

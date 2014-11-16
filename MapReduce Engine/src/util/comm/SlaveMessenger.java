@@ -119,12 +119,12 @@ public class SlaveMessenger implements Runnable {
 				retryCount++;
 				if (retryCount > retryNum) {
 					System.out
-							.println("Coordinator not responding... Job termitated");
+							.println("Coordinator not responding. Job termitated");
 					System.exit(-1);
 				}
-				System.out.println("Coordinator not responding... retry in "
-						+ sleepInterval / 1000 + " seconds... (attempt " + retryCount
-						+ "/" + retryNum + ")");
+				System.out.println("Coordinator not responding. Retry in "
+						+ sleepInterval / 1000 + " seconds... (attempt "
+						+ retryCount + "/" + retryNum + ")");
 			}
 		}
 

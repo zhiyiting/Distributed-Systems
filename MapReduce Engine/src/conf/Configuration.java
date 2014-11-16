@@ -18,7 +18,7 @@ public class Configuration {
 	public static int HEART_BEAT_INTERVAL;
 	public static int RECORD_SIZE;
 	public static int REPLICA;
-	public static int REDUCE_NUM;
+	public static int REDUCER_NUM;
 	public static int RETRY_NUM;
 	
 	static {
@@ -35,7 +35,7 @@ public class Configuration {
 			HEART_BEAT_INTERVAL = Integer.parseInt(config.getProperty("heart beat interval"));
 			RECORD_SIZE = Integer.parseInt(config.getProperty("record size"));
 			REPLICA = Integer.parseInt(config.getProperty("replica"));
-			REDUCE_NUM = Integer.parseInt(config.getProperty("reduce num"));
+			REDUCER_NUM = Integer.parseInt(config.getProperty("reducer num"));
 			RETRY_NUM = Integer.parseInt(config.getProperty("retry num"));
 		} catch (InvalidPropertiesFormatException e) {
 			e.printStackTrace();

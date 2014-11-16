@@ -47,7 +47,6 @@ public class TaskTracker {
 	}
 
 	public synchronized void addReduceTask(ArrayDeque<ReduceTask> task) {
-		System.out.println("reduce task size: " + task.size());
 		for (ReduceTask t : task) {
 			ReduceWorker worker = new ReduceWorker(t, this, dfs);
 			Thread thread = new Thread(worker);

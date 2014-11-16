@@ -17,6 +17,7 @@ public class Task implements Serializable {
 	private Status status;
 	private int slaveID;
 	private FileSplit input;
+	private char type;
 
 	public int getTaskID() {
 		return taskID;
@@ -67,14 +68,22 @@ public class Task implements Serializable {
 	
 	@Override
 	public int hashCode() {
-		return ((taskID + 1) * 31) ^ job.getId();
+		return ((taskID + 1) * 31 + type) ^ job.getId();
 	}
 	
 	public boolean equals(Object obj) {
 		if (obj instanceof Task) {
 			Task o = (Task)obj;
-			return taskID == o.getTaskID() && job.getId() == o.getJob().getId();
+			return taskID == o.getTaskID() && job.getId() == o.getJob().getId() && type == o.getType();
 		}
 		return false;
+	}
+
+	public char getType() {
+		return type;
+	}
+
+	public void setType(char type) {
+		this.type = type;
 	}
 }

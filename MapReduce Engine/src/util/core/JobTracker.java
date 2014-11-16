@@ -42,28 +42,34 @@ public class JobTracker {
 
 	public void submitMapJob(Job job) {
 		job.setID(getJobID());
-		job.setOutputPath("Map_" + job.getId() + "/");
+		System.out.println("Start Job #" + job.getId());
 		synchronized (jobList) {
-			jobList.put(jobID, job);
+			jobList.put(job.getId(), job);
 		}
+		System.out.println("Start mapping job #" + job.getId());
 		// create and distribute splits
 		dfs.distributeFile(Configuration.INPUT_DIR, Configuration.REPLICA, job);
 	}
 
 	private synchronized void submitReduceJob(Job job) {
-		System.out.println("start reduce");
-		int reducerNum = Configuration.REDUCE_NUM;
+		System.out.println("Start reducing job #" + job.getId());
+		int reducerNum = Configuration.REDUCER_NUM;
+		int taskID = 0;
 		for (int i = 1; i <= reducerNum; i++) {
 			ReduceTask task = new ReduceTask();
 			task.setJob(job);
 			task.setSlaveID(i);
-			task.setTaskID(-1);
+			task.setTaskID(taskID);
 			ArrayDeque<ReduceTask> tasks = new ArrayDeque<ReduceTask>();
 			tasks.push(task);
 			slaveToReduceTaskList.put(i, tasks);
-			HashSet<ReduceTask> hs = new HashSet<ReduceTask>();
+			HashSet<ReduceTask> hs = jobToReduceTask.get(job.getId());
+			if (hs == null) {
+				hs = new HashSet<ReduceTask>();
+			}
 			hs.add(task);
 			jobToReduceTask.put(job.getId(), hs);
+			taskID++;
 		}
 	}
 
@@ -115,27 +121,31 @@ public class JobTracker {
 		for (Task task : finishedTask) {
 			int jobID = task.getJob().getId();
 			// if the job is in mapping process
-			if (jobToMapTask.containsKey(jobID)) {
+			if (task.getType() == 'M') {
 				HashSet<MapTask> hs = jobToMapTask.get(jobID);
 				hs.remove(task);
 				if (hs.isEmpty()) {
 					// start reduce for this job
 					jobToMapTask.remove(jobID);
+					System.out.println("Finished mapping job #" + jobID);
 					submitReduceJob(task.getJob());
 					return;
 				}
 				jobToMapTask.put(jobID, hs);
 			}
 			// if the job is in reducing process
-			else if (jobToReduceTask.containsKey(jobID)) {
+			else if (task.getType() == 'R') {
 				HashSet<ReduceTask> hs = jobToReduceTask.get(jobID);
 				hs.remove(task);
+				String path = ((ReduceTask) task).getOutput();
+				System.out.println("Reducing output generated at " + path);
 				if (hs.isEmpty()) {
-					// current job is officially finished
 					jobToReduceTask.remove(jobID);
-					System.out.println("Finished~~");
-					// report finish~~
+					System.out
+							.println("MapReduce job #" + jobID + " finished.");
 				}
+			} else {
+				System.out.println("Invalid task type");
 			}
 		}
 	}
@@ -159,7 +169,7 @@ public class JobTracker {
 		tasks.add(task);
 		jobToMapTask.put(jobID, tasks);
 	}
-	
+
 	public HashMap<Integer, String> getSlaveList() {
 		return dfs.getSlaveList();
 	}
