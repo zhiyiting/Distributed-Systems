@@ -1,5 +1,9 @@
 package util.comm;
 
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map.Entry;
+
 import util.core.TaskTracker;
 import conf.Configuration;
 
@@ -11,6 +15,8 @@ public class SlaveMessenger implements Runnable {
 	private String toHost;
 	private int toPort;
 	private int slaveID;
+	private int retryCount;
+	private int retryNum;
 
 	public SlaveMessenger(TaskTracker tracker) {
 		this.tracker = tracker;
@@ -18,6 +24,8 @@ public class SlaveMessenger implements Runnable {
 		this.toHost = Configuration.MASTER_ADDRESS;
 		this.toPort = Configuration.SERVER_PORT;
 		this.sleepInterval = Configuration.HEART_BEAT_INTERVAL;
+		this.retryCount = 0;
+		this.retryNum = Configuration.RETRY_NUM;
 		this.slaveID = -1;
 		registerSlave();
 	}
@@ -39,12 +47,20 @@ public class SlaveMessenger implements Runnable {
 	}
 
 	private void dispatch(Message msg) {
+		if (msg == null) {
+			System.out.println("Coordinator died... retry in " + sleepInterval
+					/ 1000 + " seconds...");
+		}
 		String method = msg.getContent();
 		switch (method) {
 		case "todo":
 			TaskMessage m = (TaskMessage) msg;
 			tracker.addMapTask(m.getMapTask());
 			tracker.addReduceTask(m.getReduceTask());
+			break;
+		case "slave":
+			ShowSlaveMessage mm = (ShowSlaveMessage) msg;
+			tracker.setSlaveList(mm.getSlaveList());
 			break;
 		default:
 			break;
@@ -69,25 +85,48 @@ public class SlaveMessenger implements Runnable {
 					Message msg = new Message("busy", toHost, toPort);
 					ret = commModule.send(msg);
 				}
-				if (ret == null) {
-					System.out.println("Coordinator died... retry in "
-							+ sleepInterval / 1000 + " seconds...");
-				} else {
-					dispatch(ret);
-				}
+				dispatch(ret);
 
+				HashMap<Integer, HashMap<Integer, ArrayDeque<String[]>>> partitions = tracker
+						.getPartition();
+				if (partitions.size() > 0) {
+					Message msg = new Message("slave", toHost, toPort);
+					ret = commModule.send(msg);
+					dispatch(ret);
+					HashMap<Integer, String> slaveList = tracker.getSlaveList();
+					for (Entry<Integer, HashMap<Integer, ArrayDeque<String[]>>> item : partitions
+							.entrySet()) {
+						int jobID = item.getKey();
+						HashMap<Integer, ArrayDeque<String[]>> slave = item
+								.getValue();
+						for (Entry<Integer, ArrayDeque<String[]>> par : slave
+								.entrySet()) {
+							int slaveID = par.getKey();
+							ArrayDeque<String[]> partition = par.getValue();
+							String host = slaveList.get(slaveID);
+							PartitionMessage pm = new PartitionMessage(
+									"partition", host, toPort);
+							pm.setPartition(jobID, partition);
+							ret = commModule.send(pm);
+						}
+					}
+				}
 				Thread.sleep(sleepInterval);
 
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (RemoteException e) {
-				System.out.println("Coordinator died... retry in "
-						+ sleepInterval + " seconds...");
-				e.printStackTrace();
-				continue;
+				retryCount++;
+				if (retryCount > retryNum) {
+					System.out
+							.println("Coordinator not responding... Job termitated");
+					System.exit(-1);
+				}
+				System.out.println("Coordinator not responding... retry in "
+						+ sleepInterval / 1000 + " seconds... (attempt " + retryCount
+						+ "/" + retryNum + ")");
 			}
 		}
 
 	}
-
 }

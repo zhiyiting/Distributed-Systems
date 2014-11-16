@@ -1,6 +1,7 @@
 package util.comm;
 
 import java.util.ArrayDeque;
+import java.util.HashMap;
 
 import util.core.Task;
 
@@ -52,5 +53,4 @@ public class WorkMessage extends Message {
 	public void setSlaveID(int slaveID) {
 		this.slaveID = slaveID;
 	}
-
 }

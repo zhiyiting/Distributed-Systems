@@ -8,13 +8,12 @@ import java.net.Socket;
 import util.dfs.DFSClient;
 
 public class SlaveDispatcher implements Runnable {
-	
+
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	private boolean canRun;
-	private Socket socket;
 	private DFSClient dfs;
-	
+
 	public SlaveDispatcher(Socket socket, DFSClient dfs) {
 		try {
 			this.in = new ObjectInputStream(socket.getInputStream());
@@ -24,7 +23,6 @@ public class SlaveDispatcher implements Runnable {
 
 		}
 		canRun = true;
-		this.socket = socket;
 		this.dfs = dfs;
 	}
 
@@ -36,6 +34,11 @@ public class SlaveDispatcher implements Runnable {
 		case "distribute":
 			DFSMessage msg = (DFSMessage) m;
 			dfs.createFile(msg.getFile());
+			ret = new Message("ACK");
+			break;
+		case "partition":
+			PartitionMessage pm = (PartitionMessage) m;
+			dfs.addPartition(pm.getPartition());
 			ret = new Message("ACK");
 			break;
 		default:

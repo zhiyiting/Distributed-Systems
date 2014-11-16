@@ -5,15 +5,21 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.HashMap;
+
+import conf.Configuration;
 
 public class Context {
 	
 	private ArrayDeque<String[]> buffer;
 	private String path;
+	private HashMap<Integer, ArrayDeque<String[]>> partition;
+	
 	
 	public Context(String path) {
 		this.path = path;
 		buffer = new ArrayDeque<String[]>();
+		partition = new HashMap<Integer, ArrayDeque<String[]>>();
 	}
 	
 	public void write(String key, String val) {
@@ -21,6 +27,21 @@ public class Context {
 		record[0] = key;
 		record[1] = val;
 		buffer.add(record);
+	}
+	
+	public HashMap<Integer, ArrayDeque<String[]>> getPartition() {
+		int reduceNum = Configuration.REDUCE_NUM;
+		for (int i = 1; i <= reduceNum; i++) {
+			ArrayDeque<String[]> temp = new ArrayDeque<String[]>();
+			partition.put(i, temp);
+		}
+		for (String[] item: buffer) {
+			int id = item[0].hashCode() % reduceNum + 1; // slaveID
+			ArrayDeque<String[]> temp = partition.get(id);
+			temp.push(item); // KVPair
+			partition.put(id, temp);
+		}
+		return partition;
 	}
 	
 	public void generateOutput() {

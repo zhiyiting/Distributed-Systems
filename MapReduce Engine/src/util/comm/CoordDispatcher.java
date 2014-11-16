@@ -82,6 +82,10 @@ public class CoordDispatcher implements Runnable {
 		case "busy":
 			ret = new Message("ACK");
 			break;
+		case "slave":
+			ret = new ShowSlaveMessage("slave");
+			((ShowSlaveMessage)ret).setSlaveList(tracker.getSlaveList());
+			break;
 		default:
 			break;
 		}

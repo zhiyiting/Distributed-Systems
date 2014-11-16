@@ -60,12 +60,12 @@ public class DFSMaster {
 			LineRecordReader reader = new LineRecordReader(path);
 			int recordNum = reader.getRecordNum();
 			int taskID = 0;
+			LineRecordWriter writer = new LineRecordWriter(path);
 			for (int i = 0; i < recordNum; i++) {
+				FileSplit split = writer.createSplit(i, filename);
+				FileChunk chunk = writer.write(split.getFilename());
 				for (int j = 0; j < replica; j++) {
 					Pair node = dfsNode.poll();
-					LineRecordWriter writer = new LineRecordWriter(path);
-					FileSplit split = writer.createSplit(i, filename);
-					FileChunk chunk = writer.write(split.getFilename());
 					DFSMessage msg = new DFSMessage("distribute", chunk,
 							slaveList.get(node.id), Configuration.SERVER_PORT);
 					try {
@@ -99,5 +99,9 @@ public class DFSMaster {
 	public void addSlave(int i, String host) {
 		slaveList.put(i, host);
 		dfsNode.add(new Pair(i, 0));
+	}
+	
+	public HashMap<Integer, String> getSlaveList() {
+		return slaveList;
 	}
 }

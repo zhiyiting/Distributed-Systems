@@ -1,6 +1,7 @@
 package util.core;
 
 import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,6 +52,19 @@ public class JobTracker {
 
 	private synchronized void submitReduceJob(Job job) {
 		System.out.println("start reduce");
+		int reducerNum = Configuration.REDUCE_NUM;
+		for (int i = 1; i <= reducerNum; i++) {
+			ReduceTask task = new ReduceTask();
+			task.setJob(job);
+			task.setSlaveID(i);
+			task.setTaskID(-1);
+			ArrayDeque<ReduceTask> tasks = new ArrayDeque<ReduceTask>();
+			tasks.push(task);
+			slaveToReduceTaskList.put(i, tasks);
+			HashSet<ReduceTask> hs = new HashSet<ReduceTask>();
+			hs.add(task);
+			jobToReduceTask.put(job.getId(), hs);
+		}
 	}
 
 	public synchronized ArrayDeque<MapTask> assignMapTask(int slaveID,
@@ -62,7 +76,8 @@ public class JobTracker {
 				MapTask task;
 				do {
 					task = potential.pollFirst();
-					if (task == null) break;
+					if (task == null)
+						break;
 				} while (assignedTask.contains(task));
 				if (task == null) {
 					break;
@@ -80,10 +95,11 @@ public class JobTracker {
 		ArrayDeque<ReduceTask> potential = slaveToReduceTaskList.get(slaveID);
 		if (potential != null && potential.size() > 0) {
 			for (int i = 0; i < taskNum; i++) {
-				ReduceTask task = null;
+				ReduceTask task;
 				do {
 					task = potential.pollFirst();
-					if (task == null) break;
+					if (task == null)
+						break;
 				} while (assignedTask.contains(task));
 				if (task == null) {
 					break;
@@ -106,6 +122,7 @@ public class JobTracker {
 					// start reduce for this job
 					jobToMapTask.remove(jobID);
 					submitReduceJob(task.getJob());
+					return;
 				}
 				jobToMapTask.put(jobID, hs);
 			}
@@ -116,11 +133,11 @@ public class JobTracker {
 				if (hs.isEmpty()) {
 					// current job is officially finished
 					jobToReduceTask.remove(jobID);
+					System.out.println("Finished~~");
 					// report finish~~
 				}
 			}
 		}
-
 	}
 
 	public synchronized int addSlave(String host) {
@@ -141,6 +158,10 @@ public class JobTracker {
 		}
 		tasks.add(task);
 		jobToMapTask.put(jobID, tasks);
+	}
+	
+	public HashMap<Integer, String> getSlaveList() {
+		return dfs.getSlaveList();
 	}
 
 	public void list() {

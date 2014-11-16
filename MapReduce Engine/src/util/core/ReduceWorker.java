@@ -1,0 +1,48 @@
+package util.core;
+
+import java.util.ArrayDeque;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import util.api.Reducer;
+import util.core.Task.Status;
+import util.dfs.DFSClient;
+import util.io.Context;
+
+public class ReduceWorker extends Worker {
+
+	public ReduceWorker(Task t, TaskTracker trk, DFSClient dfs) {
+		super(t, trk, dfs);
+	}
+
+	@Override
+	public void run() {
+		Job job = task.getJob();
+		System.out.println("running reduce task #" + task.getTaskID());
+		task.setStatus(Status.RUNNING);
+		try {
+			Class<? extends Reducer> reducecls = job.getReducer();
+			int jobID = job.getId();
+			Reducer reducer = reducecls.newInstance();
+			String path = dfs.getFolderPath() + "job#" + jobID + "_result_" + task.getSlaveID();
+			Context context = new Context(path);
+			TreeMap<String, ArrayDeque<Integer>> partition = dfs.getPartition(jobID);
+			for (Entry<String, ArrayDeque<Integer>> item: partition.entrySet()) {
+				String key = item.getKey();
+				ArrayDeque<Integer> values = item.getValue();
+				reducer.reduce(key, values, context);
+			}
+			context.generateOutput();
+			tracker.finishReduceTask((ReduceTask) task);
+			System.out.println("Job #" + task.getJob().getId() + " finished.");
+			System.out.println("Output location: " + path);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+}

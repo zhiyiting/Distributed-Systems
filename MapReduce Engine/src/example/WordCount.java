@@ -1,6 +1,8 @@
 package example;
 
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import util.api.*;
 import util.console.ClientConsole;
@@ -16,7 +18,14 @@ public class WordCount {
 			StringTokenizer tokenizer = new StringTokenizer(line);
 			while (tokenizer.hasMoreTokens()) {
 				String word = tokenizer.nextToken();
-				context.write(word, "1");
+				Pattern pattern = Pattern.compile("[^\\w]*(\\w?.*\\w)[^\\w]*");
+				Matcher matcher = pattern.matcher(word);
+				if (matcher.find()) {
+					word = matcher.group(1);
+					if (word.length() > 0) {
+						context.write(word.toLowerCase(), "1");
+					}
+				}
 			}
 		}
 	}
@@ -32,7 +41,7 @@ public class WordCount {
 	}
 
 	public static void main(String[] args) throws Exception {
-		
+
 		Job job = new Job("wordcount");
 
 		job.setMapperClass(MyMap.class);
