@@ -20,11 +20,11 @@ public class DFSClient {
 	private String folderPath;
 	private int fileNum;
 	private SlaveListener listener;
-	private HashMap<Integer, TreeMap<String, ArrayDeque<Integer>>> jobToPartition;
+	private HashMap<Integer, TreeMap<String, ArrayDeque<String>>> jobToPartition;
 
 	public DFSClient() {
 		fileNum = 0;
-		jobToPartition = new HashMap<Integer, TreeMap<String, ArrayDeque<Integer>>>();
+		jobToPartition = new HashMap<Integer, TreeMap<String, ArrayDeque<String>>>();
 		try {
 			setHost(InetAddress.getLocalHost().getHostName());
 		} catch (UnknownHostException e1) {
@@ -67,19 +67,19 @@ public class DFSClient {
 		for (Entry<Integer, ArrayDeque<String[]>> cur : pa.entrySet()) {
 			int jobID = cur.getKey();
 			ArrayDeque<String[]> p = cur.getValue();
-			TreeMap<String, ArrayDeque<Integer>> row = jobToPartition
+			TreeMap<String, ArrayDeque<String>> row = jobToPartition
 					.get(jobID);
 			if (row == null) {
-				row = new TreeMap<String, ArrayDeque<Integer>>();
+				row = new TreeMap<String, ArrayDeque<String>>();
 			}
 			for (String[] item : p) {
 				String key = item[0];
-				int val = Integer.parseInt(item[1]);
+				String val = item[1];
 				// System.out.println("job: " + jobID + " key: " + key +
 				// " value: " + val);
-				ArrayDeque<Integer> temp = row.get(key);
+				ArrayDeque<String> temp = row.get(key);
 				if (temp == null) {
-					temp = new ArrayDeque<Integer>();
+					temp = new ArrayDeque<String>();
 				}
 				temp.add(val);
 				row.put(key, temp);
@@ -88,7 +88,7 @@ public class DFSClient {
 		}
 	}
 
-	public TreeMap<String, ArrayDeque<Integer>> getPartition(int jobID) {
+	public TreeMap<String, ArrayDeque<String>> getPartition(int jobID) {
 		return jobToPartition.get(jobID);
 	}
 

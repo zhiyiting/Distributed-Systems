@@ -22,6 +22,21 @@ public class LineRecordWriter {
 		sb = new StringBuilder();
 		chunkSize = Configuration.RECORD_SIZE;
 	}
+	
+	public LineRecordWriter(String path, long start) {
+		try {
+			f = new RandomAccessFile(path, "r");
+			f.seek(start);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		sb = new StringBuilder();
+		chunkSize = Configuration.RECORD_SIZE;
+	}
 
 	public FileSplit createSplit(int index, String filename) {
 		FileSplit file = null;

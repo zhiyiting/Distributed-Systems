@@ -3,22 +3,17 @@ package util.io;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayDeque;
-
 import conf.Configuration;
 
 public class LineRecordReader {
 
 	private String path;
 	private int recordNum;
-	private long start;
 	private long length;
 
 	public LineRecordReader(String path) {
 		this.path = path;
 		this.recordNum = 0;
-		this.start = 0;
 		this.length = 0;
 	}
 

@@ -31,10 +31,10 @@ public class WordCount {
 	}
 
 	public static class MyReduce extends Reducer {
-		public void reduce(String key, Iterable<Integer> values, Context context) {
+		public void reduce(String key, Iterable<String> values, Context context) {
 			int sum = 0;
-			for (Integer val : values) {
-				sum += val;
+			for (String val : values) {
+				sum += Integer.parseInt(val);
 			}
 			context.write(key, Integer.toString(sum));
 		}

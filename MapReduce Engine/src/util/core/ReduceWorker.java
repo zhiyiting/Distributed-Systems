@@ -27,10 +27,10 @@ public class ReduceWorker extends Worker {
 			String path = dfs.getFolderPath() + "job#" + jobID + "_result_" + task.getSlaveID();
 			((ReduceTask) task).setOutput(path);
 			Context context = new Context(path);
-			TreeMap<String, ArrayDeque<Integer>> partition = dfs.getPartition(jobID);
-			for (Entry<String, ArrayDeque<Integer>> item: partition.entrySet()) {
+			TreeMap<String, ArrayDeque<String>> partition = dfs.getPartition(jobID);
+			for (Entry<String, ArrayDeque<String>> item: partition.entrySet()) {
 				String key = item.getKey();
-				ArrayDeque<Integer> values = item.getValue();
+				ArrayDeque<String> values = item.getValue();
 				reducer.reduce(key, values, context);
 			}
 			context.generateOutput();
