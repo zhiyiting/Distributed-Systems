@@ -6,13 +6,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import util.comm.CommModule;
 import util.comm.CoordListener;
+import util.comm.Message;
 import util.dfs.DFSMaster;
 import conf.Configuration;
 
 public class JobTracker {
 
 	private Map<Integer, Job> jobList;
+	private Map<Integer, String> jobToClient;
+	private Map<Integer, ArrayDeque<String>> jobToOutput;
 	private Map<Integer, ArrayDeque<MapTask>> slaveToMapTaskList;
 	private Map<Integer, ArrayDeque<ReduceTask>> slaveToReduceTaskList;
 	private Map<Integer, HashSet<MapTask>> jobToMapTask;
@@ -36,15 +40,19 @@ public class JobTracker {
 		jobToMapTask = new ConcurrentHashMap<Integer, HashSet<MapTask>>();
 		jobToReduceTask = new ConcurrentHashMap<Integer, HashSet<ReduceTask>>();
 		assignedTask = new HashSet<Task>();
-
+		jobToClient = new ConcurrentHashMap<Integer, String>();
+		jobToOutput = new ConcurrentHashMap<Integer, ArrayDeque<String>>();
 		dfs = new DFSMaster(this);
 	}
 
-	public void submitMapJob(Job job) {
+	public void submitMapJob(String host, Job job) {
 		job.setID(getJobID());
 		System.out.println("Start Job #" + job.getId());
 		synchronized (jobList) {
 			jobList.put(job.getId(), job);
+		}
+		synchronized (jobToClient) {
+			jobToClient.put(job.getId(), host);
 		}
 		System.out.println("Start mapping job #" + job.getId());
 		// create and distribute splits
@@ -138,11 +146,27 @@ public class JobTracker {
 				HashSet<ReduceTask> hs = jobToReduceTask.get(jobID);
 				hs.remove(task);
 				String path = ((ReduceTask) task).getOutput();
+				ArrayDeque<String> curOutput = jobToOutput.get(jobID);
+				if (curOutput == null) {
+					curOutput = new ArrayDeque<String>();
+				}
+				curOutput.add(path);
+				jobToOutput.put(jobID, curOutput);
 				System.out.println("Reducing output generated at " + path);
 				if (hs.isEmpty()) {
 					jobToReduceTask.remove(jobID);
-					System.out
-							.println("MapReduce job #" + jobID + " finished.");
+					System.out.println("Job #" + jobID + " finished.");
+					String toHost = jobToClient.get(jobID);
+					StringBuilder sb = new StringBuilder();
+					sb.append("Job #" + jobID + " finished.\n");
+					sb.append("Generated output location on DFS: \n\t");
+					ArrayDeque<String> outputs = jobToOutput.get(jobID);
+					for (String s : outputs) {
+						sb.append(s);
+						sb.append("\n\t");
+					}
+					Message msg = new Message(sb.toString(), toHost, Configuration.CLIENT_PORT);
+					CommModule.send(msg, toHost, Configuration.CLIENT_PORT);
 				}
 			} else {
 				System.out.println("Invalid task type");

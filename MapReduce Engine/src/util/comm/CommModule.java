@@ -61,4 +61,25 @@ public class CommModule {
 		}
 		return null;
 	}
+	
+	public static void send(Message m, String toHost, int toPort) {
+		try {
+			Socket socket = new Socket(toHost, toPort);
+			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+			out.writeObject(m);
+			out.flush();
+			in.readObject();
+			socket.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

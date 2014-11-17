@@ -39,7 +39,7 @@ public class CoordDispatcher implements Runnable {
 		// from client
 		case "start":
 			Job job = ((JobMessage) m).getJob();
-			tracker.submitMapJob(job);
+			tracker.submitMapJob(socket.getInetAddress().getHostName(), job);
 			ret = new Message("Job #" + job.getId() + " " + job.getName()
 					+ " started");
 			break;
@@ -84,7 +84,7 @@ public class CoordDispatcher implements Runnable {
 			break;
 		case "slave":
 			ret = new ShowSlaveMessage("slave");
-			((ShowSlaveMessage)ret).setSlaveList(tracker.getSlaveList());
+			((ShowSlaveMessage) ret).setSlaveList(tracker.getSlaveList());
 			break;
 		default:
 			break;
