@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import conf.Configuration;
 import util.api.Reducer;
 import util.core.Task.Status;
 import util.dfs.DFSClient;
@@ -24,18 +25,21 @@ public class ReduceWorker extends Worker {
 			Class<? extends Reducer> reducecls = job.getReducer();
 			int jobID = job.getId();
 			Reducer reducer = reducecls.newInstance();
-			String path = dfs.getFolderPath() + "job#" + jobID + "_result_" + task.getSlaveID();
+			String path = dfs.getFolderPath() + Configuration.OUTPUT_DIR
+					+ "job" + jobID + "_part" + task.getSlaveID();
 			((ReduceTask) task).setOutput(path);
 			Context context = new Context(path);
-			TreeMap<String, ArrayDeque<String>> partition = dfs.getPartition(jobID);
-			for (Entry<String, ArrayDeque<String>> item: partition.entrySet()) {
+			TreeMap<String, ArrayDeque<String>> partition = dfs
+					.getPartition(jobID);
+			for (Entry<String, ArrayDeque<String>> item : partition.entrySet()) {
 				String key = item.getKey();
 				ArrayDeque<String> values = item.getValue();
 				reducer.reduce(key, values, context);
 			}
 			context.generateOutput();
 			tracker.finishReduceTask((ReduceTask) task);
-			System.out.println("Reduce #" + task.getJob().getId() + " finished.");
+			System.out.println("Reduce #" + task.getJob().getId()
+					+ " finished.");
 			System.out.println("Output location: " + path);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block

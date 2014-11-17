@@ -55,11 +55,11 @@ public class DFSMaster {
 			System.out.println("Input Directory doesn't exist");
 			return;
 		}
+		int taskID = 0;
 		for (String filename : inputDir.list()) {
 			String path = in + "/" + filename;
 			LineRecordReader reader = new LineRecordReader(path);
 			int recordNum = reader.getRecordNum();
-			int taskID = 0;
 			LineRecordWriter writer = new LineRecordWriter(path);
 			for (int i = 0; i < recordNum; i++) {
 				FileSplit split = writer.createSplit(i, filename);
