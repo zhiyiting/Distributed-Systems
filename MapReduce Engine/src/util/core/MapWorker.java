@@ -33,7 +33,7 @@ public class MapWorker extends Worker {
 			}
 			String path = dfs.getFolderPath() + file.getFilename();
 			ArrayDeque<String[]> KVPair = outfm.getKVPair(path);
-			Context context = new Context(path + "_out");
+			Context context = new Context(path + "_out", job);
 			for (String[] pair : KVPair) {
 				mapper.map(pair[0], pair[1], context);
 			}

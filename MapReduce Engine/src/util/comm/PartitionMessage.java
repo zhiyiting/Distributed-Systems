@@ -8,7 +8,6 @@ public class PartitionMessage extends Message {
 	private static final long serialVersionUID = 4718349054002088714L;
 	
 	private HashMap<Integer, ArrayDeque<String[]>> jobToPartition;
-	private int jobID;
 	
 	public PartitionMessage(String content, String host, int port) {
 		super(content, host, port);
@@ -26,13 +25,5 @@ public class PartitionMessage extends Message {
 		}
 		temp.addAll(partition);
 		jobToPartition.put(jobID, temp);
-	}
-
-	public int getJobID() {
-		return jobID;
-	}
-
-	public void setJobID(int jobID) {
-		this.jobID = jobID;
 	}
 }

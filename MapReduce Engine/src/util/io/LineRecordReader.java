@@ -3,6 +3,8 @@ package util.io;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+
+import util.core.Job;
 import conf.Configuration;
 
 public class LineRecordReader {
@@ -10,11 +12,13 @@ public class LineRecordReader {
 	private String path;
 	private int recordNum;
 	private long length;
+	private Job job;
 
-	public LineRecordReader(String path) {
+	public LineRecordReader(String path, Job job) {
 		this.path = path;
 		this.recordNum = 0;
 		this.length = 0;
+		this.job = job;
 	}
 
 	public int getRecordNum() {
@@ -23,7 +27,7 @@ public class LineRecordReader {
 			while (f.readLine() != null) {
 				length++;
 			}
-			recordNum = (int) (length / Configuration.RECORD_SIZE);
+			recordNum = (int) (length / job.conf.RECORD_SIZE);
 			f.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

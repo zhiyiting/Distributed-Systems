@@ -67,9 +67,9 @@ public class DFSMaster {
 		int taskID = 0;
 		for (String filename : inputDir.list()) {
 			String path = in + filename;
-			LineRecordReader reader = new LineRecordReader(path);
+			LineRecordReader reader = new LineRecordReader(path, job);
 			int recordNum = reader.getRecordNum();
-			LineRecordWriter writer = new LineRecordWriter(path);
+			LineRecordWriter writer = new LineRecordWriter(path, job);
 			for (int i = 0; i < recordNum; i++) {
 				FileSplit split = writer.createSplit(i, filename);
 				String fn = split.getFilename();
@@ -128,8 +128,8 @@ public class DFSMaster {
 		for (MapTask task : tasks) {
 			FileSplit split = task.getInput();
 			LineRecordWriter writer = new LineRecordWriter(
-					Configuration.INPUT_DIR + split.getOriginalName(),
-					split.getStart());
+					task.getJob().conf.INPUT_DIR + split.getOriginalName(),
+					split.getStart(), task.getJob());
 			Pair node = dfsNode.poll();
 			if (node != null && node.id == id) {
 				node = dfsNode.poll();

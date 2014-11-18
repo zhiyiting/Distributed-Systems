@@ -46,6 +46,7 @@ public class WordCount {
 
 		job.setMapperClass(MyMap.class);
 		job.setReducerClass(MyReduce.class);
+		job.setConfiguration("Config.xml");
 
 		ClientConsole client = new ClientConsole(job);
 		client.run();

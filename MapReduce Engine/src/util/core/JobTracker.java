@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import util.comm.CommModule;
@@ -51,7 +52,7 @@ public class JobTracker {
 	public void submitMapJob(String host, Job job) {
 		job.setID(getJobID());
 		// create and distribute splits
-		dfs.distributeFile(Configuration.INPUT_DIR, Configuration.REPLICA, job);
+		dfs.distributeFile(job.conf.INPUT_DIR, job.conf.REPLICA, job);
 		System.out.println("Start Job #" + job.getId());
 		synchronized (jobList) {
 			jobList.put(job.getId(), job);
@@ -64,7 +65,7 @@ public class JobTracker {
 
 	private synchronized void submitReduceJob(Job job) {
 		System.out.println("Start reducing job #" + job.getId());
-		int reducerNum = Configuration.REDUCER_NUM;
+		int reducerNum = job.conf.REDUCER_NUM;
 		int taskID = 0;
 		for (int i = 1; i <= reducerNum; i++) {
 			ReduceTask task = new ReduceTask();
@@ -91,13 +92,17 @@ public class JobTracker {
 		if (potential != null && potential.size() > 0) {
 			for (int i = 0; i < taskNum; i++) {
 				MapTask task;
+				int jobID = 0;
+				HashSet<Task> t = null;
 				do {
 					task = potential.pollFirst();
 					if (task == null)
 						break;
-				} while (jobAssignedTask.get(task.getJob().getId()) != null
-						&& jobAssignedTask.get(task.getJob().getId()).contains(
-								task));
+					jobID = task.getJob().getId();
+					t = jobAssignedTask.get(jobID);
+					if (t == null)
+						t = new HashSet<Task>();
+				} while (t.contains(task));
 				if (task == null) {
 					break;
 				}
@@ -105,9 +110,6 @@ public class JobTracker {
 				HashSet<MapTask> taskList = slaveRunningTask.get(slaveID);
 				taskList.add(task);
 				slaveRunningTask.put(slaveID, taskList);
-				int jobID = task.getJob().getId();
-				HashSet<Task> t = jobAssignedTask.get(jobID);
-				if (t == null) t = new HashSet<Task>();
 				t.add(task);
 				jobAssignedTask.put(jobID, t);
 			}
@@ -189,7 +191,7 @@ public class JobTracker {
 					Message msg = new Message(sb.toString(), toHost,
 							Configuration.CLIENT_PORT);
 					CommModule.send(msg, toHost, Configuration.CLIENT_PORT);
-					cleanUp(jobID);
+					//cleanUp(jobID);
 				}
 			} else {
 				System.out.println("Invalid task type");
@@ -267,5 +269,27 @@ public class JobTracker {
 	private synchronized int getSlaveID() {
 		slaveID++;
 		return slaveID;
+	}
+	
+	public void getRunningJobs() {
+		for (Entry<Integer, ArrayDeque<MapTask>> t: slaveMapTaskList.entrySet()) {
+			int slaveID = t.getKey();
+			Iterator<MapTask> it = t.getValue().iterator();
+			System.out.println("Slave " + slaveID);
+			while (it.hasNext()) {
+				MapTask task = it.next();
+				System.out.println(task.getJob().getId() + "  " + task.getTaskID());
+			}
+		}
+		
+		for (Entry<Integer, HashSet<MapTask>> t: jobMapTask.entrySet()) {
+			int jobID = t.getKey();
+			Iterator<MapTask> it = t.getValue().iterator();
+			System.out.println("Job " + jobID);
+			while (it.hasNext()) {
+				MapTask task = it.next();
+				System.out.println(task.getTaskID());
+			}
+		}
 	}
 }

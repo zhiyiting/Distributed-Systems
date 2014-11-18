@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import util.core.Job;
 import conf.Configuration;
 
 public class LineRecordWriter {
@@ -12,7 +13,7 @@ public class LineRecordWriter {
 	private RandomAccessFile f;
 	private int chunkSize;
 
-	public LineRecordWriter(String path) {
+	public LineRecordWriter(String path, Job job) {
 		try {
 			f = new RandomAccessFile(path, "r");
 		} catch (FileNotFoundException e) {
@@ -20,10 +21,10 @@ public class LineRecordWriter {
 			e.printStackTrace();
 		}
 		sb = new StringBuilder();
-		chunkSize = Configuration.RECORD_SIZE;
+		chunkSize = job.conf.RECORD_SIZE;
 	}
 	
-	public LineRecordWriter(String path, long start) {
+	public LineRecordWriter(String path, long start, Job job) {
 		try {
 			f = new RandomAccessFile(path, "r");
 			f.seek(start);
@@ -35,7 +36,7 @@ public class LineRecordWriter {
 			e.printStackTrace();
 		}
 		sb = new StringBuilder();
-		chunkSize = Configuration.RECORD_SIZE;
+		chunkSize = job.conf.RECORD_SIZE;
 	}
 
 	public FileSplit createSplit(int index, String filename) {

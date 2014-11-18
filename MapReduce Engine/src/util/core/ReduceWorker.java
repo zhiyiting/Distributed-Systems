@@ -25,10 +25,10 @@ public class ReduceWorker extends Worker {
 			Class<? extends Reducer> reducecls = job.getReducer();
 			int jobID = job.getId();
 			Reducer reducer = reducecls.newInstance();
-			String path = dfs.getFolderPath() + Configuration.OUTPUT_DIR
+			String path = dfs.getFolderPath() + job.conf.OUTPUT_DIR
 					+ "job" + jobID + "_part" + task.getSlaveID();
 			((ReduceTask) task).setOutput(path);
-			Context context = new Context(path);
+			Context context = new Context(path, job);
 			TreeMap<String, ArrayDeque<String>> partition = dfs
 					.getPartition(jobID);
 			for (Entry<String, ArrayDeque<String>> item : partition.entrySet()) {

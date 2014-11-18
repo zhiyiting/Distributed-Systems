@@ -10,6 +10,7 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import util.comm.SlaveListener;
 import util.io.FileChunk;
@@ -20,11 +21,11 @@ public class DFSClient {
 	private String folderPath;
 	private int fileNum;
 	private SlaveListener listener;
-	private HashMap<Integer, TreeMap<String, ArrayDeque<String>>> jobToPartition;
+	private ConcurrentHashMap<Integer, TreeMap<String, ArrayDeque<String>>> jobToPartition;
 
 	public DFSClient() {
 		fileNum = 0;
-		jobToPartition = new HashMap<Integer, TreeMap<String, ArrayDeque<String>>>();
+		jobToPartition = new ConcurrentHashMap<Integer, TreeMap<String, ArrayDeque<String>>>();
 		try {
 			setHost(InetAddress.getLocalHost().getHostName());
 		} catch (UnknownHostException e1) {
@@ -63,7 +64,7 @@ public class DFSClient {
 		}
 	}
 
-	public void addPartition(HashMap<Integer, ArrayDeque<String[]>> pa) {
+	public synchronized void addPartition(HashMap<Integer, ArrayDeque<String[]>> pa) {
 		for (Entry<Integer, ArrayDeque<String[]>> cur : pa.entrySet()) {
 			int jobID = cur.getKey();
 			ArrayDeque<String[]> p = cur.getValue();
@@ -88,7 +89,7 @@ public class DFSClient {
 		}
 	}
 
-	public TreeMap<String, ArrayDeque<String>> getPartition(int jobID) {
+	public synchronized TreeMap<String, ArrayDeque<String>> getPartition(int jobID) {
 		return jobToPartition.get(jobID);
 	}
 

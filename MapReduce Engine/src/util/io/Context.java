@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 
+import util.core.Job;
 import conf.Configuration;
 
 public class Context {
@@ -14,12 +15,14 @@ public class Context {
 	private ArrayDeque<String[]> buffer;
 	private String path;
 	private HashMap<Integer, ArrayDeque<String[]>> partition;
+	private Job job;
 	
 	
-	public Context(String path) {
+	public Context(String path, Job job) {
 		this.path = path;
 		buffer = new ArrayDeque<String[]>();
 		partition = new HashMap<Integer, ArrayDeque<String[]>>();
+		this.job = job;
 	}
 	
 	public void write(String key, String val) {
@@ -30,7 +33,7 @@ public class Context {
 	}
 	
 	public HashMap<Integer, ArrayDeque<String[]>> getPartition() {
-		int reduceNum = Configuration.REDUCER_NUM;
+		int reduceNum = job.conf.REDUCER_NUM;
 		for (int i = 1; i <= reduceNum; i++) {
 			ArrayDeque<String[]> temp = new ArrayDeque<String[]>();
 			partition.put(i, temp);

@@ -2,6 +2,7 @@ package util.core;
 
 import java.io.Serializable;
 
+import conf.Configuration;
 import util.api.Mapper;
 import util.api.OutputFormat;
 import util.api.Reducer;
@@ -15,6 +16,7 @@ public class Job implements Serializable{
 	private Class<? extends Mapper> mapper;
 	private Class<? extends Reducer> reducer;
 	private Class<? extends OutputFormat> outputformat;
+	public Configuration conf;
 
 	public Job(String jobName) {
 		this.name = jobName;
@@ -79,5 +81,9 @@ public class Job implements Serializable{
 
 	public void setOutputFormat(Class<? extends OutputFormat> outputformat) {
 		this.outputformat = outputformat;
+	}
+	
+	public void setConfiguration(String in) {
+		conf = new Configuration(in);
 	}
 }
