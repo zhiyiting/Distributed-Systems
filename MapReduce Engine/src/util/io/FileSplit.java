@@ -20,6 +20,10 @@ public class FileSplit implements Serializable {
 	public String getFilename() {
 		return this.filename + "_" + index;
 	}
+	
+	public String getOriginalName() {
+		return this.filename;
+	}
 
 	public long getStart() {
 		return this.start;

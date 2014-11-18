@@ -3,6 +3,7 @@ package util.core;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,13 +16,14 @@ import conf.Configuration;
 public class JobTracker {
 
 	private Map<Integer, Job> jobList;
-	private Map<Integer, String> jobToClient;
-	private Map<Integer, ArrayDeque<String>> jobToOutput;
-	private Map<Integer, ArrayDeque<MapTask>> slaveToMapTaskList;
-	private Map<Integer, ArrayDeque<ReduceTask>> slaveToReduceTaskList;
-	private Map<Integer, HashSet<MapTask>> jobToMapTask;
-	private Map<Integer, HashSet<ReduceTask>> jobToReduceTask;
-	private HashSet<Task> assignedTask;
+	private Map<Integer, String> jobClient;
+	private Map<Integer, ArrayDeque<String>> jobOutput;
+	private Map<Integer, ArrayDeque<MapTask>> slaveMapTaskList;
+	private Map<Integer, ArrayDeque<ReduceTask>> slaveReduceTaskList;
+	private Map<Integer, HashSet<MapTask>> slaveRunningTask;
+	private Map<Integer, HashSet<MapTask>> jobMapTask;
+	private Map<Integer, HashSet<ReduceTask>> jobReduceTask;
+	private Map<Integer, HashSet<Task>> jobAssignedTask;
 
 	private DFSMaster dfs;
 
@@ -35,28 +37,29 @@ public class JobTracker {
 		t.setDaemon(false);
 		t.start();
 		jobList = new ConcurrentHashMap<Integer, Job>();
-		slaveToMapTaskList = new ConcurrentHashMap<Integer, ArrayDeque<MapTask>>();
-		slaveToReduceTaskList = new ConcurrentHashMap<Integer, ArrayDeque<ReduceTask>>();
-		jobToMapTask = new ConcurrentHashMap<Integer, HashSet<MapTask>>();
-		jobToReduceTask = new ConcurrentHashMap<Integer, HashSet<ReduceTask>>();
-		assignedTask = new HashSet<Task>();
-		jobToClient = new ConcurrentHashMap<Integer, String>();
-		jobToOutput = new ConcurrentHashMap<Integer, ArrayDeque<String>>();
+		slaveMapTaskList = new ConcurrentHashMap<Integer, ArrayDeque<MapTask>>();
+		slaveReduceTaskList = new ConcurrentHashMap<Integer, ArrayDeque<ReduceTask>>();
+		slaveRunningTask = new ConcurrentHashMap<Integer, HashSet<MapTask>>();
+		jobMapTask = new ConcurrentHashMap<Integer, HashSet<MapTask>>();
+		jobReduceTask = new ConcurrentHashMap<Integer, HashSet<ReduceTask>>();
+		jobAssignedTask = new ConcurrentHashMap<Integer, HashSet<Task>>();
+		jobClient = new ConcurrentHashMap<Integer, String>();
+		jobOutput = new ConcurrentHashMap<Integer, ArrayDeque<String>>();
 		dfs = new DFSMaster(this);
 	}
 
 	public void submitMapJob(String host, Job job) {
 		job.setID(getJobID());
+		// create and distribute splits
+		dfs.distributeFile(Configuration.INPUT_DIR, Configuration.REPLICA, job);
 		System.out.println("Start Job #" + job.getId());
 		synchronized (jobList) {
 			jobList.put(job.getId(), job);
 		}
-		synchronized (jobToClient) {
-			jobToClient.put(job.getId(), host);
+		synchronized (jobClient) {
+			jobClient.put(job.getId(), host);
 		}
 		System.out.println("Start mapping job #" + job.getId());
-		// create and distribute splits
-		dfs.distributeFile(Configuration.INPUT_DIR, Configuration.REPLICA, job);
 	}
 
 	private synchronized void submitReduceJob(Job job) {
@@ -70,13 +73,13 @@ public class JobTracker {
 			task.setTaskID(taskID);
 			ArrayDeque<ReduceTask> tasks = new ArrayDeque<ReduceTask>();
 			tasks.push(task);
-			slaveToReduceTaskList.put(i, tasks);
-			HashSet<ReduceTask> hs = jobToReduceTask.get(job.getId());
+			slaveReduceTaskList.put(i, tasks);
+			HashSet<ReduceTask> hs = jobReduceTask.get(job.getId());
 			if (hs == null) {
 				hs = new HashSet<ReduceTask>();
 			}
 			hs.add(task);
-			jobToReduceTask.put(job.getId(), hs);
+			jobReduceTask.put(job.getId(), hs);
 			taskID++;
 		}
 	}
@@ -84,7 +87,7 @@ public class JobTracker {
 	public synchronized ArrayDeque<MapTask> assignMapTask(int slaveID,
 			int taskNum) {
 		ArrayDeque<MapTask> tasks = new ArrayDeque<MapTask>();
-		ArrayDeque<MapTask> potential = slaveToMapTaskList.get(slaveID);
+		ArrayDeque<MapTask> potential = slaveMapTaskList.get(slaveID);
 		if (potential != null && potential.size() > 0) {
 			for (int i = 0; i < taskNum; i++) {
 				MapTask task;
@@ -92,12 +95,21 @@ public class JobTracker {
 					task = potential.pollFirst();
 					if (task == null)
 						break;
-				} while (assignedTask.contains(task));
+				} while (jobAssignedTask.get(task.getJob().getId()) != null
+						&& jobAssignedTask.get(task.getJob().getId()).contains(
+								task));
 				if (task == null) {
 					break;
 				}
 				tasks.add(task);
-				assignedTask.add(task);
+				HashSet<MapTask> taskList = slaveRunningTask.get(slaveID);
+				taskList.add(task);
+				slaveRunningTask.put(slaveID, taskList);
+				int jobID = task.getJob().getId();
+				HashSet<Task> t = jobAssignedTask.get(jobID);
+				if (t == null) t = new HashSet<Task>();
+				t.add(task);
+				jobAssignedTask.put(jobID, t);
 			}
 		}
 		return tasks;
@@ -106,7 +118,7 @@ public class JobTracker {
 	public synchronized ArrayDeque<ReduceTask> assignReduceTask(int slaveID,
 			int taskNum) {
 		ArrayDeque<ReduceTask> tasks = new ArrayDeque<ReduceTask>();
-		ArrayDeque<ReduceTask> potential = slaveToReduceTaskList.get(slaveID);
+		ArrayDeque<ReduceTask> potential = slaveReduceTaskList.get(slaveID);
 		if (potential != null && potential.size() > 0) {
 			for (int i = 0; i < taskNum; i++) {
 				ReduceTask task;
@@ -114,12 +126,16 @@ public class JobTracker {
 					task = potential.pollFirst();
 					if (task == null)
 						break;
-				} while (assignedTask.contains(task));
+				} while (jobAssignedTask.get(task.getJob().getId()).contains(
+						task));
 				if (task == null) {
 					break;
 				}
 				tasks.add(task);
-				assignedTask.add(task);
+				HashSet<Task> t = jobAssignedTask.get(jobID);
+				int jobID = task.getJob().getId();
+				t.add(task);
+				jobAssignedTask.put(jobID, t);
 			}
 		}
 		return tasks;
@@ -130,43 +146,50 @@ public class JobTracker {
 			int jobID = task.getJob().getId();
 			// if the job is in mapping process
 			if (task.getType() == 'M') {
-				HashSet<MapTask> hs = jobToMapTask.get(jobID);
+				int slaveID = task.getSlaveID();
+				HashSet<MapTask> running = slaveRunningTask.get(slaveID);
+				running.remove(task);
+				slaveRunningTask.put(slaveID, running);
+				HashSet<MapTask> hs = jobMapTask.get(jobID);
 				hs.remove(task);
 				if (hs.isEmpty()) {
 					// start reduce for this job
-					jobToMapTask.remove(jobID);
+					jobMapTask.remove(jobID);
 					System.out.println("Finished mapping job #" + jobID);
 					submitReduceJob(task.getJob());
 					return;
 				}
-				jobToMapTask.put(jobID, hs);
+				System.out.println("Map task remaining size: " + hs.size());
+				jobMapTask.put(jobID, hs);
 			}
 			// if the job is in reducing process
 			else if (task.getType() == 'R') {
-				HashSet<ReduceTask> hs = jobToReduceTask.get(jobID);
+				HashSet<ReduceTask> hs = jobReduceTask.get(jobID);
 				hs.remove(task);
 				String path = ((ReduceTask) task).getOutput();
-				ArrayDeque<String> curOutput = jobToOutput.get(jobID);
+				ArrayDeque<String> curOutput = jobOutput.get(jobID);
 				if (curOutput == null) {
 					curOutput = new ArrayDeque<String>();
 				}
 				curOutput.add(path);
-				jobToOutput.put(jobID, curOutput);
+				jobOutput.put(jobID, curOutput);
 				System.out.println("Reducing output generated at " + path);
 				if (hs.isEmpty()) {
-					jobToReduceTask.remove(jobID);
+					jobReduceTask.remove(jobID);
 					System.out.println("Job #" + jobID + " finished.");
-					String toHost = jobToClient.get(jobID);
+					String toHost = jobClient.get(jobID);
 					StringBuilder sb = new StringBuilder();
 					sb.append("Job #" + jobID + " finished.\n");
 					sb.append("Generated output location on DFS: \n\t");
-					ArrayDeque<String> outputs = jobToOutput.get(jobID);
+					ArrayDeque<String> outputs = jobOutput.get(jobID);
 					for (String s : outputs) {
 						sb.append(s);
 						sb.append("\n\t");
 					}
-					Message msg = new Message(sb.toString(), toHost, Configuration.CLIENT_PORT);
+					Message msg = new Message(sb.toString(), toHost,
+							Configuration.CLIENT_PORT);
 					CommModule.send(msg, toHost, Configuration.CLIENT_PORT);
+					cleanUp(jobID);
 				}
 			} else {
 				System.out.println("Invalid task type");
@@ -177,32 +200,57 @@ public class JobTracker {
 	public synchronized int addSlave(String host) {
 		dfs.addSlave(getSlaveID(), host);
 		ArrayDeque<MapTask> hs = new ArrayDeque<MapTask>();
-		slaveToMapTaskList.put(slaveID, hs);
+		slaveMapTaskList.put(slaveID, hs);
+		HashSet<MapTask> t = new HashSet<MapTask>();
+		slaveRunningTask.put(slaveID, t);
 		return slaveID;
 	}
 
 	public synchronized void addQueuedMapTask(int n, MapTask task) {
-		ArrayDeque<MapTask> taskList = slaveToMapTaskList.get(n);
+		ArrayDeque<MapTask> taskList = slaveMapTaskList.get(n);
 		taskList.push(task);
-		slaveToMapTaskList.put(n, taskList);
+		slaveMapTaskList.put(n, taskList);
 		int jobID = task.getJob().getId();
-		HashSet<MapTask> tasks = jobToMapTask.get(jobID);
+		HashSet<MapTask> tasks = jobMapTask.get(jobID);
 		if (tasks == null) {
 			tasks = new HashSet<MapTask>();
 		}
-		tasks.add(task);
-		jobToMapTask.put(jobID, tasks);
+		if (!tasks.contains(task)) {
+			tasks.add(task);
+			jobMapTask.put(jobID, tasks);
+		}
 	}
 
 	public HashMap<Integer, String> getSlaveList() {
 		return dfs.getSlaveList();
 	}
 
-	public void list() {
-
+	public synchronized void loseContact(int id) {
+		slaveMapTaskList.remove(id);
+		slaveReduceTaskList.remove(id);
+		dfs.removeSlave(id);
+		dfs.enforceReplication(id, slaveMapTaskList.get(id));
 	}
 
-	public void stop() {
+	public synchronized ArrayDeque<MapTask> getRunningMapList(int id) {
+		ArrayDeque<MapTask> list = new ArrayDeque<MapTask>();
+		HashSet<MapTask> tasks = slaveRunningTask.get(id);
+		Iterator<MapTask> it = tasks.iterator();
+		while (it.hasNext()) {
+			MapTask t = it.next();
+			list.add(t);
+			jobAssignedTask.get(t.getJob().getId()).remove(t);
+		}
+		tasks.clear();
+		slaveRunningTask.put(id, tasks);
+		return list;
+	}
+
+	private synchronized void cleanUp(int jobID) {
+		HashSet<MapTask> m = new HashSet<MapTask>();
+		jobMapTask.put(jobID, m);
+		HashSet<ReduceTask> r = new HashSet<ReduceTask>();
+		jobReduceTask.put(jobID, r);
 
 	}
 

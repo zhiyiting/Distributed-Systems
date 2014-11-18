@@ -82,7 +82,8 @@ public class SlaveMessenger implements Runnable {
 					msg.setSlaveID(slaveID);
 					ret = commModule.send(msg);
 				} else {
-					Message msg = new Message("busy", toHost, toPort);
+					WorkMessage msg = new WorkMessage("busy", toHost, toPort);
+					msg.setSlaveID(slaveID);
 					ret = commModule.send(msg);
 				}
 				dispatch(ret);
@@ -90,7 +91,8 @@ public class SlaveMessenger implements Runnable {
 				HashMap<Integer, HashMap<Integer, ArrayDeque<String[]>>> partitions = tracker
 						.getPartition();
 				if (partitions.size() > 0) {
-					Message msg = new Message("slave", toHost, toPort);
+					WorkMessage msg = new WorkMessage("slave", toHost, toPort);
+					msg.setSlaveID(slaveID);
 					ret = commModule.send(msg);
 					dispatch(ret);
 					HashMap<Integer, String> slaveList = tracker.getSlaveList();

@@ -25,7 +25,6 @@ public class CoordinatorConsole implements Runnable {
 				switch (in) {
 				// print all the jobs and associated mappers
 				case "list":
-					tracker.list();
 					break;
 				// stop the node
 				case "quit":

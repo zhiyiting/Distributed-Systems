@@ -18,8 +18,9 @@ public class CoordDispatcher implements Runnable {
 	private boolean canRun;
 	private JobTracker tracker;
 	private Socket socket;
+	private SlaveMonitor slaveMonitor;
 
-	public CoordDispatcher(Socket socket, JobTracker tracker) {
+	public CoordDispatcher(Socket socket, JobTracker tracker, SlaveMonitor monitor) {
 		try {
 			this.in = new ObjectInputStream(socket.getInputStream());
 			this.out = new ObjectOutputStream(socket.getOutputStream());
@@ -30,6 +31,7 @@ public class CoordDispatcher implements Runnable {
 		canRun = true;
 		this.socket = socket;
 		this.tracker = tracker;
+		this.slaveMonitor = monitor;
 	}
 
 	private Message dispatch(Message m) {
@@ -47,7 +49,7 @@ public class CoordDispatcher implements Runnable {
 			ret = new Message(tracker.toString());
 			break;
 		case "stop":
-			tracker.stop();
+			//tracker.stop();
 			ret = new Message("Job stopped");
 			break;
 		// from slaves
@@ -55,6 +57,7 @@ public class CoordDispatcher implements Runnable {
 			int slaveID = tracker.addSlave(socket.getInetAddress()
 					.getHostName());
 			ret = new Message(String.valueOf(slaveID));
+			slaveMonitor.resetSlave(slaveID);
 			System.out.println("Slave #" + slaveID + "("
 					+ socket.getInetAddress().getHostName() + ") connected");
 			break;
@@ -77,13 +80,16 @@ public class CoordDispatcher implements Runnable {
 					((TaskMessage) ret).setReduceTask(reduces);
 				}
 			}
+			slaveMonitor.resetSlave(msg.getSlaveID());
 			tracker.markDone(msg.getFinishedTask());
 			break;
 		case "busy":
 			ret = new Message("ACK");
+			slaveMonitor.resetSlave(((WorkMessage)m).getSlaveID());
 			break;
 		case "slave":
 			ret = new ShowSlaveMessage("slave");
+			slaveMonitor.resetSlave(((WorkMessage)m).getSlaveID());
 			((ShowSlaveMessage) ret).setSlaveList(tracker.getSlaveList());
 			break;
 		default:
