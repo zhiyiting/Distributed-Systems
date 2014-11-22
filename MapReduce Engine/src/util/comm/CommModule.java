@@ -25,7 +25,7 @@ public class CommModule {
 	 * 
 	 * @param message
 	 * @return return message
-	 * @throws RemoteException 
+	 * @throws RemoteException
 	 */
 	public Message send(Message msg) throws RemoteException {
 		try {
@@ -47,8 +47,8 @@ public class CommModule {
 			out.writeObject(msg);
 			out.flush();
 			// get the return message from the socket
-			Message o = (Message)in.readObject();
-			if(o == null) {
+			Message o = (Message) in.readObject();
+			if (o == null) {
 				throw new RemoteException("can't connect to server");
 			}
 			return o;
@@ -61,12 +61,21 @@ public class CommModule {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Function to send a message with specific destination
+	 * 
+	 * @param message
+	 * @param toHost
+	 * @param toPort
+	 */
 	public static void send(Message m, String toHost, int toPort) {
 		try {
 			Socket socket = new Socket(toHost, toPort);
-			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+			ObjectOutputStream out = new ObjectOutputStream(
+					socket.getOutputStream());
+			ObjectInputStream in = new ObjectInputStream(
+					socket.getInputStream());
 			out.writeObject(m);
 			out.flush();
 			in.readObject();

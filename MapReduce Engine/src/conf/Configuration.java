@@ -7,6 +7,12 @@ import java.io.Serializable;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
 
+/**
+ * Configuration class will read information from an xml file
+ * 
+ * @author zhiyiting
+ *
+ */
 public class Configuration implements Serializable {
 
 	private static final long serialVersionUID = 2425337396764969957L;
@@ -28,6 +34,8 @@ public class Configuration implements Serializable {
 		config = new Properties();
 		try {
 			config.loadFromXML(new FileInputStream(in));
+			// following fields can be configured in the file at runtime
+			// other fields cannot be changed once it's compiled
 			INPUT_DIR = config.getProperty("input dir") + "/";
 			OUTPUT_DIR = config.getProperty("output dir") + "/";
 			RECORD_SIZE = Integer.parseInt(config.getProperty("record size"));

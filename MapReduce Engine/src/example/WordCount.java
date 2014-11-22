@@ -9,15 +9,22 @@ import util.console.ClientConsole;
 import util.core.Job;
 import util.io.Context;
 
+/**
+ * A Word Count example
+ * 
+ * @author zhiyiting
+ *
+ */
 public class WordCount {
 
-	public static class MyMap extends Mapper {
-
+	// custom mapper class for word count
+	public static class WordCountMapper extends Mapper {
 		public void map(String key, String value, Context context) {
 			String line = value.toString();
 			StringTokenizer tokenizer = new StringTokenizer(line);
 			while (tokenizer.hasMoreTokens()) {
 				String word = tokenizer.nextToken();
+				// filter the unnecessary symbols
 				Pattern pattern = Pattern.compile("[^\\w]*(\\w?.*\\w)[^\\w]*");
 				Matcher matcher = pattern.matcher(word);
 				if (matcher.find()) {
@@ -30,7 +37,8 @@ public class WordCount {
 		}
 	}
 
-	public static class MyReduce extends Reducer {
+	// custom reducer class for word count
+	public static class WordCountReducer extends Reducer {
 		public void reduce(String key, Iterable<String> values, Context context) {
 			int sum = 0;
 			for (String val : values) {
@@ -41,15 +49,20 @@ public class WordCount {
 	}
 
 	public static void main(String[] args) throws Exception {
-
+		// name the job
 		Job job = new Job("wordcount");
-
-		job.setMapperClass(MyMap.class);
-		job.setReducerClass(MyReduce.class);
+		// set mapper, reducer and configuration
+		job.setMapperClass(WordCountMapper.class);
+		job.setReducerClass(WordCountReducer.class);
 		job.setConfiguration("Config.xml");
 
+		// start the job and wait for termination
 		ClientConsole client = new ClientConsole(job);
 		client.run();
+		while (!client.isFinished()) {
+			Thread.sleep(5000);
+		}
+		System.exit(0);
 	}
 
 }

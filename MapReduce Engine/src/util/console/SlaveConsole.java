@@ -7,13 +7,22 @@ import java.io.InputStreamReader;
 import util.comm.SlaveMessenger;
 import util.core.TaskTracker;
 
-public class SlaveConsole implements Runnable{
+/**
+ * Slave node
+ * 
+ * @author zhiyiting
+ *
+ */
+public class SlaveConsole implements Runnable {
 
 	private boolean canRun;
 	private BufferedReader br;
 	private TaskTracker tracker;
 	private SlaveMessenger messenger;
-	
+
+	/**
+	 * Start a heart-beat messenger and task tracker
+	 */
 	public SlaveConsole() {
 		this.canRun = true;
 		this.br = new BufferedReader(new InputStreamReader(System.in));
@@ -21,9 +30,12 @@ public class SlaveConsole implements Runnable{
 		this.messenger = new SlaveMessenger(tracker);
 		Thread t = new Thread(messenger);
 		t.setDaemon(false);
-		t.start();	
+		t.start();
 	}
 
+	/**
+	 * Slave shell
+	 */
 	@Override
 	public void run() {
 		while (canRun) {
@@ -39,13 +51,13 @@ public class SlaveConsole implements Runnable{
 				// stop the node
 				case "quit":
 					canRun = false;
-					break;			
+					break;
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
 

@@ -7,7 +7,13 @@ import util.api.Mapper;
 import util.api.OutputFormat;
 import util.api.Reducer;
 
-public class Job implements Serializable{
+/**
+ * Job class defines the components in a job
+ * 
+ * @author zhiyiting
+ *
+ */
+public class Job implements Serializable {
 
 	private static final long serialVersionUID = -8502305018282114686L;
 	private int id;
@@ -26,37 +32,29 @@ public class Job implements Serializable{
 		this.reducer = null;
 		this.outputformat = null;
 	}
-	
+
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public void setID(int n) {
 		this.setId(n);
 	}
-	
+
 	public void setMapperClass(Class<? extends Mapper> cls) {
 		this.mapper = cls;
 	}
-	
+
 	public Class<? extends Mapper> getMapper() {
 		return this.mapper;
 	}
-	
+
 	public void setReducerClass(Class<? extends Reducer> cls) {
 		this.reducer = cls;
 	}
-	
+
 	public Class<? extends Reducer> getReducer() {
 		return this.reducer;
-	}
-	
-	public void setInputFormatClass(Class <?> cls) {
-		
-	}
-	
-	public void setOutputFormatClass(Class <?> cls) {
-		
 	}
 
 	public int getId() {
@@ -82,7 +80,7 @@ public class Job implements Serializable{
 	public void setOutputFormat(Class<? extends OutputFormat> outputformat) {
 		this.outputformat = outputformat;
 	}
-	
+
 	public void setConfiguration(String in) {
 		conf = new Configuration(in);
 	}

@@ -9,6 +9,12 @@ import util.dfs.DFSClient;
 import util.io.Context;
 import util.io.FileSplit;
 
+/**
+ * MapWorker class do the map task
+ * 
+ * @author zhiyiting
+ *
+ */
 public class MapWorker extends Worker {
 
 	public MapWorker(Task t, TaskTracker trk, DFSClient dfs) {
@@ -18,14 +24,17 @@ public class MapWorker extends Worker {
 	@Override
 	public void run() {
 		Job job = task.getJob();
-		System.out.println("running map task #" + task.getTaskID());
+		System.out.println("Running map task: Job " + job.getId() + " Task "
+				+ task.getTaskID());
 		task.setStatus(Status.RUNNING);
 		try {
+			// get new instance of the map and output format
 			Class<? extends Mapper> mapcls = job.getMapper();
 			Mapper mapper = mapcls.newInstance();
 			FileSplit file = task.getInput();
 			Class<? extends OutputFormat> outcls = job.getOutputFormat();
 			OutputFormat outfm;
+			// get the default output format if not defined
 			if (outcls == null) {
 				outfm = new OutputFormat();
 			} else {
@@ -38,9 +47,10 @@ public class MapWorker extends Worker {
 				mapper.map(pair[0], pair[1], context);
 			}
 			context.generateOutput();
+			// add partition
 			tracker.addPartition(job.getId(), context.getPartition());
 			tracker.finishMapTask((MapTask) task);
-			System.out.println("Job #" + task.getJob().getId() + " Task #"
+			System.out.println("Job " + job.getId() + " Task "
 					+ task.getTaskID() + " finished");
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block

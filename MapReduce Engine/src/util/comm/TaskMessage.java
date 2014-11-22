@@ -5,6 +5,12 @@ import java.util.ArrayDeque;
 import util.core.MapTask;
 import util.core.ReduceTask;
 
+/**
+ * TaskMessage to be transmitted for assigning and reporting tasks
+ * 
+ * @author zhiyiting
+ *
+ */
 public class TaskMessage extends Message {
 
 	private static final long serialVersionUID = -7201557988860331942L;

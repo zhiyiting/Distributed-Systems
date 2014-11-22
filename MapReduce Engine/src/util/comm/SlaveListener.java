@@ -7,11 +7,22 @@ import java.net.Socket;
 import util.dfs.DFSClient;
 import conf.Configuration;
 
-public class SlaveListener implements Runnable{
+/**
+ * SlaveListener class to listen for incoming messages at slave side
+ * 
+ * @author zhiyiting
+ *
+ */
+public class SlaveListener implements Runnable {
 
 	private ServerSocket serverSocket;
 	private DFSClient dfs;
-	
+
+	/**
+	 * Listens on a given port
+	 * 
+	 * @param dfs
+	 */
 	public SlaveListener(DFSClient dfs) {
 		int port = Configuration.SERVER_PORT;
 		try {
@@ -24,7 +35,10 @@ public class SlaveListener implements Runnable{
 		}
 		this.dfs = dfs;
 	}
-	
+
+	/**
+	 * Receiving an incoming message, start a dispatcher thread to process it
+	 */
 	@Override
 	public void run() {
 		while (true) {
@@ -38,7 +52,7 @@ public class SlaveListener implements Runnable{
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 }

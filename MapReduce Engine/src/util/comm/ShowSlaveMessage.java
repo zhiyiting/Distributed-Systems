@@ -2,8 +2,14 @@ package util.comm;
 
 import java.util.HashMap;
 
+/**
+ * Message to be transmitted for slave purpose
+ * 
+ * @author zhiyiting
+ *
+ */
 public class ShowSlaveMessage extends Message {
-	
+
 	private static final long serialVersionUID = -7406401747697018708L;
 	private HashMap<Integer, String> slaveList;
 

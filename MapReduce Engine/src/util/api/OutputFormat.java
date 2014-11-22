@@ -7,18 +7,27 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayDeque;
 
+/**
+ * OutputFormat class parse the file by lines to generate output
+ * User can extend it with custom output format class
+ * 
+ * @author zhiyiting
+ *
+ */
 public class OutputFormat {
 
-	public OutputFormat() {
-
-	}
-
+	/**
+	 * Get key-value pair from the input file
+	 * @param path
+	 * @return key-value pairs
+	 */
 	public ArrayDeque<String[]> getKVPair(String path) {
 		ArrayDeque<String[]> result = new ArrayDeque<String[]>();
 		File file = new File(path);
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			String line;
+			// read the file line by line
 			while ((line = br.readLine()) != null) {
 				String[] pair = { "", line };
 				result.add(pair);

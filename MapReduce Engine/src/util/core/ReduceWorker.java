@@ -4,7 +4,6 @@ import java.util.ArrayDeque;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import conf.Configuration;
 import util.api.Reducer;
 import util.core.Task.Status;
 import util.dfs.DFSClient;

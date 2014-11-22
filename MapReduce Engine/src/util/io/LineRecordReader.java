@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import util.core.Job;
-import conf.Configuration;
 
 public class LineRecordReader {
 

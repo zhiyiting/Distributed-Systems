@@ -7,6 +7,12 @@ import java.net.Socket;
 
 import util.dfs.DFSClient;
 
+/**
+ * Dispatcher class at the slave side; parse the incoming messages
+ * 
+ * @author zhiyiting
+ *
+ */
 public class SlaveDispatcher implements Runnable {
 
 	private ObjectInputStream in;
@@ -26,17 +32,24 @@ public class SlaveDispatcher implements Runnable {
 		this.dfs = dfs;
 	}
 
+	/**
+	 * Dispatch the incoming message
+	 * 
+	 * @param message
+	 * @return reply message
+	 */
 	private Message dispatch(Message m) {
 		Message ret = null;
 		String method = m.getContent();
 		switch (method) {
-		// from client
 		case "distribute":
+			// get and create distributed from another node
 			DFSMessage msg = (DFSMessage) m;
 			dfs.createFile(msg.getFile());
 			ret = new Message("ACK");
 			break;
 		case "partition":
+			// get and save the partition file from another node
 			PartitionMessage pm = (PartitionMessage) m;
 			dfs.addPartition(pm.getPartition());
 			ret = new Message("ACK");
@@ -71,6 +84,9 @@ public class SlaveDispatcher implements Runnable {
 		}
 	}
 
+	/**
+	 * Stop the dispatcher
+	 */
 	public void stop() {
 		canRun = false;
 	}

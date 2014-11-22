@@ -14,23 +14,42 @@ import util.comm.Message;
 import util.dfs.DFSMaster;
 import conf.Configuration;
 
+/**
+ * Job tracker class to coordinate and process the jobs submitted
+ * 
+ * @author zhiyiting
+ *
+ */
 public class JobTracker {
 
+	// map job id with job
 	private Map<Integer, Job> jobList;
+	// map job id to its submission client
 	private Map<Integer, String> jobClient;
+	// map job id to its output folder
 	private Map<Integer, ArrayDeque<String>> jobOutput;
+	// map slave id to list of map tasks to be run on this slave
 	private Map<Integer, ArrayDeque<MapTask>> slaveMapTaskList;
+	// map slave id to list of reduce tasks to be run on this slave
 	private Map<Integer, ArrayDeque<ReduceTask>> slaveReduceTaskList;
+	// map slave id to the task it is running
 	private Map<Integer, HashSet<MapTask>> slaveRunningTask;
+	// map job id to associated map tasks
 	private Map<Integer, HashSet<MapTask>> jobMapTask;
+	// map job id to associated reduce tasks
 	private Map<Integer, HashSet<ReduceTask>> jobReduceTask;
+	// map job id to associated tasks that has been assigned
 	private Map<Integer, HashSet<Task>> jobAssignedTask;
 
+	// dfs master node
 	private DFSMaster dfs;
 
 	private int slaveID = 0;
 	private int jobID = 0;
 
+	/**
+	 * Constructor to initialize the job tracker
+	 */
 	public JobTracker() {
 		CoordListener listener = new CoordListener(Configuration.SERVER_PORT,
 				this);
@@ -49,6 +68,12 @@ public class JobTracker {
 		dfs = new DFSMaster(this);
 	}
 
+	/**
+	 * get job id and distribute the input files
+	 * 
+	 * @param host
+	 * @param job
+	 */
 	public void submitMapJob(String host, Job job) {
 		job.setID(getJobID());
 		// create and distribute splits
@@ -60,9 +85,18 @@ public class JobTracker {
 		synchronized (jobClient) {
 			jobClient.put(job.getId(), host);
 		}
+		synchronized (jobAssignedTask) {
+			HashSet<Task> hs = new HashSet<Task>();
+			jobAssignedTask.put(job.getId(), hs);
+		}
 		System.out.println("Start mapping job #" + job.getId());
 	}
 
+	/**
+	 * create reduce tasks
+	 * 
+	 * @param job
+	 */
 	private synchronized void submitReduceJob(Job job) {
 		System.out.println("Start reducing job #" + job.getId());
 		int reducerNum = job.conf.REDUCER_NUM;
@@ -85,6 +119,13 @@ public class JobTracker {
 		}
 	}
 
+	/**
+	 * Function to return a list of to do tasks for a given slave
+	 * 
+	 * @param slaveID
+	 * @param taskNum
+	 * @return map tasks to do
+	 */
 	public synchronized ArrayDeque<MapTask> assignMapTask(int slaveID,
 			int taskNum) {
 		ArrayDeque<MapTask> tasks = new ArrayDeque<MapTask>();
@@ -94,29 +135,40 @@ public class JobTracker {
 				MapTask task;
 				int jobID = 0;
 				HashSet<Task> t = null;
+				// check if the task has been assigned to other slaves
 				do {
 					task = potential.pollFirst();
 					if (task == null)
 						break;
 					jobID = task.getJob().getId();
 					t = jobAssignedTask.get(jobID);
-					if (t == null)
-						t = new HashSet<Task>();
 				} while (t.contains(task));
 				if (task == null) {
 					break;
 				}
+				// add unassigned task to return value
 				tasks.add(task);
+				// add the task to slave to task running list
 				HashSet<MapTask> taskList = slaveRunningTask.get(slaveID);
 				taskList.add(task);
 				slaveRunningTask.put(slaveID, taskList);
+				// add the job and task to assigned list
 				t.add(task);
 				jobAssignedTask.put(jobID, t);
+				// update the slave to map task list
+				slaveMapTaskList.put(slaveID, potential);
 			}
 		}
 		return tasks;
 	}
 
+	/**
+	 * Function to return a list of to do reduce tasks for the slave
+	 * 
+	 * @param slaveID
+	 * @param taskNum
+	 * @return to do reduce task
+	 */
 	public synchronized ArrayDeque<ReduceTask> assignReduceTask(int slaveID,
 			int taskNum) {
 		ArrayDeque<ReduceTask> tasks = new ArrayDeque<ReduceTask>();
@@ -133,27 +185,37 @@ public class JobTracker {
 				if (task == null) {
 					break;
 				}
+				// update the lists
 				tasks.add(task);
 				HashSet<Task> t = jobAssignedTask.get(jobID);
 				int jobID = task.getJob().getId();
 				t.add(task);
 				jobAssignedTask.put(jobID, t);
+				slaveReduceTaskList.put(slaveID, potential);
 			}
 		}
 		return tasks;
 	}
 
+	/**
+	 * mark the tasks done and update the lists
+	 * 
+	 * @param finishedTask
+	 */
 	public synchronized void markDone(ArrayDeque<Task> finishedTask) {
 		for (Task task : finishedTask) {
 			int jobID = task.getJob().getId();
 			// if the job is in mapping process
 			if (task.getType() == 'M') {
 				int slaveID = task.getSlaveID();
+				// get the running tasks and remove the finished ones
 				HashSet<MapTask> running = slaveRunningTask.get(slaveID);
 				running.remove(task);
 				slaveRunningTask.put(slaveID, running);
+				// remove the task from job task list
 				HashSet<MapTask> hs = jobMapTask.get(jobID);
 				hs.remove(task);
+				// check if there is remaining task
 				if (hs.isEmpty()) {
 					// start reduce for this job
 					jobMapTask.remove(jobID);
@@ -161,7 +223,6 @@ public class JobTracker {
 					submitReduceJob(task.getJob());
 					return;
 				}
-				System.out.println("Map task remaining size: " + hs.size());
 				jobMapTask.put(jobID, hs);
 			}
 			// if the job is in reducing process
@@ -173,16 +234,16 @@ public class JobTracker {
 				if (curOutput == null) {
 					curOutput = new ArrayDeque<String>();
 				}
+				// add the output path to the list
 				curOutput.add(path);
 				jobOutput.put(jobID, curOutput);
 				System.out.println("Reducing output generated at " + path);
+				// if all the reduce jobs finished, report to the client
 				if (hs.isEmpty()) {
 					jobReduceTask.remove(jobID);
 					System.out.println("Job #" + jobID + " finished.");
 					String toHost = jobClient.get(jobID);
 					StringBuilder sb = new StringBuilder();
-					sb.append("Job #" + jobID + " finished.\n");
-					sb.append("Generated output location on DFS: \n\t");
 					ArrayDeque<String> outputs = jobOutput.get(jobID);
 					for (String s : outputs) {
 						sb.append(s);
@@ -191,7 +252,6 @@ public class JobTracker {
 					Message msg = new Message(sb.toString(), toHost,
 							Configuration.CLIENT_PORT);
 					CommModule.send(msg, toHost, Configuration.CLIENT_PORT);
-					//cleanUp(jobID);
 				}
 			} else {
 				System.out.println("Invalid task type");
@@ -199,8 +259,16 @@ public class JobTracker {
 		}
 	}
 
+	/**
+	 * Function to add slave node to the job tracker
+	 * 
+	 * @param host
+	 * @return slave ID
+	 */
 	public synchronized int addSlave(String host) {
+		// report the dfs node
 		dfs.addSlave(getSlaveID(), host);
+		// initialize the lists
 		ArrayDeque<MapTask> hs = new ArrayDeque<MapTask>();
 		slaveMapTaskList.put(slaveID, hs);
 		HashSet<MapTask> t = new HashSet<MapTask>();
@@ -208,10 +276,16 @@ public class JobTracker {
 		return slaveID;
 	}
 
-	public synchronized void addQueuedMapTask(int n, MapTask task) {
-		ArrayDeque<MapTask> taskList = slaveMapTaskList.get(n);
+	/**
+	 * Function to add map tasks to the list
+	 * 
+	 * @param slave ID
+	 * @param task
+	 */
+	public synchronized void addQueuedMapTask(int slaveID, MapTask task) {
+		ArrayDeque<MapTask> taskList = slaveMapTaskList.get(slaveID);
 		taskList.push(task);
-		slaveMapTaskList.put(n, taskList);
+		slaveMapTaskList.put(slaveID, taskList);
 		int jobID = task.getJob().getId();
 		HashSet<MapTask> tasks = jobMapTask.get(jobID);
 		if (tasks == null) {
@@ -223,10 +297,20 @@ public class JobTracker {
 		}
 	}
 
+	/**
+	 * Function to get active slave list
+	 * 
+	 * @return list of slaves
+	 */
 	public HashMap<Integer, String> getSlaveList() {
 		return dfs.getSlaveList();
 	}
 
+	/**
+	 * Function to report that a given slave is unreachable
+	 * 
+	 * @param id
+	 */
 	public synchronized void loseContact(int id) {
 		slaveMapTaskList.remove(id);
 		slaveReduceTaskList.remove(id);
@@ -234,6 +318,12 @@ public class JobTracker {
 		dfs.enforceReplication(id, slaveMapTaskList.get(id));
 	}
 
+	/**
+	 * Function to get the running map tasks for replica enforcement
+	 * 
+	 * @param slave id
+	 * @return task list
+	 */
 	public synchronized ArrayDeque<MapTask> getRunningMapList(int id) {
 		ArrayDeque<MapTask> list = new ArrayDeque<MapTask>();
 		HashSet<MapTask> tasks = slaveRunningTask.get(id);
@@ -241,19 +331,12 @@ public class JobTracker {
 		while (it.hasNext()) {
 			MapTask t = it.next();
 			list.add(t);
+			// mark the task as unassigned
 			jobAssignedTask.get(t.getJob().getId()).remove(t);
 		}
-		tasks.clear();
-		slaveRunningTask.put(id, tasks);
+		// remove the slave ID from the list
+		slaveRunningTask.remove(id, tasks);
 		return list;
-	}
-
-	private synchronized void cleanUp(int jobID) {
-		HashSet<MapTask> m = new HashSet<MapTask>();
-		jobMapTask.put(jobID, m);
-		HashSet<ReduceTask> r = new HashSet<ReduceTask>();
-		jobReduceTask.put(jobID, r);
-
 	}
 
 	@Override
@@ -261,28 +344,41 @@ public class JobTracker {
 		return null;
 	}
 
+	/**
+	 * Function to generate a new job ID
+	 * @return jobID
+	 */
 	private synchronized int getJobID() {
 		jobID++;
 		return jobID;
 	}
 
+	/**
+	 * Function to generate a new slave ID
+	 * @return slaveID
+	 */
 	private synchronized int getSlaveID() {
 		slaveID++;
 		return slaveID;
 	}
-	
+
+	/**
+	 * Function to see what jobs are running
+	 */
 	public void getRunningJobs() {
-		for (Entry<Integer, ArrayDeque<MapTask>> t: slaveMapTaskList.entrySet()) {
+		for (Entry<Integer, ArrayDeque<MapTask>> t : slaveMapTaskList
+				.entrySet()) {
 			int slaveID = t.getKey();
 			Iterator<MapTask> it = t.getValue().iterator();
 			System.out.println("Slave " + slaveID);
 			while (it.hasNext()) {
 				MapTask task = it.next();
-				System.out.println(task.getJob().getId() + "  " + task.getTaskID());
+				System.out.println(task.getJob().getId() + "  "
+						+ task.getTaskID());
 			}
 		}
-		
-		for (Entry<Integer, HashSet<MapTask>> t: jobMapTask.entrySet()) {
+
+		for (Entry<Integer, HashSet<MapTask>> t : jobMapTask.entrySet()) {
 			int jobID = t.getKey();
 			Iterator<MapTask> it = t.getValue().iterator();
 			System.out.println("Job " + jobID);

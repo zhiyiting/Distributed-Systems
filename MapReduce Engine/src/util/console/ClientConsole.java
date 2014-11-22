@@ -12,14 +12,26 @@ import util.comm.RemoteException;
 import util.core.Job;
 import conf.Configuration;
 
-public class ClientConsole implements Runnable{
+/**
+ * Client node
+ * 
+ * @author zhiyiting
+ *
+ */
+public class ClientConsole implements Runnable {
 
 	private Job job;
 	private BufferedReader br;
 	private CommModule commModule;
 	private String toHost;
 	private int toPort;
-	
+	private boolean fin = false;
+
+	/**
+	 * Start the listener at the client node
+	 * 
+	 * @param job
+	 */
 	public ClientConsole(Job job) {
 		this.job = job;
 		this.br = new BufferedReader(new InputStreamReader(System.in));
@@ -31,7 +43,10 @@ public class ClientConsole implements Runnable{
 		thread.start();
 		startJob();
 	}
-	
+
+	/**
+	 * Start the job
+	 */
 	private void startJob() {
 		JobMessage msg = new JobMessage("start", job, toHost, toPort);
 		System.out.println("Distributing file on DFS...");
@@ -44,7 +59,10 @@ public class ClientConsole implements Runnable{
 			System.exit(-1);
 		}
 	}
-	
+
+	/**
+	 * Client shell to print current status of jobs
+	 */
 	@Override
 	public void run() {
 		while (true) {
@@ -75,7 +93,15 @@ public class ClientConsole implements Runnable{
 				e.printStackTrace();
 			}
 		}
-		
+
+	}
+
+	public boolean isFinished() {
+		return fin;
+	}
+
+	public void downloadOutput(String path) {
+
 	}
 
 }

@@ -7,6 +7,12 @@ import conf.Configuration;
 import util.console.CoordinatorConsole;
 import util.console.SlaveConsole;
 
+/**
+ * The Map Reduce framework
+ * 
+ * @author zhiyiting
+ *
+ */
 public class MapReduceEngine {
 	public static void main(String[] args) {
 		String host = null;
@@ -18,18 +24,17 @@ public class MapReduceEngine {
 			return;
 		}
 		// determine if the node is master/slave
+		// the master host is configured in the configuration file
 		if (host.equals(Configuration.MASTER_ADDRESS)) {
 			System.out.println("Running coordinator on " + host);
 			CoordinatorConsole coord = new CoordinatorConsole();
-			coord.run();		
-		}
-		else {
+			coord.run();
+		} else {
 			SlaveConsole slave = new SlaveConsole();
 			try {
 				System.out.println("Created local file system at "
 						+ InetAddress.getLocalHost().getHostName() + "/");
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			slave.run();

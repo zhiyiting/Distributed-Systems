@@ -4,6 +4,12 @@ import java.io.Serializable;
 
 import util.io.FileSplit;
 
+/**
+ * Base class for the task
+ * 
+ * @author zhiyiting
+ *
+ */
 public class Task implements Serializable {
 
 	private static final long serialVersionUID = -128303213552988241L;
@@ -65,16 +71,21 @@ public class Task implements Serializable {
 	public void setJob(Job job) {
 		this.job = job;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return ((taskID + 1) * 31 + type) ^ job.getId();
 	}
-	
+
+	/**
+	 * Override the equal function
+	 * Determine equality only on taskID, jobID and type
+	 */
 	public boolean equals(Object obj) {
 		if (obj instanceof Task) {
-			Task o = (Task)obj;
-			return taskID == o.getTaskID() && job.getId() == o.getJob().getId() && type == o.getType();
+			Task o = (Task) obj;
+			return taskID == o.getTaskID() && job.getId() == o.getJob().getId()
+					&& type == o.getType();
 		}
 		return false;
 	}

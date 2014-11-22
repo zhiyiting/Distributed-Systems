@@ -2,6 +2,7 @@ package util.dfs;
 
 import java.io.File;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,14 +21,21 @@ import util.io.FileSplit;
 import util.io.LineRecordReader;
 import util.io.LineRecordWriter;
 
+/**
+ * DFS Master class at the master side
+ * 
+ * @author zhiyiting
+ *
+ */
 public class DFSMaster {
 
-	private HashMap<Integer, String> slaveList;
+	private ArrayList<String> slaveList;
 	private HashMap<Integer, HashMap<Integer, HashSet<FileSplit>>> jobToSlaveFile;
 	private PriorityQueue<Pair> dfsNode;
 	private CommModule commModule;
 	private JobTracker tracker;
 
+	// Type for the priority queue
 	class Pair implements Comparable<Pair> {
 		public int id;
 		public int fileCount;
@@ -43,14 +51,26 @@ public class DFSMaster {
 		}
 	}
 
+	/**
+	 * Constructor to initialize the DFS master
+	 * 
+	 * @param tracker
+	 */
 	public DFSMaster(JobTracker tracker) {
-		slaveList = new HashMap<Integer, String>();
+		slaveList = new ArrayList<String>();
 		jobToSlaveFile = new HashMap<Integer, HashMap<Integer, HashSet<FileSplit>>>();
 		dfsNode = new PriorityQueue<Pair>();
 		commModule = new CommModule();
 		this.tracker = tracker;
 	}
 
+	/**
+	 * Function to distribute file with replication at the beginning of a job
+	 * 
+	 * @param input file
+	 * @param replica
+	 * @param job
+	 */
 	public synchronized void distributeFile(String in, int replica, Job job) {
 		System.out.println("Distributing file on DFS...");
 		File inputDir = new File(in);
@@ -65,20 +85,26 @@ public class DFSMaster {
 			slaveToFile = new HashMap<Integer, HashSet<FileSplit>>();
 		}
 		int taskID = 0;
+		// iterate through the input files to generate file split
 		for (String filename : inputDir.list()) {
 			String path = in + filename;
+			// create reader and writer for the file
 			LineRecordReader reader = new LineRecordReader(path, job);
 			int recordNum = reader.getRecordNum();
 			LineRecordWriter writer = new LineRecordWriter(path, job);
+			// generate file splits
 			for (int i = 0; i < recordNum; i++) {
 				FileSplit split = writer.createSplit(i, filename);
 				String fn = split.getFilename();
+				// write the data into a file chunk
 				FileChunk chunk = writer.write(fn);
+				// create a new map task accordingly
 				MapTask newTask = new MapTask();
 				newTask.setInput(split);
 				newTask.setJob(job);
 				newTask.setStatus(Status.PENDING);
 				newTask.setTaskID(taskID);
+				// choose a node with least files and replicate the file chunk
 				for (int j = 0; j < replica; j++) {
 					Pair node = dfsNode.poll();
 					if (node == null) {
@@ -109,11 +135,20 @@ public class DFSMaster {
 		jobToSlaveFile.put(jobID, slaveToFile);
 	}
 
+	/**
+	 * Function to add a new slave
+	 * @param id
+	 * @param host
+	 */
 	public void addSlave(int i, String host) {
-		slaveList.put(i, host);
+		slaveList.add(i, host);
 		dfsNode.add(new Pair(i, 0));
 	}
 
+	/**
+	 * Function to remove slave
+	 * @param id
+	 */
 	public synchronized void removeSlave(int id) {
 		slaveList.remove(id);
 	}
