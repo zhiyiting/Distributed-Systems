@@ -3,7 +3,7 @@
 <properties>
 <entry key="input dir">Input2</entry>
 <entry key="output dir">Output2</entry>
-<entry key="record size">200</entry>
+<entry key="record size">10</entry>
 <entry key="replica">2</entry>
 <entry key="reducer num">1</entry>
 </properties>

@@ -57,7 +57,7 @@ public class LineRecordWriter {
 	}
 
 	/**
-	 * Create a file split with a pre-defined chunksize
+	 * Create a file split with a pre-defined chunk size
 	 * 
 	 * @param index
 	 * @param filename
@@ -79,11 +79,15 @@ public class LineRecordWriter {
 	 * @param filename
 	 * @return file chunk
 	 */
-	public FileChunk write(String filename) {
+	public synchronized FileChunk write(String filename) {
 		sb = new StringBuilder();
 		for (int i = 0; i < chunkSize; i++) {
 			try {
-				sb.append(f.readLine());
+				String line;
+				if ((line = f.readLine()) == null) {
+					break;
+				}
+				sb.append(line);
 				sb.append('\n');
 			} catch (IOException e) {
 				e.printStackTrace();

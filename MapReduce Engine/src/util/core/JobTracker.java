@@ -76,9 +76,6 @@ public class JobTracker {
 	 */
 	public void submitMapJob(String host, Job job) {
 		job.setID(getJobID());
-		// create and distribute splits
-		dfs.distributeFile(job.conf.INPUT_DIR, job.conf.REPLICA, job);
-		System.out.println("Start Job #" + job.getId());
 		synchronized (jobList) {
 			jobList.put(job.getId(), job);
 		}
@@ -89,6 +86,8 @@ public class JobTracker {
 			HashSet<Task> hs = new HashSet<Task>();
 			jobAssignedTask.put(job.getId(), hs);
 		}
+		// create and distribute splits
+		dfs.distributeFile(job.conf.INPUT_DIR, job.conf.REPLICA, job);
 		System.out.println("Start mapping job #" + job.getId());
 	}
 
@@ -134,7 +133,7 @@ public class JobTracker {
 			for (int i = 0; i < taskNum; i++) {
 				MapTask task;
 				int jobID = 0;
-				HashSet<Task> t = null;
+				HashSet<Task> t = new HashSet<Task>();
 				// check if the task has been assigned to other slaves
 				do {
 					task = potential.pollFirst();
@@ -335,7 +334,7 @@ public class JobTracker {
 			jobAssignedTask.get(t.getJob().getId()).remove(t);
 		}
 		// remove the slave ID from the list
-		slaveRunningTask.remove(id, tasks);
+		slaveRunningTask.remove(id);
 		return list;
 	}
 

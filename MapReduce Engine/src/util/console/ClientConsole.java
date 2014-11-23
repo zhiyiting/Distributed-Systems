@@ -25,7 +25,7 @@ public class ClientConsole implements Runnable {
 	private CommModule commModule;
 	private String toHost;
 	private int toPort;
-	private boolean fin = false;
+	private boolean fin;
 
 	/**
 	 * Start the listener at the client node
@@ -38,7 +38,7 @@ public class ClientConsole implements Runnable {
 		this.commModule = new CommModule();
 		this.toHost = Configuration.MASTER_ADDRESS;
 		this.toPort = Configuration.SERVER_PORT;
-		ClientListener listener = new ClientListener(Configuration.CLIENT_PORT);
+		ClientListener listener = new ClientListener(Configuration.CLIENT_PORT, this);
 		Thread thread = new Thread(listener);
 		thread.start();
 		startJob();
@@ -50,6 +50,7 @@ public class ClientConsole implements Runnable {
 	private void startJob() {
 		JobMessage msg = new JobMessage("start", job, toHost, toPort);
 		System.out.println("Distributing file on DFS...");
+		fin = false;
 		try {
 			Message ret = commModule.send(msg);
 			System.out.println(ret.getContent());
@@ -99,9 +100,9 @@ public class ClientConsole implements Runnable {
 	public boolean isFinished() {
 		return fin;
 	}
-
-	public void downloadOutput(String path) {
-
+	
+	public void setFinish() {
+		fin = true;
 	}
 
 }

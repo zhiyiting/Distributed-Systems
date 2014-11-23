@@ -43,7 +43,7 @@ public class LineRecordReader {
 			while (f.readLine() != null) {
 				length++;
 			}
-			recordNum = (int) (length / job.conf.RECORD_SIZE);
+			recordNum = (int) (length / job.conf.RECORD_SIZE + 1);
 			f.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

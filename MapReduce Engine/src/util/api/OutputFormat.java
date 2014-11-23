@@ -18,6 +18,7 @@ public class OutputFormat {
 
 	/**
 	 * Get key-value pair from the input file
+	 * 
 	 * @param path
 	 * @return key-value pairs
 	 */

@@ -6,8 +6,9 @@ JC = javac
 
 CLASSES = \
 	conf/Configuration.java \
-	client/MapReduceEngine.java \
+	framework/MapReduceEngine.java \
 	example/WordCount.java \
+	example/BasketballPlayerSalaryRank.java \
 
 default: classes
 
@@ -17,4 +18,6 @@ clean:
 	$(RM) */*.class */*/*.class
 	rm -rf unix*
 
+startMR:
+	java framework.MapReduceEngine
 

@@ -16,31 +16,41 @@ public class BasketballPlayerSalaryRank {
 	// custom mapper class for word sort
 	public static class BasketballPlayerSalaryMapper extends Mapper {
 		public void map(String key, String value, Context context) {
-			String line = value.toString();
-			String[] words = line.split("/t");
-			// use the salary as key to be sorted
-			/*
-			-0-	 pitcher's name,
-			-1-  player's team at the end of in 1986,
-			-2-  player's league at the end of 1986,
-			-3-  number of wins in 1986,
-			-4-  number of losses in 1986,
-			-5-  earned run average in 1986,
-			-6-  number of games in 1986,
-			-7-  number of innings pitched in 1986,
-			-8-  number of saves in 1986,
-			-9-  number of years in the major leagues,
-			-10- number of wins during his career,
-			-11- number of losses during his career,
-			-12- earned run average during his career,
-			-13- number of games during his career,
-			-14- number of innings pitched during his career,
-			-15- number of saves during his career,
-			-16- 1987 annual salary on opening day in thousands of dollars,
-			-17- player's league at the beginning of 1987,
-			-18- player's team at the beginning of 1987.
-			*/
-			context.write(words[16], words[0] + " of " + words[18]);
+			if (value.length() > 1) {
+				String[] words = value.split("\\t");
+				// use the salary as key to be sorted
+				/*
+				-0-	 pitcher's name,
+				-1-  player's team at the end of in 1986,
+				-2-  player's league at the end of 1986,
+				-3-  number of wins in 1986,
+				-4-  number of losses in 1986,
+				-5-  earned run average in 1986,
+				-6-  number of games in 1986,
+				-7-  number of innings pitched in 1986,
+				-8-  number of saves in 1986,
+				-9-  number of years in the major leagues,
+				-10- number of wins during his career,
+				-11- number of losses during his career,
+				-12- earned run average during his career,
+				-13- number of games during his career,
+				-14- number of innings pitched during his career,
+				-15- number of saves during his career,
+				-16- 1987 annual salary on opening day in thousands of dollars,
+				-17- player's league at the beginning of 1987,
+				-18- player's team at the beginning of 1987.
+				*/
+				if (words.length > 18) {
+					int salary = 0;
+					try {
+						salary = (int)Float.parseFloat(words[16]);
+					}
+					catch (NumberFormatException e) {
+						salary = 0;
+					}
+					context.write(String.format("%010d", salary), words[0] + " of " + words[18]);
+				}
+			}
 		}
 	}
 
@@ -49,7 +59,14 @@ public class BasketballPlayerSalaryRank {
 		public void reduce(String key, Iterable<String> values, Context context) {
 			for (String val : values) {
 				// name + team, salary
-				context.write(val, key);
+				String salary = null;
+				try {
+					salary = Integer.valueOf(key).toString();
+				}
+				catch (NumberFormatException e){
+					salary = key;
+				}
+				context.write(val, salary);
 			}
 		}
 	}
