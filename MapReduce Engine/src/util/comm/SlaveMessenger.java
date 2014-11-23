@@ -128,6 +128,7 @@ public class SlaveMessenger implements Runnable {
 					ret = commModule.send(msg);
 					dispatch(ret);
 					HashMap<Integer, String> slaveList = tracker.getSlaveList();
+					
 					// send the partition information to corresponding slaves
 					for (Entry<Integer, HashMap<Integer, ArrayDeque<String[]>>> item : partitions
 							.entrySet()) {

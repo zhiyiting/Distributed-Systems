@@ -31,6 +31,7 @@ public class DFSMaster {
 
 	private HashMap<Integer, String> slaveList;
 	private HashMap<Integer, HashMap<Integer, HashSet<FileSplit>>> jobToSlaveFile;
+	private HashMap<Integer, Integer> jobTaskCount;
 	private PriorityQueue<Pair> dfsNode;
 	private CommModule commModule;
 	private JobTracker tracker;
@@ -62,6 +63,7 @@ public class DFSMaster {
 		dfsNode = new PriorityQueue<Pair>();
 		commModule = new CommModule();
 		this.tracker = tracker;
+		jobTaskCount = new HashMap<Integer, Integer>();
 	}
 
 	/**
@@ -72,7 +74,7 @@ public class DFSMaster {
 	 * @param job
 	 */
 	public synchronized void distributeFile(String in, int replica, Job job) {
-		System.out.println("Distributing file on DFS...");
+		System.out.println("Distributing files on DFS...");
 		File inputDir = new File(in);
 		if (!inputDir.exists()) {
 			System.out.println("Input Directory doesn't exist");
@@ -133,6 +135,7 @@ public class DFSMaster {
 			}
 		}
 		jobToSlaveFile.put(jobID, slaveToFile);
+		jobTaskCount.put(jobID, taskID);
 	}
 
 	/**
@@ -245,11 +248,20 @@ public class DFSMaster {
 	}
 
 	/**
-	 * Function to get the  active slave list
+	 * Function to get the active slave list
 	 * 
 	 * @return slave list
 	 */
 	public HashMap<Integer, String> getSlaveList() {
 		return slaveList;
+	}
+	
+	/**
+	 * Function to get the task count of a job
+	 * 
+	 * @return job task count
+	 */
+	public HashMap<Integer, Integer> getJobTaskCount() {
+		return jobTaskCount;
 	}
 }

@@ -93,9 +93,9 @@ public class JobTracker {
 			HashSet<Task> hs = new HashSet<Task>();
 			jobFinishedTask.put(job.getId(), hs);
 		}
+		System.out.println("Start job #" + job.getId());
 		// create and distribute splits
 		dfs.distributeFile(job.conf.INPUT_DIR, job.conf.REPLICA, job);
-		System.out.println("Start mapping job #" + job.getId());
 	}
 
 	/**
@@ -107,14 +107,18 @@ public class JobTracker {
 		System.out.println("Start reducing job #" + job.getId());
 		int reducerNum = job.conf.REDUCER_NUM;
 		int taskID = 0;
+		int slaveID = 1;
 		for (int i = 1; i <= reducerNum; i++) {
 			ReduceTask task = new ReduceTask();
 			task.setJob(job);
-			task.setSlaveID(i);
+			while (!dfs.getSlaveList().containsKey(slaveID)) {
+				slaveID ++;
+			}
+			task.setSlaveID(slaveID);
 			task.setTaskID(taskID);
 			ArrayDeque<ReduceTask> tasks = new ArrayDeque<ReduceTask>();
 			tasks.push(task);
-			slaveReduceTaskList.put(i, tasks);
+			slaveReduceTaskList.put(slaveID, tasks);
 			HashSet<ReduceTask> hs = jobReduceTask.get(job.getId());
 			if (hs == null) {
 				hs = new HashSet<ReduceTask>();
@@ -122,6 +126,7 @@ public class JobTracker {
 			hs.add(task);
 			jobReduceTask.put(job.getId(), hs);
 			taskID++;
+			slaveID++;
 		}
 	}
 
@@ -350,10 +355,39 @@ public class JobTracker {
 		return list;
 	}
 	
+	/**
+	 * Function to get finished task list of a job
+	 * @param id
+	 * @return finished task list
+	 */
 	public synchronized HashSet<Task> getFinishedTaskList(int id) {
 		HashSet<Task> ft = new HashSet<Task>();
 		ft = jobFinishedTask.get(id);
 		return ft;
+	}
+	
+	/**
+	 * Function to get the job status percentage
+	 * @param jobID
+	 * @return percentage
+	 */
+	public String getPercent(int jobID) {
+		StringBuilder sb = new StringBuilder();
+		HashMap<Integer, Integer> taskCount = dfs.getJobTaskCount();
+		if (jobFinishedTask.get(jobID) != null && taskCount.get(jobID) != null) {
+			int total = taskCount.get(jobID);
+			int finished = jobFinishedTask.get(jobID).size();
+			int percentage = finished * 100 / total;
+			if (percentage > 100) {
+				percentage = 100;
+			}
+			sb.append(percentage);
+		}
+		else {
+			sb.append("0");
+		}
+		sb.append("%");
+		return sb.toString();
 	}
 
 	/**

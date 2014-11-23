@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import util.comm.ClientHeartBeat;
 import util.comm.ClientListener;
 import util.comm.CommModule;
 import util.comm.JobMessage;
@@ -25,7 +26,6 @@ public class ClientConsole implements Runnable {
 	private CommModule commModule;
 	private String toHost;
 	private int toPort;
-	private boolean fin;
 
 	/**
 	 * Start the listener at the client node
@@ -49,16 +49,21 @@ public class ClientConsole implements Runnable {
 	 */
 	private void startJob() {
 		JobMessage msg = new JobMessage("start", job, toHost, toPort);
-		System.out.println("Distributing file on DFS...");
-		fin = false;
+		System.out.println("Distributing files on DFS...");
 		try {
 			Message ret = commModule.send(msg);
-			System.out.println(ret.getContent());
+			job.setId(Integer.parseInt(ret.getContent()));
+			System.out.println("Job #" + job.getId() + " " + job.getName()
+					+ " started");
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.exit(-1);
 		}
+		System.out.println("Status:\n0%");
+		ClientHeartBeat heartbeat = new ClientHeartBeat(job);
+		Thread t = new Thread(heartbeat);
+		t.start();
 	}
 
 	/**
@@ -95,14 +100,6 @@ public class ClientConsole implements Runnable {
 			}
 		}
 
-	}
-
-	public boolean isFinished() {
-		return fin;
-	}
-	
-	public void setFinish() {
-		fin = true;
 	}
 
 }

@@ -56,12 +56,16 @@ public class CoordDispatcher implements Runnable {
 			Job job = ((JobMessage) m).getJob();
 			// report to job tracker and start the job
 			tracker.submitMapJob(socket.getInetAddress().getHostName(), job);
-			ret = new Message("Job #" + job.getId() + " " + job.getName()
-					+ " started");
+			ret = new Message(job.getId() + "");
 			break;
 		case "list":
 			// return the status of the jobs
-			ret = new Message(tracker.toString());
+			ret = new Message("");
+			break;
+		case "status":
+			// return the percentage of the jobs
+			int jobID = ((JobMessage) m).getJob().getId();
+			ret = new Message(tracker.getPercent(jobID));
 			break;
 		case "stop":
 			// tracker.stop();
