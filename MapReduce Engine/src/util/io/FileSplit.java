@@ -2,6 +2,12 @@ package util.io;
 
 import java.io.Serializable;
 
+/**
+ * FileSplit class defines information in file split
+ * 
+ * @author zhiyiting
+ *
+ */
 public class FileSplit implements Serializable {
 
 	private static final long serialVersionUID = -4955423900859261947L;
@@ -20,7 +26,7 @@ public class FileSplit implements Serializable {
 	public String getFilename() {
 		return this.filename + "_" + index;
 	}
-	
+
 	public String getOriginalName() {
 		return this.filename;
 	}

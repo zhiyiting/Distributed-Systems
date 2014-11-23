@@ -6,6 +6,12 @@ import java.io.RandomAccessFile;
 
 import util.core.Job;
 
+/**
+ * LineRecordReader class provides functions to read from file
+ * 
+ * @author zhiyiting
+ *
+ */
 public class LineRecordReader {
 
 	private String path;
@@ -13,6 +19,12 @@ public class LineRecordReader {
 	private long length;
 	private Job job;
 
+	/**
+	 * Constructor to define where to start reading
+	 * 
+	 * @param path
+	 * @param job
+	 */
 	public LineRecordReader(String path, Job job) {
 		this.path = path;
 		this.recordNum = 0;
@@ -20,6 +32,11 @@ public class LineRecordReader {
 		this.job = job;
 	}
 
+	/**
+	 * Function to get record number (lines) from the file
+	 * 
+	 * @return record number
+	 */
 	public int getRecordNum() {
 		try {
 			RandomAccessFile f = new RandomAccessFile(path, "r");

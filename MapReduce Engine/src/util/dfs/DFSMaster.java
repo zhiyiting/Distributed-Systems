@@ -2,7 +2,6 @@ package util.dfs;
 
 import java.io.File;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,7 +28,7 @@ import util.io.LineRecordWriter;
  */
 public class DFSMaster {
 
-	private ArrayList<String> slaveList;
+	private HashMap<Integer, String> slaveList;
 	private HashMap<Integer, HashMap<Integer, HashSet<FileSplit>>> jobToSlaveFile;
 	private PriorityQueue<Pair> dfsNode;
 	private CommModule commModule;
@@ -57,7 +56,7 @@ public class DFSMaster {
 	 * @param tracker
 	 */
 	public DFSMaster(JobTracker tracker) {
-		slaveList = new ArrayList<String>();
+		slaveList = new HashMap<Integer, String>();
 		jobToSlaveFile = new HashMap<Integer, HashMap<Integer, HashSet<FileSplit>>>();
 		dfsNode = new PriorityQueue<Pair>();
 		commModule = new CommModule();
@@ -141,27 +140,36 @@ public class DFSMaster {
 	 * @param host
 	 */
 	public void addSlave(int i, String host) {
-		slaveList.add(i, host);
+		slaveList.put(i, host);
 		dfsNode.add(new Pair(i, 0));
 	}
 
 	/**
 	 * Function to remove slave
+	 * 
 	 * @param id
 	 */
 	public synchronized void removeSlave(int id) {
 		slaveList.remove(id);
 	}
 
+	/**
+	 * Function to enforce replication
+	 * 
+	 * @param id
+	 * @param tasks
+	 */
 	public synchronized void enforceReplication(int id,
 			ArrayDeque<MapTask> tasks) {
 		if (tasks == null) {
 			tasks = new ArrayDeque<MapTask>();
 		}
+		// get running task for that job id
 		ArrayDeque<MapTask> runningTask = tracker.getRunningMapList(id);
 		tasks.addAll(runningTask);
 		for (MapTask task : tasks) {
 			FileSplit split = task.getInput();
+			// regenerate file split accordingly
 			LineRecordWriter writer = new LineRecordWriter(
 					task.getJob().conf.INPUT_DIR + split.getOriginalName(),
 					split.getStart(), task.getJob());
@@ -176,6 +184,7 @@ public class DFSMaster {
 			HashMap<Integer, HashSet<FileSplit>> slaveToFile = jobToSlaveFile
 					.get(jobID);
 			HashSet<FileSplit> files = slaveToFile.get(node.id);
+			// get the node with least files
 			if (files == null) {
 				files = new HashSet<FileSplit>();
 				files.add(split);
@@ -188,6 +197,8 @@ public class DFSMaster {
 				node.fileCount++;
 				dfsNode.add(node);
 			} else {
+				// if the node already contains that file chunk
+				// randomly select another node to put the chunk
 				dfsNode.add(node);
 				Iterator<Pair> itr = dfsNode.iterator();
 				boolean found = false;
@@ -228,6 +239,11 @@ public class DFSMaster {
 		}
 	}
 
+	/**
+	 * Function to get the  active slave list
+	 * 
+	 * @return slave list
+	 */
 	public HashMap<Integer, String> getSlaveList() {
 		return slaveList;
 	}
