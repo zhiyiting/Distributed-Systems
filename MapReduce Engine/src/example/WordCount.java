@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import util.api.*;
-import util.console.ClientConsole;
+import util.console.JobClient;
 import util.core.Job;
 import util.io.Context;
 
@@ -57,8 +57,8 @@ public class WordCount {
 		job.setConfiguration("Config.xml");
 
 		// start the job and wait for termination
-		ClientConsole client = new ClientConsole(job);
-		client.run();
+		JobClient client = new JobClient(job);
+		client.startJob();
 	}
 
 }

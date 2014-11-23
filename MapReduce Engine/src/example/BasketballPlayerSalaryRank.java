@@ -2,7 +2,7 @@ package example;
 
 import util.api.Mapper;
 import util.api.Reducer;
-import util.console.ClientConsole;
+import util.console.JobClient;
 import util.core.Job;
 import util.io.Context;
 
@@ -77,7 +77,7 @@ public class BasketballPlayerSalaryRank {
 		job.setMapperClass(BasketballPlayerSalaryMapper.class);
 		job.setReducerClass(BasketballPlayerSalaryReducer.class);
 		job.setConfiguration("Config2.xml");
-		ClientConsole client = new ClientConsole(job);
-		client.run();
+		JobClient client = new JobClient(job);
+		client.startJob();
 	}
 }
