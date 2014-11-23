@@ -184,7 +184,7 @@ public class TaskTracker {
 		System.out.println("Map tasks");
 		if (mapTasks.size() > 0) {
 			for (Task task : mapTasks) {
-				System.out.println(task.toString());
+				System.out.println(task.getTaskID());
 			}
 		} else {
 			System.out.println("empty");
@@ -192,7 +192,7 @@ public class TaskTracker {
 		System.out.println("Reduce tasks");
 		if (reduceTasks.size() > 0) {
 			for (Task task : reduceTasks) {
-				System.out.println(task.toString());
+				System.out.println(task.getTaskID());
 			}
 		} else {
 			System.out.println("empty");

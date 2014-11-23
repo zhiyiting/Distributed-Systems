@@ -38,7 +38,7 @@ public class ClientConsole implements Runnable {
 		this.commModule = new CommModule();
 		this.toHost = Configuration.MASTER_ADDRESS;
 		this.toPort = Configuration.SERVER_PORT;
-		ClientListener listener = new ClientListener(Configuration.CLIENT_PORT, this);
+		ClientListener listener = new ClientListener(Configuration.CLIENT_PORT);
 		Thread thread = new Thread(listener);
 		thread.start();
 		startJob();

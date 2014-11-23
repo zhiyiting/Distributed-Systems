@@ -57,13 +57,6 @@ public class Task implements Serializable {
 		this.input = input;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(job.toString());
-		return sb.toString();
-	}
-
 	public Job getJob() {
 		return job;
 	}

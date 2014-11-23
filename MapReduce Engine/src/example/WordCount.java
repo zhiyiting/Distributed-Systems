@@ -59,10 +59,6 @@ public class WordCount {
 		// start the job and wait for termination
 		ClientConsole client = new ClientConsole(job);
 		client.run();
-		while (!client.isFinished()) {
-			Thread.sleep(5000);
-		}
-		System.exit(0);
 	}
 
 }

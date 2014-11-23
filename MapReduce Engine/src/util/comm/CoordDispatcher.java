@@ -47,7 +47,7 @@ public class CoordDispatcher implements Runnable {
 	 * @param message
 	 * @return return message
 	 */
-	private Message dispatch(Message m) {
+	private synchronized Message dispatch(Message m) {
 		Message ret = null;
 		String method = m.getContent();
 		switch (method) {

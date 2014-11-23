@@ -79,9 +79,5 @@ public class BasketballPlayerSalaryRank {
 		job.setConfiguration("Config2.xml");
 		ClientConsole client = new ClientConsole(job);
 		client.run();
-		while (!client.isFinished()) {
-			Thread.sleep(5000);
-		}
-		System.exit(0);
 	}
 }

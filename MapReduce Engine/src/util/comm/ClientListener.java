@@ -6,8 +6,6 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import util.console.ClientConsole;
-
 /**
  * ClientListener listens for messages transmitted to client
  * 
@@ -17,17 +15,15 @@ import util.console.ClientConsole;
 public class ClientListener implements Runnable {
 
 	private ServerSocket serverSocket;
-	private ClientConsole console;
 
 	/**
 	 * Listens at a given port number
 	 * 
 	 * @param port
 	 */
-	public ClientListener(int port, ClientConsole console) {
+	public ClientListener(int port) {
 		try {
 			this.serverSocket = new ServerSocket(port);
-			this.console = console;
 			System.out.println("listening on port " + port);
 		} catch (IOException e) {
 			System.out.println("Cannot listen on port " + port);
@@ -50,13 +46,13 @@ public class ClientListener implements Runnable {
 						socket.getOutputStream());
 				Message input = (Message) in.readObject();
 				// parse the message and generate output
-				System.out.println("Generated output path: \n\t");
+				System.out.println("Generated output path:");
 				System.out.println(input.getContent());
 				out.writeObject("ACK");
 				out.flush();
 				out.close();
 				in.close();
-				console.setFinish();
+				System.exit(0);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -40,6 +40,8 @@ public class JobTracker {
 	private Map<Integer, HashSet<ReduceTask>> jobReduceTask;
 	// map job id to associated tasks that has been assigned
 	private Map<Integer, HashSet<Task>> jobAssignedTask;
+	// map job id to finished task
+	private Map<Integer, HashSet<Task>> jobFinishedTask;
 
 	// dfs master node
 	private DFSMaster dfs;
@@ -65,6 +67,7 @@ public class JobTracker {
 		jobAssignedTask = new ConcurrentHashMap<Integer, HashSet<Task>>();
 		jobClient = new ConcurrentHashMap<Integer, String>();
 		jobOutput = new ConcurrentHashMap<Integer, ArrayDeque<String>>();
+		jobFinishedTask = new ConcurrentHashMap<Integer, HashSet<Task>>();
 		dfs = new DFSMaster(this);
 	}
 
@@ -85,6 +88,10 @@ public class JobTracker {
 		synchronized (jobAssignedTask) {
 			HashSet<Task> hs = new HashSet<Task>();
 			jobAssignedTask.put(job.getId(), hs);
+		}
+		synchronized (jobFinishedTask) {
+			HashSet<Task> hs = new HashSet<Task>();
+			jobFinishedTask.put(job.getId(), hs);
 		}
 		// create and distribute splits
 		dfs.distributeFile(job.conf.INPUT_DIR, job.conf.REPLICA, job);
@@ -214,20 +221,25 @@ public class JobTracker {
 				// remove the task from job task list
 				HashSet<MapTask> hs = jobMapTask.get(jobID);
 				hs.remove(task);
+				jobMapTask.put(jobID, hs);
+				HashSet<Task> ft = jobFinishedTask.get(jobID);
+				ft.add(task);
+				jobFinishedTask.put(jobID, ft);
 				// check if there is remaining task
 				if (hs.isEmpty()) {
 					// start reduce for this job
 					jobMapTask.remove(jobID);
 					System.out.println("Finished mapping job #" + jobID);
 					submitReduceJob(task.getJob());
-					return;
 				}
-				jobMapTask.put(jobID, hs);
 			}
 			// if the job is in reducing process
 			else if (task.getType() == 'R') {
 				HashSet<ReduceTask> hs = jobReduceTask.get(jobID);
 				hs.remove(task);
+				HashSet<Task> ft = jobFinishedTask.get(jobID);
+				ft.add(task);
+				jobFinishedTask.put(jobID, ft);
 				String path = ((ReduceTask) task).getOutput();
 				ArrayDeque<String> curOutput = jobOutput.get(jobID);
 				if (curOutput == null) {
@@ -246,7 +258,7 @@ public class JobTracker {
 					ArrayDeque<String> outputs = jobOutput.get(jobID);
 					for (String s : outputs) {
 						sb.append(s);
-						sb.append("\n\t");
+						sb.append("\n");
 					}
 					Message msg = new Message(sb.toString(), toHost,
 							Configuration.CLIENT_PORT);
@@ -311,10 +323,10 @@ public class JobTracker {
 	 * @param id
 	 */
 	public synchronized void loseContact(int id) {
+		dfs.enforceReplication(id, slaveMapTaskList.get(id));
+		dfs.removeSlave(id);
 		slaveMapTaskList.remove(id);
 		slaveReduceTaskList.remove(id);
-		dfs.removeSlave(id);
-		dfs.enforceReplication(id, slaveMapTaskList.get(id));
 	}
 
 	/**
@@ -337,10 +349,11 @@ public class JobTracker {
 		slaveRunningTask.remove(id);
 		return list;
 	}
-
-	@Override
-	public String toString() {
-		return null;
+	
+	public synchronized HashSet<Task> getFinishedTaskList(int id) {
+		HashSet<Task> ft = new HashSet<Task>();
+		ft = jobFinishedTask.get(id);
+		return ft;
 	}
 
 	/**

@@ -14,6 +14,7 @@ import util.comm.RemoteException;
 import util.core.Job;
 import util.core.JobTracker;
 import util.core.MapTask;
+import util.core.Task;
 import util.core.Task.Status;
 import util.io.FileChunk;
 import util.io.FileSplit;
@@ -235,7 +236,11 @@ public class DFSMaster {
 				break;
 			}
 			task.setSlaveID(node.id);
-			tracker.addQueuedMapTask(node.id, task);
+			HashSet<Task> ft = new HashSet<Task>();
+			ft = tracker.getFinishedTaskList(jobID);
+			if (!ft.contains(task)) {
+				tracker.addQueuedMapTask(node.id, task);
+			}
 		}
 	}
 
