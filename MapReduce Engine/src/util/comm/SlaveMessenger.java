@@ -101,23 +101,6 @@ public class SlaveMessenger implements Runnable {
 		while (true) {
 			try {
 				Message ret = null;
-				int idleMapSlot = tracker.getIdleMapSlot();
-				int idleReduceSlot = tracker.getIdleReduceSlot();
-				// if there are slots for new tasks, ask the master for new task
-				if (idleMapSlot > 0 || idleReduceSlot > 0) {
-					WorkMessage msg = new WorkMessage("idle", toHost, toPort);
-					msg.setFinishedTask(tracker.getFinishedTasks());
-					msg.setMapSlot(idleMapSlot);
-					msg.setReduceSlot(idleReduceSlot);
-					msg.setSlaveID(slaveID);
-					ret = commModule.send(msg);
-				} else {
-					// if there is no available slots, tell the master too
-					WorkMessage msg = new WorkMessage("busy", toHost, toPort);
-					msg.setSlaveID(slaveID);
-					ret = commModule.send(msg);
-				}
-				dispatch(ret);
 				// produce partitions it generated from map tasks
 				HashMap<Integer, HashMap<Integer, ArrayDeque<String[]>>> partitions = tracker
 						.getPartition();
@@ -148,6 +131,23 @@ public class SlaveMessenger implements Runnable {
 						}
 					}
 				}
+				int idleMapSlot = tracker.getIdleMapSlot();
+				int idleReduceSlot = tracker.getIdleReduceSlot();
+				// if there are slots for new tasks, ask the master for new task
+				if (idleMapSlot > 0 || idleReduceSlot > 0) {
+					WorkMessage msg = new WorkMessage("idle", toHost, toPort);
+					msg.setFinishedTask(tracker.getFinishedTasks());
+					msg.setMapSlot(idleMapSlot);
+					msg.setReduceSlot(idleReduceSlot);
+					msg.setSlaveID(slaveID);
+					ret = commModule.send(msg);
+				} else {
+					// if there is no available slots, tell the master too
+					WorkMessage msg = new WorkMessage("busy", toHost, toPort);
+					msg.setSlaveID(slaveID);
+					ret = commModule.send(msg);
+				}
+				dispatch(ret);
 				// wait for some interval until the next heart beat
 				Thread.sleep(sleepInterval);
 			} catch (InterruptedException e) {

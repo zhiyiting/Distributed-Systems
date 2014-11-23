@@ -95,7 +95,11 @@ public class JobTracker {
 		}
 		System.out.println("Start job #" + job.getId());
 		// create and distribute splits
-		dfs.distributeFile(job.conf.INPUT_DIR, job.conf.REPLICA, job);
+		if (!dfs.distributeFile(job.conf.INPUT_DIR, job.conf.REPLICA, job)) {
+			String toHost = jobClient.get(jobID);
+			Message msg = new Message("fail");
+			CommModule.send(msg, toHost, Configuration.CLIENT_PORT);
+		}
 	}
 
 	/**
@@ -106,6 +110,13 @@ public class JobTracker {
 	private synchronized void submitReduceJob(Job job) {
 		System.out.println("Start reducing job #" + job.getId());
 		int reducerNum = job.conf.REDUCER_NUM;
+		if (dfs.getSlaveList().size() < reducerNum) {
+			System.out.println("Not enough reducer. Cannot reduce. Job terminated.");
+			String toHost = jobClient.get(jobID);
+			Message msg = new Message("fail");
+			CommModule.send(msg, toHost, Configuration.CLIENT_PORT);
+			return;
+		}
 		int taskID = 0;
 		int slaveID = 1;
 		for (int i = 1; i <= reducerNum; i++) {
@@ -166,8 +177,6 @@ public class JobTracker {
 				// add the job and task to assigned list
 				t.add(task);
 				jobAssignedTask.put(jobID, t);
-				// update the slave to map task list
-				slaveMapTaskList.put(slaveID, potential);
 			}
 		}
 		return tasks;
@@ -265,8 +274,8 @@ public class JobTracker {
 						sb.append(s);
 						sb.append("\n");
 					}
-					Message msg = new Message(sb.toString(), toHost,
-							Configuration.CLIENT_PORT);
+					// send finish message back
+					Message msg = new Message(sb.toString());
 					CommModule.send(msg, toHost, Configuration.CLIENT_PORT);
 				}
 			} else {
@@ -350,8 +359,6 @@ public class JobTracker {
 			// mark the task as unassigned
 			jobAssignedTask.get(t.getJob().getId()).remove(t);
 		}
-		// remove the slave ID from the list
-		slaveRunningTask.remove(id);
 		return list;
 	}
 	

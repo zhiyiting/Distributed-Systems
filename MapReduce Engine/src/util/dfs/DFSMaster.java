@@ -69,16 +69,21 @@ public class DFSMaster {
 	/**
 	 * Function to distribute file with replication at the beginning of a job
 	 * 
-	 * @param input file
+	 * @param input
+	 *            file
 	 * @param replica
 	 * @param job
 	 */
-	public synchronized void distributeFile(String in, int replica, Job job) {
+	public synchronized boolean distributeFile(String in, int replica, Job job) {
 		System.out.println("Distributing files on DFS...");
+		if (slaveList.size() <= 0) {
+			System.out.println("No slave available. Cannot start job.");
+			return false;
+		}
 		File inputDir = new File(in);
 		if (!inputDir.exists()) {
 			System.out.println("Input Directory doesn't exist");
-			return;
+			return false;
 		}
 		int jobID = job.getId();
 		HashMap<Integer, HashSet<FileSplit>> slaveToFile = jobToSlaveFile
@@ -112,6 +117,51 @@ public class DFSMaster {
 					if (node == null) {
 						break;
 					}
+
+					HashSet<FileSplit> files = slaveToFile.get(node.id);
+					// get the node with least files
+					if (files == null) {
+						files = new HashSet<FileSplit>();
+						files.add(split);
+						slaveToFile.put(node.id, files);
+						node.fileCount++;
+						dfsNode.add(node);
+					} else if (!files.contains(split)) {
+						files.add(split);
+						slaveToFile.put(node.id, files);
+						node.fileCount++;
+						dfsNode.add(node);
+					} else {
+						// if the node already contains that file chunk
+						// randomly select another node to put the chunk
+						dfsNode.add(node);
+						Iterator<Pair> itr = dfsNode.iterator();
+						boolean found = false;
+						while (itr.hasNext()) {
+							node = itr.next();
+							files = slaveToFile.get(node.id);
+							if (files == null) {
+								files = new HashSet<FileSplit>();
+								files.add(split);
+								slaveToFile.put(node.id, files);
+								node.fileCount++;
+								found = true;
+								break;
+							} else if (!files.contains(split)) {
+								files.add(split);
+								slaveToFile.put(node.id, files);
+								node.fileCount++;
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
+							System.out
+									.println("Failed to enforce replication for "
+											+ split.getFilename());
+							continue;
+						}
+					}
 					DFSMessage msg = new DFSMessage("distribute", chunk,
 							slaveList.get(node.id), Configuration.SERVER_PORT);
 					try {
@@ -119,14 +169,6 @@ public class DFSMaster {
 					} catch (RemoteException e) {
 						break;
 					}
-					node.fileCount++;
-					dfsNode.add(node);
-					HashSet<FileSplit> fileList = slaveToFile.get(node.id);
-					if (fileList == null) {
-						fileList = new HashSet<FileSplit>();
-					}
-					fileList.add(split);
-					slaveToFile.put(node.id, fileList);
 					newTask.setSlaveID(node.id);
 					// let tracker know the node can work on a new task
 					tracker.addQueuedMapTask(node.id, newTask);
@@ -136,10 +178,12 @@ public class DFSMaster {
 		}
 		jobToSlaveFile.put(jobID, slaveToFile);
 		jobTaskCount.put(jobID, taskID);
+		return true;
 	}
 
 	/**
 	 * Function to add a new slave
+	 * 
 	 * @param id
 	 * @param host
 	 */
@@ -172,6 +216,7 @@ public class DFSMaster {
 		ArrayDeque<MapTask> runningTask = tracker.getRunningMapList(id);
 		tasks.addAll(runningTask);
 		for (MapTask task : tasks) {
+			int jobID = task.getJob().getId();
 			FileSplit split = task.getInput();
 			// regenerate file split accordingly
 			LineRecordWriter writer = new LineRecordWriter(
@@ -184,7 +229,6 @@ public class DFSMaster {
 			if (node == null) {
 				return;
 			}
-			int jobID = task.getJob().getId();
 			HashMap<Integer, HashSet<FileSplit>> slaveToFile = jobToSlaveFile
 					.get(jobID);
 			HashSet<FileSplit> files = slaveToFile.get(node.id);
@@ -216,7 +260,7 @@ public class DFSMaster {
 						node.fileCount++;
 						found = true;
 						break;
-					} else if (!files.contains(task)) {
+					} else if (!files.contains(split)) {
 						files.add(split);
 						slaveToFile.put(node.id, files);
 						node.fileCount++;
@@ -238,12 +282,13 @@ public class DFSMaster {
 			} catch (RemoteException e) {
 				break;
 			}
-			task.setSlaveID(node.id);
 			HashSet<Task> ft = new HashSet<Task>();
 			ft = tracker.getFinishedTaskList(jobID);
-			if (!ft.contains(task)) {
-				tracker.addQueuedMapTask(node.id, task);
+			if (ft.contains(task)) {
+				continue;
 			}
+			task.setSlaveID(node.id);
+			tracker.addQueuedMapTask(node.id, task);
 		}
 	}
 
@@ -255,7 +300,7 @@ public class DFSMaster {
 	public HashMap<Integer, String> getSlaveList() {
 		return slaveList;
 	}
-	
+
 	/**
 	 * Function to get the task count of a job
 	 * 

@@ -45,9 +45,16 @@ public class ClientListener implements Runnable {
 				ObjectOutputStream out = new ObjectOutputStream(
 						socket.getOutputStream());
 				Message input = (Message) in.readObject();
-				// parse the message and generate output
-				System.out.println("Generated output path:");
-				System.out.println(input.getContent());
+				switch (input.getContent()) {
+					case "fail":
+						System.out.println("Job Fail");
+						break;
+					default:
+						// parse the message and generate output
+						System.out.println("Generated output path:");
+						System.out.println(input.getContent());
+						break;
+				}
 				out.writeObject("ACK");
 				out.flush();
 				out.close();
