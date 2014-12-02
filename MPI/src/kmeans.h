@@ -1,6 +1,14 @@
 #ifndef _KMEANS_H_
 #define _KMEANS_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <time.h>
+
+#define THRESHOLD 0.01
+
 typedef struct {
 	int k, count;
 	char *input_filename;

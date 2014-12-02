@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include <time.h>
 #include "kmeans.h"
-
-#define THRESHOLD 0.01
-
 
 double compute_square(double v) {
     return v * v;
@@ -36,7 +28,6 @@ void print_result(point_t *centroids, int k) {
     for (int i = 0; i < k; i++) {
         printf("Cluster %d: %lf, %lf\n", i, centroids[i].x, centroids[i].y);
     }
-    printf("-----------END OF PHASE-----------\n");
 }
 
 config_t *read_config() {
@@ -228,11 +219,9 @@ int compare_replace(point_t *centroids, point_t *new_centroids, int k) {
 void kmeans(point_t *centroids, point_t *dataset, int k, int n) {
     node_t **cluster = compute_cluster(dataset, centroids, k, n);
     point_t *new_centroids = compute_centroid(cluster, k);
-    print_result(new_centroids, k);
     while (!compare_replace(centroids, new_centroids, k)) {
         cluster = compute_cluster(dataset, centroids, k, n);
         new_centroids = compute_centroid(cluster, k);
-        print_result(new_centroids, k);
     }
 }
 
@@ -245,6 +234,7 @@ int main() {
     int num_of_points = config->count;
     point_t *centroids = init_centroid(dataset, k, num_of_points);
     kmeans(centroids, dataset, k, num_of_points);
+    print_result(centroids, k);
     write_result(centroids, k, config);
     return 0;
 }
