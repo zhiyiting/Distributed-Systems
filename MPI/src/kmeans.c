@@ -97,6 +97,8 @@ point_t *init_centroid(point_t *dataset, int k, int n) {
     point_t *centroids = (point_t *)malloc(k * sizeof(point_t));
     double *min_dist_squared = (double *)malloc(n * sizeof(double));
     int *visited = (int *)malloc(n * sizeof(int));
+    time_t t;
+    srand((unsigned) time(&t));
     // for simplicity, select the first point as a centroid
     centroids[0] = dataset[0];
     for (int i = 1; i < n; i++) {
@@ -184,8 +186,8 @@ node_t **compute_cluster(point_t *dataset, point_t *centroids, int k, int n) {
     return cluster;
 }
 
-point_t *compute_centroid(node_t **cluster, int k) {
-    point_t *new_centroids = (point_t *)malloc(k * sizeof(point_t));
+cluster_sum_t *compute_cluster_sum(node_t **cluster, int k) {
+    cluster_sum_t *cluster_sum = (cluster_sum_t *)malloc(k * sizeof(cluster_sum_t));
     for (int i = 0; i < k; i++) {
         node_t *p = cluster[i];
         int count = 0;
@@ -198,10 +200,24 @@ point_t *compute_centroid(node_t **cluster, int k) {
             count++;
             p = p->next;
         }
-        centroid.x = sum_x / (double) count;
-        centroid.y = sum_y / (double) count;
+        cluster_sum[i].sum_x = sum_x;
+        cluster_sum[i].sum_y = sum_y;
+        cluster_sum[i].count = count;
+    }
+    return cluster_sum;
+}
+
+point_t *compute_centroid(node_t **cluster, int k) {
+	cluster_sum_t *cluster_sum = compute_cluster_sum(cluster, k);
+	point_t *new_centroids = (point_t *)malloc(k * sizeof(point_t));
+    for (int i = 0; i < k; i++) {
+        point_t centroid;
+        cluster_sum_t ccluster = cluster_sum[i];
+        centroid.x = ccluster.sum_x / (double) ccluster.count;
+        centroid.y = ccluster.sum_y / (double) ccluster.count;
         new_centroids[i] = centroid;
     }
+    free(cluster_sum);
     return new_centroids;
 }
 
@@ -223,11 +239,11 @@ void kmeans(point_t *centroids, point_t *dataset, int k, int n) {
         cluster = compute_cluster(dataset, centroids, k, n);
         new_centroids = compute_centroid(cluster, k);
     }
+    free(cluster);
+    free(new_centroids);
 }
 
 int main() {
-    time_t t;
-    srand((unsigned) time(&t));
     config_t *config = read_config();
     int k = config->k;
     point_t *dataset = init_dataset(config);

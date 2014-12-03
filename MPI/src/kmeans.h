@@ -24,4 +24,9 @@ typedef struct node_t {
 	struct node_t *next;
 } node_t;
 
+typedef struct {
+	double sum_x, sum_y;
+	int count;
+} cluster_sum_t;
+
 #endif
