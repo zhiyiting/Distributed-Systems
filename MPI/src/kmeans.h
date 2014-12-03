@@ -29,4 +29,14 @@ typedef struct {
 	int count;
 } cluster_sum_t;
 
+config_t *read_config();
+point_t* init_dataset(config_t *);
+point_t *init_centroid(point_t *, int, int);
+void kmeans(point_t *, point_t *, int, int);
+void write_result(point_t *, int, config_t *);
+void print_result(point_t *, int);
+int compare_replace(point_t *, point_t *, int);
+cluster_sum_t *compute_cluster_sum(node_t **, int);
+node_t **compute_cluster(point_t *, point_t *, int, int);
+
 #endif

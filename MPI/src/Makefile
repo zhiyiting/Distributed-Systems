@@ -1,18 +1,10 @@
-CC = gcc
-MPICC = mpicc
-
-all: kmeansTest.o kmeans.o cluster.h
-
-	$(MPICC) $(FLG) kmeansTest.o kmeans.o -lm -o $(NAME)
-
-kmeansTest.o: kmeansTest.c kmeans.h
-
-	$(MPICC) $(FLG) kmeansTest.c -c -lm
-
-kmeans.o: kmeans.c kmeans.h cluster.h
-
-	$(MPICC) $(FLG) kmeans.c -c
+all:
+	mpicc -std=c99 kmeans-para.c kmeans.c -o kmeans-para.out
+	gcc -std=c99 kmeans-seq.c kmeans.c -o kmeans-seq.out
 
 clean:
 	rm -f *.o *.out *.exe
 	rm -f *.bin  
+
+runpara:
+	mpirun -np 4 -machinefile machinefile kmeans-para.out

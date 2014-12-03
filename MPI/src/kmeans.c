@@ -172,6 +172,7 @@ node_t **compute_cluster(point_t *dataset, point_t *centroids, int k, int n) {
     }
     for (int j = 0; j < n; j++) {
         point_t curpoint = dataset[j];
+        printf("current point %lf, %lf\n", curpoint.x, curpoint.y);
         double min_distance = compute_distance(curpoint, centroids[0]);;
         int index = 0;
         for (int i = 1; i < k; i++) {
@@ -187,23 +188,26 @@ node_t **compute_cluster(point_t *dataset, point_t *centroids, int k, int n) {
 }
 
 cluster_sum_t *compute_cluster_sum(node_t **cluster, int k) {
+	printf("computing\n");
     cluster_sum_t *cluster_sum = (cluster_sum_t *)malloc(k * sizeof(cluster_sum_t));
     for (int i = 0; i < k; i++) {
         node_t *p = cluster[i];
         int count = 0;
         double sum_x = 0;
         double sum_y = 0;
-        point_t centroid;
         while (p != NULL) {
             sum_x += p->point.x;
             sum_y += p->point.y;
             count++;
             p = p->next;
+
         }
         cluster_sum[i].sum_x = sum_x;
         cluster_sum[i].sum_y = sum_y;
         cluster_sum[i].count = count;
     }
+    	printf("computed\n");
+
     return cluster_sum;
 }
 
@@ -241,16 +245,4 @@ void kmeans(point_t *centroids, point_t *dataset, int k, int n) {
     }
     free(cluster);
     free(new_centroids);
-}
-
-int main() {
-    config_t *config = read_config();
-    int k = config->k;
-    point_t *dataset = init_dataset(config);
-    int num_of_points = config->count;
-    point_t *centroids = init_centroid(dataset, k, num_of_points);
-    kmeans(centroids, dataset, k, num_of_points);
-    print_result(centroids, k);
-    write_result(centroids, k, config);
-    return 0;
 }
