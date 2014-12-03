@@ -165,14 +165,13 @@ node_t *insert_point(node_t *ptr, point_t point) {
 }
 
 node_t **compute_cluster(point_t *dataset, point_t *centroids, int k, int n) {
-    node_t **cluster = (node_t **)malloc(k * sizeof(node_t *));
+    node_t **cluster = (node_t **)calloc(k, sizeof(node_t *));
     if (k <= 0) {
         printf("Invalid cluster number\n");
         exit(1);
     }
     for (int j = 0; j < n; j++) {
         point_t curpoint = dataset[j];
-        printf("current point %lf, %lf\n", curpoint.x, curpoint.y);
         double min_distance = compute_distance(curpoint, centroids[0]);;
         int index = 0;
         for (int i = 1; i < k; i++) {
@@ -188,7 +187,6 @@ node_t **compute_cluster(point_t *dataset, point_t *centroids, int k, int n) {
 }
 
 cluster_sum_t *compute_cluster_sum(node_t **cluster, int k) {
-	printf("computing\n");
     cluster_sum_t *cluster_sum = (cluster_sum_t *)malloc(k * sizeof(cluster_sum_t));
     for (int i = 0; i < k; i++) {
         node_t *p = cluster[i];
@@ -206,8 +204,6 @@ cluster_sum_t *compute_cluster_sum(node_t **cluster, int k) {
         cluster_sum[i].sum_y = sum_y;
         cluster_sum[i].count = count;
     }
-    	printf("computed\n");
-
     return cluster_sum;
 }
 

@@ -62,7 +62,6 @@ int main(int argc, char **argv) {
     		if (i == num_tasks - 1) {
     			send_count += remaining_points;
     		}
-    		printf("Master: Send dataset to slave %d\n", i);
     		rc = MPI_Send(&send_count, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
     		rc = MPI_Send(&dataset[points_sent], send_count, point_type, i, 2, MPI_COMM_WORLD);
     		rc = MPI_Send(&k, 1, MPI_INT, i, 3, MPI_COMM_WORLD);
@@ -78,9 +77,7 @@ int main(int argc, char **argv) {
      		}
     		for (int i = 1; i < num_tasks; i++) {
     			rc = MPI_Send(&startflag, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-    			printf("Master: Send centroids to slave %d\n", i);
     			rc = MPI_Send(centroids, k, point_type, i, 4, MPI_COMM_WORLD);
-    			printf("Master: Receive result from slave %d\n", i);
     		}
     		for (int i = 1; i < num_tasks; i++) {
     			rc = MPI_Recv(temp, k, cluster_type, i, 5, MPI_COMM_WORLD, &Stat);
@@ -110,29 +107,24 @@ int main(int argc, char **argv) {
 	}
 	else {
 		rc = MPI_Recv(&num_of_points, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &Stat);
-		printf("Slave %d: Received num of data points, which is %d\n", rank, num_of_points);
+		printf("Slave %d: Received %d data points\n", rank, num_of_points);
 		dataset = (point_t *)malloc(num_of_points * sizeof(point_t));
 		rc = MPI_Recv(dataset, num_of_points, point_type, 0, 2, MPI_COMM_WORLD, &Stat);
-		printf("Slave %d: Received dataset\n", rank);
 		rc = MPI_Recv(&k, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &Stat);
 		rc = MPI_Recv(&startflag, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &Stat);
 
 		centroids = (point_t *)malloc(k * sizeof(point_t));
 		while (startflag) {
 			rc = MPI_Recv(centroids, k, point_type, 0, 4, MPI_COMM_WORLD, &Stat);
-			printf("Slave %d: Received centroids\n", rank);
 			node_t **cluster = compute_cluster(dataset, centroids, k, num_of_points);
 			cluster_sum_t *cluster_sum = compute_cluster_sum(cluster, k);
-			printf("Slave %d: Result computed\n", rank);
 			rc = MPI_Send(cluster_sum, k, cluster_type, 0, 5, MPI_COMM_WORLD);
-			printf("Slave %d: Send result to master\n", rank);
 			free(cluster_sum);
 			free(cluster);
 			rc = MPI_Recv(&startflag, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &Stat);
 		}
 		free(centroids);
 		free(dataset);
-		printf("finished\n");
 	}
 	free(point_type);
 	free(cluster_type);
