@@ -1,3 +1,0 @@
-cluster_number: 5
-input_path: input.txt
-output_path: output.txt

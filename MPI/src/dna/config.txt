@@ -1,0 +1,5 @@
+cluster_number: 3
+point_per_cluster: 100
+DNA_length: 20
+input_path: input/3_100
+output_path: output/5_cluster_100_point.txt
