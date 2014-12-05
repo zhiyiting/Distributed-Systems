@@ -48,15 +48,14 @@ int main(int argc, char **argv) {
 	if (rank == 0) {
 		config_t *config = read_config();
     	k = config->k;
-    	dataset = init_dataset(config);
     	num_of_points = config->count;
+    	dataset = init_dataset(config);
     	centroids = init_centroid(dataset, k, num_of_points);
     	cluster_sum_t *cluster_sum = (cluster_sum_t *)malloc(k * sizeof(cluster_sum_t));
     	int points_per_machine = num_of_points / (num_tasks - 1);
     	int remaining_points = num_of_points % (num_tasks - 1);
     	int points_sent = 0;
     	// send dataset to slaves
-    	int remaining_point = num_of_points;
     	for (int i = 1; i < num_tasks; i++) {
     		int send_count = points_per_machine;
     		if (i == num_tasks - 1) {
@@ -102,6 +101,7 @@ int main(int argc, char **argv) {
     	free(temp);
     	free(new_centroids);
     	free(cluster_sum);
+    	printf("Final Result:\n");
     	print_result(centroids, k);
     	write_result(centroids, k, config);
 	}
