@@ -91,7 +91,7 @@ for i in range(0, numClusters):
 # step 2: generate the strands for each centroid
 points = []
 minClusterVar = 1
-maxClusterVar = dnaLength / 2
+maxClusterVar = 5
 base = ('A', 'C', 'G', 'T')
 for i in range(0, numClusters):
     # compute the variance for this cluster

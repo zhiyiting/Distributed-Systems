@@ -5,6 +5,7 @@ int compute_distance(dna_t p1, dna_t p2, int l) {
     int count = 0;
     char *s1 = p1.acid;
     char *s2 = p2.acid;
+    /* calculate the count of same character from two strands */
     for (int i = 0; i < l; i++) {
         if (s1[i] == s2[i]) {
             count++;
@@ -25,6 +26,7 @@ void write_result(dna_t *centroids, int l, int k, config_t *config) {
         fprintf(stderr, "Can't open output file!\n");
         exit(1);
     }
+    /* iterate through the centroids and write the result */
     for (int i = 0; i < k; i++) {
         char *s = centroids[i].acid;
         fprintf(fp, "Cluster %d: %c", i, s[0]);
@@ -47,6 +49,7 @@ void print_dna(dna_t dna, int l) {
 
 /* print the centroids result */
 void print_result(dna_t *centroids, int l, int k) {
+    /* iterate through the centroids and print the result */
     for (int i = 0; i < k; i++) {
         char *s = centroids[i].acid;
         printf("Cluster %d: %c", i, s[0]);
@@ -68,27 +71,33 @@ config_t *read_config() {
     char input_filename[256];
     char output_filename[256];
     char temp[256];
+    /* read the cluster number */
     if (fscanf(fp, "%s %d", temp, &k) != 2) {
         fprintf(stderr, "Can't read cluster number!\n");
         exit(1);
     }
+    /* read the point count per cluster */
     if (fscanf(fp, "%s %d", temp, &count) != 2) {
-        fprintf(stderr, "Can't read dna length!\n");
+        fprintf(stderr, "Can't read point count!\n");
         exit(1);
     }
+    /* read the dna length */
     if (fscanf(fp, "%s %d", temp, &l) != 2) {
         fprintf(stderr, "Can't read dna length!\n");
         exit(1);
     }
+    /* read the input file name */
     if (fscanf(fp, "%s %s", temp, input_filename) != 2) {
         fprintf(stderr, "Can't read input file name!\n");
         exit(1);
     }
+    /* read the output file name */
     if (fscanf(fp, "%s %s", temp, output_filename) != 2) {
         fprintf(stderr, "Can't read output file name!\n");
         exit(1);
     }
     fclose(fp);
+    /* store the information in the config structure */
     config_t *config = (config_t *)malloc(sizeof(config_t));
     config->k = k;
     config->l = l;
@@ -110,6 +119,7 @@ dna_t* init_dataset(config_t *config) {
     int count = config->count;
     int l = config->l;
     dna_t *dataset = (dna_t *)malloc(count * sizeof(dna_t));
+    /* read information from file*/
     for (int i = 0; i < count; i++) {
         char *content = (char *)calloc(l, sizeof(char));
         char temp;
@@ -138,6 +148,7 @@ dna_t *init_centroid(dna_t *dataset, int l, int k, int n) {
         visited[i] = 0;
     }
     visited[0] = 1;
+    // initialize the dist sum of unvisited nodes
     for (int i = 1; i < k; i++) {
         int sum_dist = 0;
         for (int j = 0; j < n; j++) {
@@ -145,9 +156,12 @@ dna_t *init_centroid(dna_t *dataset, int l, int k, int n) {
                 sum_dist += min_similarity[j];
             }
         }
+        // each point is chosen with probability porpotional to D(x)2
         double r = generate_random_double() * sum_dist;
+        // the index to be added as a centroid
         int next_index = -1;
         int temp_sum = 0;
+        // sum through the distance, stops when sum >= r
         for (int j = 0; j < n; j++) {
             if (!visited[j]) {
                 temp_sum += min_similarity[j];
@@ -157,6 +171,7 @@ dna_t *init_centroid(dna_t *dataset, int l, int k, int n) {
                 }
             }
         }
+        // if not found, use the last unvisited node as centroid
         if (next_index == -1) {
             for (int j = n - 1; j >= 0; j--) {
                 if (!visited[j]) {
@@ -165,6 +180,8 @@ dna_t *init_centroid(dna_t *dataset, int l, int k, int n) {
                 }
             }
         }
+        // if found, add it to the centroid array
+        // recalculate the similarity array
         if (next_index >= 0) {
             visited[next_index] = 1;
             dna_t new_centroid = dataset[next_index];
@@ -205,6 +222,7 @@ node_t **compute_cluster(dna_t *dataset, dna_t *centroids, int l, int k, int n) 
         exit(1);
     }
     for (int j = 0; j < n; j++) {
+        // for each point, compute its closet centroid
         dna_t curpoint = dataset[j];
         int min_distance = compute_distance(curpoint, centroids[0], l);
         int index = 0;
@@ -215,6 +233,7 @@ node_t **compute_cluster(dna_t *dataset, dna_t *centroids, int l, int k, int n) 
                 index = i;
             }
         }
+        // add the point to that cluster
         cluster[index] = insert_point(cluster[index], curpoint);
     }
     return cluster;
@@ -223,6 +242,7 @@ node_t **compute_cluster(dna_t *dataset, dna_t *centroids, int l, int k, int n) 
 /* compute [sum, count] pair for each cluster */
 cluster_sum_t *compute_cluster_sum(node_t **cluster, int l, int k) {
     cluster_sum_t *cluster_sum = (cluster_sum_t *)malloc(k * sizeof(cluster_sum_t));
+    // initialize the cluster_sum array
     for (int i = 0; i < k; i++) {
         node_t *p = cluster[i];
         int **count = (int **)malloc(l * sizeof(int *));
@@ -232,6 +252,7 @@ cluster_sum_t *compute_cluster_sum(node_t **cluster, int l, int k) {
                 count[j][k] = 0;
             }
         }
+        // for each index, compute the count of A, C, G, T respectively
         while (p != NULL) {
             char* acid = p->strand.acid;
             for (int j = 0; j < l; j++) {
@@ -263,10 +284,12 @@ dna_t *compute_centroid(node_t **cluster, int l, int k) {
     cluster_sum_t *cluster_sum = compute_cluster_sum(cluster, l, k);
     dna_t *new_centroids = (dna_t *)malloc(k * sizeof(dna_t));
     char base[4] = {'A', 'C', 'G', 'T'};
+    // for each cluster, compute the centroid
     for (int i = 0; i < k; i++) {
         dna_t centroid;
         char *content = (char *)malloc(l * sizeof(char));
         cluster_sum_t ccluster = cluster_sum[i];
+        // use the max count of alphabet as the mean
         for (int j = 0; j < l; j++) {
             int count = ccluster.count[j][0];
             int index = 0;
@@ -301,8 +324,11 @@ int compare_replace(dna_t *centroids, dna_t *new_centroids, int l, int k) {
 
 /* a sequential kmeans process */
 void kmeans(dna_t *centroids, dna_t *dataset, int l, int k, int n) {
+    /* compute and initialize the cluster */
     node_t **cluster = compute_cluster(dataset, centroids, l, k, n);
+    /* compute new centroids */
     dna_t *new_centroids = compute_centroid(cluster, l, k);
+    /* if there's a big difference, recompute the centroid */
     while (!compare_replace(centroids, new_centroids, l, k)) {
         cluster = compute_cluster(dataset, centroids, l, k, n);
         new_centroids = compute_centroid(cluster, l, k);

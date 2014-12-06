@@ -2,6 +2,10 @@
 #include "kmeans.h"
 
 int main(int argc, char **argv) {
+	clock_t start_program, end_program;
+    double total_time_used;
+    start_program = clock();
+
 	int num_tasks, rank, len, rc;
 	MPI_Status Stat;
 	char hostname[MPI_MAX_PROCESSOR_NAME];
@@ -28,10 +32,6 @@ int main(int argc, char **argv) {
     l = config->l;
 
 	if (rank == 0) {
-		clock_t start, end;
-     	double cpu_time_used;
-     	start = clock();
-
 		char base[4] = {'A', 'C', 'G', 'T'};
     	dataset = init_dataset(config);
     	centroids = init_centroid(dataset, l, k, num_of_points);
@@ -53,6 +53,11 @@ int main(int argc, char **argv) {
     		}
     	}
     	dna_t *new_centroids = (dna_t *)malloc(k * sizeof(dna_t));
+
+    	clock_t start, end;
+     	double kmeans_time_used;
+     	start = clock();
+
     	do {
     		for (int i = 1; i < num_tasks; i++) {
     			rc = MPI_Send(&startflag, 1, MPI_INT, i, 3, MPI_COMM_WORLD);
@@ -98,6 +103,8 @@ int main(int argc, char **argv) {
 		        new_centroids[i] = centroid;
     		}
     	} while (!compare_replace(centroids, new_centroids, l, k));
+    	end = clock();
+     	kmeans_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     	startflag = 0;
     	for (int i = 1; i < num_tasks; i++) {
     		rc = MPI_Send(&startflag, 1, MPI_INT, i, 3, MPI_COMM_WORLD);
@@ -107,14 +114,14 @@ int main(int argc, char **argv) {
     	printf("Final Result:\n");
     	print_result(centroids, l, k);
     	write_result(centroids, l, k, config);
-    	end = clock();
-     	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-     	printf("Total time used: %lf\n", cpu_time_used);
+    	end_program = clock();
+     	total_time_used = ((double) (end_program - start_program)) / CLOCKS_PER_SEC;
+     	printf("Kmeans time used: %lf\n", kmeans_time_used);
+     	printf("Total time used: %lf\n", total_time_used);
 	}
 	else {
 		// receive number of points of dataset
 		rc = MPI_Recv(&num_of_points, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &Stat);
-		printf("Slave %d: Received %d data points\n", rank, num_of_points);
 		dataset = (dna_t *)malloc(num_of_points * sizeof(dna_t));
 		for (int i = 0; i < num_of_points; i++) {
 			dataset[i].acid = (char *)malloc(l * sizeof(char));

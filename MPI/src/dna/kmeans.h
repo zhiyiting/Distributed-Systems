@@ -33,6 +33,7 @@ typedef struct {
 	int **count;
 } cluster_sum_t;
 
+/* functions implemented in kmeans.c */
 config_t *read_config();
 dna_t* init_dataset(config_t *);
 dna_t *init_centroid(dna_t *, int, int, int);
