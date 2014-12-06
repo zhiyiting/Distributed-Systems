@@ -79,6 +79,7 @@ int main(int argc, char **argv) {
     		rc = MPI_Send(&k, 1, MPI_INT, i, 3, MPI_COMM_WORLD);
     		points_sent += send_count;
     	}
+
     	/* initialize new centroids */
     	point_t *new_centroids = (point_t *)malloc(k * sizeof(point_t));
     	cluster_sum_t *temp = (cluster_sum_t *)malloc(k * sizeof(cluster_sum_t));
@@ -140,6 +141,8 @@ int main(int argc, char **argv) {
      	total_time_used = ((double) (end_program - start_program)) / CLOCKS_PER_SEC;
     	printf("Kmeans time used: %lf\n", kmeans_time_used);
      	printf("Total time used: %lf\n", total_time_used);
+        /* clean up */
+        free(config);
 	}
 	/* slave process */
 	else {

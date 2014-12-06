@@ -105,6 +105,8 @@ point_t *init_centroid(point_t *dataset, int k, int n) {
         min_dist_squared[i] = compute_distance(centroids[0], dataset[i]);
         visited[i] = 0;
     }
+    /* the same to ../dna/kmeans.c */
+    /* refer to that file for detailed explanations */
     visited[0] = 1;
     for (int i = 1; i < k; i++) {
         double sum_dist = 0.0;
