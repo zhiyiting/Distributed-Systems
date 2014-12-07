@@ -63,6 +63,10 @@ config_t *read_config() {
         exit(1);
     }
     fclose(fp);
+    if (k <= 0 || count <= 0) {
+        fprintf(stderr, "Invalid input!\n");
+        exit(1);
+    }
     config_t *config = (config_t *)malloc(sizeof(config_t));
     config->k = k;
     config->count = k * count;
@@ -245,7 +249,6 @@ void kmeans(point_t *centroids, point_t *dataset, int k, int n) {
     node_t **cluster = compute_cluster(dataset, centroids, k, n);
     point_t *new_centroids = compute_centroid(cluster, k);
     while (!compare_replace(centroids, new_centroids, k)) {
-    	printf("phase\n");
         cluster = compute_cluster(dataset, centroids, k, n);
         new_centroids = compute_centroid(cluster, k);
     }

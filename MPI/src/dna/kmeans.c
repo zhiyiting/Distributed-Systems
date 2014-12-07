@@ -5,9 +5,9 @@ int compute_distance(dna_t p1, dna_t p2, int l) {
     int count = 0;
     char *s1 = p1.acid;
     char *s2 = p2.acid;
-    /* calculate the count of same character from two strands */
+    /* calculate the count of different character from two strands */
     for (int i = 0; i < l; i++) {
-        if (s1[i] == s2[i]) {
+        if (s1[i] != s2[i]) {
             count++;
         }
     }
@@ -97,6 +97,10 @@ config_t *read_config() {
         exit(1);
     }
     fclose(fp);
+    if (k <= 0 || l <= 0 || count <= 0) {
+    	fprintf(stderr, "Invalid input!\n");
+        exit(1);
+    }
     /* store the information in the config structure */
     config_t *config = (config_t *)malloc(sizeof(config_t));
     config->k = k;
@@ -206,9 +210,12 @@ dna_t *init_centroid(dna_t *dataset, int l, int k, int n) {
 }
 
 /* insert a point before a node and make it the head of a list */
-node_t *insert_point(node_t *ptr, dna_t strand) {
+node_t *insert_point(node_t *ptr, dna_t strand, int l) {
     node_t *node = (node_t *)malloc(sizeof(node_t));
-    node->strand = strand;
+    node->strand.acid = (char *)malloc(l * sizeof(char));
+    for (int i = 0; i < l; i++) {
+        node->strand.acid[i] = strand.acid[i];
+    }
     node->next = ptr;
     ptr = node;
     return ptr;
@@ -234,7 +241,7 @@ node_t **compute_cluster(dna_t *dataset, dna_t *centroids, int l, int k, int n) 
             }
         }
         // add the point to that cluster
-        cluster[index] = insert_point(cluster[index], curpoint);
+        cluster[index] = insert_point(cluster[index], curpoint, l);
     }
     return cluster;
 }
@@ -244,37 +251,36 @@ cluster_sum_t *compute_cluster_sum(node_t **cluster, int l, int k) {
     cluster_sum_t *cluster_sum = (cluster_sum_t *)malloc(k * sizeof(cluster_sum_t));
     // initialize the cluster_sum array
     for (int i = 0; i < k; i++) {
-        node_t *p = cluster[i];
-        int **count = (int **)malloc(l * sizeof(int *));
+        cluster_sum[i].count = (int **)malloc(l * sizeof(int *));
         for (int j = 0; j < l; j++) {
-            count[j] = (int *)malloc(4 * sizeof(int));
+            cluster_sum[i].count[j] = (int *)malloc(4 * sizeof(int));
             for (int k = 0; k < 4; k++) {
-                count[j][k] = 0;
+                cluster_sum[i].count[j][k] = 0;
             }
         }
+        node_t *p = cluster[i];
         // for each index, compute the count of A, C, G, T respectively
         while (p != NULL) {
             char* acid = p->strand.acid;
             for (int j = 0; j < l; j++) {
                 switch(acid[j]) {
                     case 'A':
-                        count[j][0]++;
+                        cluster_sum[i].count[j][0]++;
                         break;
                     case 'C':
-                        count[j][1]++;
+                        cluster_sum[i].count[j][1]++;
                         break;
                     case 'G':
-                        count[j][2]++;
+                        cluster_sum[i].count[j][2]++;
                         break;
                     case 'T':
-                        count[j][3]++;
+                        cluster_sum[i].count[j][3]++;
                         break;
                 }
             }
             p = p->next;
 
         }
-        cluster_sum[i].count = count;
     }
     return cluster_sum;
 }

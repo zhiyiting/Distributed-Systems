@@ -1,4 +1,4 @@
-cluster_number: 10
-point_per_cluster: 100000
-input_path: input/10_100000
-output_path: output/5_cluster_100_point.txt
+cluster_number: 3
+point_per_cluster: 1000000
+input_path: input/3_1000000
+output_path: output/3_1000000

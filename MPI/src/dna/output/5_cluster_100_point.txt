@@ -1,3 +1,0 @@
-Cluster 0: C,C,C,T,T,C,T,C,T,G,G,A,C,G,T,T,G,C,T,G
-Cluster 1: A,C,A,G,C,C,C,T,C,A,G,T,C,A,T,G,T,C,T,T
-Cluster 2: T,T,G,A,T,C,A,C,C,C,G,A,C,G,C,T,G,A,A,G

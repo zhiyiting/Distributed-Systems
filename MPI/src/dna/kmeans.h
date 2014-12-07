@@ -8,7 +8,7 @@
 #include <time.h>
 
 /* threshold to terminate kmeans */
-#define THRESHOLD 6
+#define THRESHOLD 0
 
 /* config file structure */
 typedef struct {
